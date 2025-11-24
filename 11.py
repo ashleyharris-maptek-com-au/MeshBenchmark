@@ -34,3 +34,88 @@ def prepareSubpassPrompt(index):
     if index == 2: return prompt.replace("PARAM_A", "5").replace("PARAM_B", "(4,4,4,4,4)").replace("PARAM_C", "[0, 0,0,0,0]")
     if index == 3: return prompt.replace("PARAM_A", "6").replace("PARAM_B", "(3,3,3,3,3,3)").replace("PARAM_C", "[0, 0,0,0,0,0]")
     raise StopIteration
+
+def gradeAnswer(answer : dict, subPassIndex : int):
+    # Define test parameters based on subPassIndex
+    if subPassIndex == 0:
+        dimensions = 3
+        grid_size = (4, 4, 4)
+        start_pos = [0, 0, 0]
+    elif subPassIndex == 1:
+        dimensions = 4
+        grid_size = (5, 5, 5, 5)
+        start_pos = [0, 0, 0, 0]
+    elif subPassIndex == 2:
+        dimensions = 5
+        grid_size = (4, 4, 4, 4, 4)
+        start_pos = [0, 0, 0, 0, 0]
+    elif subPassIndex == 3:
+        dimensions = 6
+        grid_size = (3, 3, 3, 3, 3, 3)
+        start_pos = [0, 0, 0, 0, 0, 0]
+    else:
+        return 0
+    
+    # Extract path from answer
+    if "path" not in answer:
+        return 0
+    
+    path = answer["path"]
+    
+    # Path must have at least one position
+    if not path or len(path) == 0:
+        return 0
+    
+    # Check first position matches start
+    if len(path[0]) != dimensions:
+        return 0
+    
+    if list(path[0]) != start_pos:
+        return 0
+    
+    # Track visited cells to detect repeats
+    visited = set()
+    visited.add(tuple(path[0]))
+    
+    # Validate each move
+    for i in range(1, len(path)):
+        curr_pos = path[i]
+        prev_pos = path[i-1]
+        
+        # Check dimensionality
+        if len(curr_pos) != dimensions:
+            return 0
+        
+        # Count how many dimensions changed
+        changes = []
+        for dim in range(dimensions):
+            if curr_pos[dim] != prev_pos[dim]:
+                changes.append((dim, curr_pos[dim] - prev_pos[dim]))
+        
+        # Must change exactly one dimension
+        if len(changes) != 1:
+            return 0
+        
+        # Must be a single cell move (+1 or -1)
+        dim, delta = changes[0]
+        if abs(delta) != 1:
+            return 0
+        
+        # Check bounds
+        for dim in range(dimensions):
+            if curr_pos[dim] < 0 or curr_pos[dim] >= grid_size[dim]:
+                return 0
+        
+        # Check for repeats
+        pos_tuple = tuple(curr_pos)
+        if pos_tuple in visited:
+            return 0
+        
+        visited.add(pos_tuple)
+    
+    # Score is the fraction of cells occupied
+    total_cells = 1
+    for size in grid_size:  
+        total_cells *= size
+    
+    return len(path) / total_cells

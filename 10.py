@@ -20,4 +20,3 @@ def prepareSubpassPrompt(index):
     if index == 3: return prompt.replace("PARAM_A", "256")
     raise StopIteration
 
-    
