@@ -1,3 +1,8 @@
+import itertools
+import VolumeComparison as vc
+
+title="Hamiltonian Path on Grid"
+
 prompt = """
 You have a SIZE*SIZE grid of unit squares, with cell coordinates (x, y) where 1 ≤ x ≤ SIZE, 1 ≤ y ≤ SIZE.
 
@@ -45,6 +50,9 @@ structure = {
   ]
 }
 
+subpassParamSummary = ["4x4 grid", "8x8 grid", "12x12 grid", "16x16 grid", "16x16 grid with cells (3,3) and (3,4) removed"]
+promptChangeSummary = "Grid size increases across subpasses, with a missing chunk in the final subpass"
+
 
 def prepareSubpassPrompt(index):
     if index == 0: return prompt.replace("SIZE", "4").replace("SQUARED", "16").replace("TWIST", "")
@@ -54,11 +62,10 @@ def prepareSubpassPrompt(index):
     if index == 4: return prompt.replace("SIZE", "16").replace("SQUARED", "254").replace("TWIST", 
         "Cells 3,3 and 3,4 have been removed from the grid and must be skipped.")
 
-
     raise StopIteration
 
 
-def gradeAnswer(answer : dict, subPass : int):
+def gradeAnswer(answer : dict, subPass : int, aiEngineName : str):
     if subPass == 0 and len(answer["steps"]) != 16:
         return 0
     if subPass == 1 and len(answer["steps"]) != 64:
@@ -94,7 +101,7 @@ def gradeAnswer(answer : dict, subPass : int):
         if xDiff + yDiff != 1:
             print("didn't step side-adjacent" + str(step["xy"]) + " from " + str(location))
             return 0
-        location = step["xy"]
+        location = tuple(step["xy"])
         if location in visited:
             print("visited " + str(location) + " more than once!")
             return 0
@@ -102,3 +109,29 @@ def gradeAnswer(answer : dict, subPass : int):
 
     return 1
 
+def resultToNiceReport(answer, subPass, aiEngineName):
+    scadOutput = ""
+    for a,b in itertools.pairwise(answer["steps"]):
+        xMid = (a['xy'][0] + b['xy'][0])/2
+        yMid = (a['xy'][1] + b['xy'][1])/2
+
+        scadOutput += f"""
+hull() {{
+    translate([{a['xy'][0]* 0.9 + xMid*0.1}, {a['xy'][1]* 0.9 + yMid*0.1}, 0]) cube([0.01, 0.01, 0.01], center=true);
+    translate([{b['xy'][0]* 0.9 + xMid*0.1}, {b['xy'][1]* 0.9 + yMid*0.1}, 0]) cube([0.01, 0.01, 0.01], center=true);
+}}
+
+"""
+
+    for i,a in enumerate(answer["steps"]):
+        scadOutput += f"""
+translate([{a['xy'][0]}, {a['xy'][1]}, 0]) linear_extrude(0.01) text("{i}",size=0.15, halign="center", valign="center");
+"""
+
+    import os
+    os.makedirs("results", exist_ok=True)
+    output_path = "results/9_Visualization_" + aiEngineName + "_" + str(len(answer["steps"])) + ".png"
+    vc.render_scadText_to_png(scadOutput, output_path)
+    print(f"Saved visualization to {output_path}")
+
+    return f'<img src="{os.path.basename(output_path)}" alt="Hamiltonian Path Visualization" style="max-width: 100%;">'

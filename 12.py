@@ -1,13 +1,30 @@
+import VolumeComparison as vc
+import itertools
+
+title = "Fit a loop into a square that's perimeter is smaller than the total length"
+
 prompt = """
 You have PARAM_A 1m lengths of pipe, and an square area of side length PARAM_B to play with.
 
 Lay the pipe out to form a closed loop, using all the pipe, and returning to the starting point.
 
-You can not cross yourself, and you can not cross the boundary of the area. You do not need to 
+You can not cross existing pipe, you can not re-use vertices, and you can not cross the boundary of the area. You do not need to 
 stick to axis aligned paths.
 
-Return the loop as a list of the pipe endpoints.
+Return the loop as a list of the pipe endpoints. Note that N pipes requires N+1 verticies to describe a path, but since the 
+first and last vertices are the same, you only need to return N points.
 """
+
+subpassParamSummary = [
+    "3 pipes in 1x1. This is a trivial equalateral triangle.", 
+    "16 pipes in 3x3", 
+    "30 pipes in 4x4", 
+    "60 pipes in 10x10", 
+    "150 pipes in 20x20", 
+    "600 pipes in 40x40"
+]
+
+promptChangeSummary = "Increasing pipe length and square size."
 
 structure = {
     "type": "object",
@@ -37,16 +54,18 @@ structure = {
 }
 
 def prepareSubpassPrompt(index):
-    if index == 0: return prompt.replace("PARAM_A", "16").replace("PARAM_B", "3")
-    if index == 1: return prompt.replace("PARAM_A", "30").replace("PARAM_B", "4")
-    if index == 2: return prompt.replace("PARAM_A", "60").replace("PARAM_B", "10")
-    if index == 3: return prompt.replace("PARAM_A", "150").replace("PARAM_B", "20")
+    if index == 0: return prompt.replace("PARAM_A", "3").replace("PARAM_B", "1")
+    if index == 1: return prompt.replace("PARAM_A", "16").replace("PARAM_B", "3")
+    if index == 2: return prompt.replace("PARAM_A", "30").replace("PARAM_B", "4")
+    if index == 3: return prompt.replace("PARAM_A", "60").replace("PARAM_B", "10")
+    if index == 4: return prompt.replace("PARAM_A", "150").replace("PARAM_B", "20")
+    if index == 5: return prompt.replace("PARAM_A", "600").replace("PARAM_B", "40")
     raise StopIteration
 
-def gradeAnswer(answer: dict, subPassIndex: int):
+def gradeAnswer(answer: dict, subPassIndex: int, aiEngineName: str):
     # Get parameters for this subpass
-    pipe_counts = [16, 30, 60, 150]
-    boundary_sizes = [3, 4, 10, 20]
+    pipe_counts = [3, 16, 30, 60, 150, 600]
+    boundary_sizes = [2, 3, 4, 10, 20, 40]
     
     if subPassIndex < 0 or subPassIndex >= len(pipe_counts):
         return 0
@@ -73,10 +92,9 @@ def gradeAnswer(answer: dict, subPassIndex: int):
         except (TypeError, ValueError):
             continue
     
-    # Check correct number of points (should be expected_pipes + 1 for the endpoints)
-    # Actually, the endpoints define the segments, so we need expected_pipes + 1 points
-    if len(parsed_points) != expected_pipes + 1:
-        print(f"Expected {expected_pipes + 1} points (for {expected_pipes} pipe segments), got {len(parsed_points)}")
+    # Check correct number of points (N pipes in a closed loop = N vertices)
+    if len(parsed_points) != expected_pipes:
+        print(f"Expected {expected_pipes} points (for {expected_pipes} pipe segments in closed loop), got {len(parsed_points)}")
         return 0
     
     # Check all points are within bounds [0, boundary]
@@ -171,3 +189,30 @@ def gradeAnswer(answer: dict, subPassIndex: int):
     
     print(f"Valid loop with {len(parsed_points)} points, all within bounds and 1 unit apart")
     return 1
+
+
+def resultToNiceReport(result : dict, subPass, aiEngineName : str):
+
+    # Get the square size from the subpass parameters
+    boundary_sizes = [1, 3, 4, 10, 20, 40]
+    squareSize = boundary_sizes[subPass] if subPass < len(boundary_sizes) else 10
+
+    scad_content = ""
+    
+    result['points'].append(result['points'][0])
+
+    for a,b in itertools.pairwise(result['points']):
+        scad_content += "hull(){\n"
+        scad_content += f"    translate([{a['x']}, {a['y']}]) sphere(0.01);\n"
+        scad_content += f"    translate([{b['x']}, {b['y']}]) sphere(0.01);\n"
+        scad_content += "}\n"
+    
+    scad_content += f"translate([0,0,-0.01]) color([0.1,0.1,0.1]) cube([{squareSize},{squareSize},0.01]);"
+
+    import os
+    os.makedirs("results", exist_ok=True)
+    output_path = "results/12_Visualization_" + aiEngineName + "_" + str(squareSize) + ".png"
+    vc.render_scadText_to_png(scad_content, output_path)
+    print(f"Saved visualization to {output_path}")
+
+    return f'<img src="{os.path.basename(output_path)}" alt="Pipe Loop Visualization" style="max-width: 100%;">'

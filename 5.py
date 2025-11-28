@@ -1,9 +1,11 @@
+title = "Maze generation - ASCII Art"
+
 prompt = """
 Generate a PARAM_A * PARAM_A ASCII art maze.
 
 The maze must use the following characters:
 # - Wall
-. - Correct solution Path
+. - Correct solution path
 A - Start
 B - End
   - Untaken path (space)
@@ -12,10 +14,19 @@ The maze must be solvable, there must be only one solution, the annotated path m
 from A to B must cover at least 10% of the maze area. The path threw the maze can only be 1 cell wide, and solvable with
 only horizontal or vertical moves.
 
+The maze must be 'watertight', that is have walls touching the border of the grid all around, A and B must be within the maze.
+
 Return the maze as a string, with newlines between rows.
 """
 
 structure = None # We just take a string here.
+
+subpassParamSummary = [
+    "16x16 maze",
+    "32x32 maze",
+    "64x64 maze",
+    "128x128 maze"
+]
 
 def prepareSubpassPrompt(index):
     if index == 0: return prompt.replace("PARAM_A", "16")
@@ -24,12 +35,12 @@ def prepareSubpassPrompt(index):
     if index == 3: return prompt.replace("PARAM_A", "128")
     raise StopIteration
 
-def gradeAnswer(answer : str,subPass : int):
+def gradeAnswer(answer : str,subPass : int, aiEngineName : str):
     answer = answer.strip()
     if answer.count("A") != 1 or answer.count("B") != 1:
         print("Maze must have exactly one A and one B")
         return 0
-    
+
     spaces = answer.count(" ")
     stepCount = answer.count(".") + 2 # +2 for A and B
     walls = answer.count("#")
@@ -45,14 +56,21 @@ def gradeAnswer(answer : str,subPass : int):
     for row in rows:
         cells.append(list(row))
 
+    expectedRows = 16 if subPass == 0 else 32 if subPass == 1 else 64 if subPass == 2 else 128
+    expectedColumns = expectedRows
+
     # Check that all rows are the same width:
     for row in cells:
-        if len(row) != len(cells[0]):
-            print("Maze must have all rows the same width")
+        if len(row) != expectedColumns:
+            print("Maze must have " + str(expectedColumns) + " columns")
             return 0
 
-    width = len(cells[0])
-    height = len(cells)
+    width = expectedColumns
+    height = expectedRows
+
+    if height != len(cells):
+        print("Maze must have " + str(expectedRows) + " rows")
+        return 0
 
     location = None
     for y in range(len(cells)):
@@ -95,30 +113,3 @@ def gradeAnswer(answer : str,subPass : int):
                 return 0
 
     return 1
-
-    
-gemini3Answer = [
-    """
-################
-#A..#...#.....##
-###.#.#.#.###.##
-# #...#.#.# #.##
-# #####.#.# #.##
-#.....#...#...##
-#.###.#####.####
-#..B#...#...# ##
-#######.#.### ##
-#.......#.....##
-#.###########.##
-#.....#.......##
-# ###.#.########
-#   #...      ##
-################
-################
-
-    """,
-    """
-    """,
-    "",
-    ""
-]

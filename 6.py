@@ -1,4 +1,8 @@
 import itertools
+import VolumeComparison as vc
+
+
+title = "Voxel Grid Projection - shadow coverage and no symmetries"
 
 prompt = """
 Position PARAM_A voxels in a cubic grid of PARAM_B voxels per side, such that the orthographic projection to all 3 planes is 
@@ -16,13 +20,13 @@ structure = {
         "type": "object",
         "properties": {
           "xyz": {
-            "type": "number"
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
           }
         },
         "propertyOrdering": [
-          "xyz"
-        ],
-        "required": [
           "xyz"
         ]
       }
@@ -33,13 +37,40 @@ structure = {
   ]
 }
 
+subpassParamSummary = [
+    "Cover a 6x6x6 grid with 50 voxels",
+    "Cover a 8x8x8 grid with 100 voxels", 
+    "Cover a 12x12x12 grid with 200 voxels"
+]
+
+promptChangeSummary = "Progressively larger grids with more voxels across subpasses"
+
 def prepareSubpassPrompt(index):
     if index == 0: return prompt.replace("PARAM_A", "50").replace("PARAM_B", "6")
     if index == 1: return prompt.replace("PARAM_A", "100").replace("PARAM_B", "8")
     if index == 2: return prompt.replace("PARAM_A", "200").replace("PARAM_B", "12")
     raise StopIteration
 
-def gradeAnswer(answer: dict, subPass: int):
+def resultToNiceReport(result, subPass, aiEngineName):
+    # Convert the result to a nice HTML report format
+
+    voxels = result.get("voxels", [])
+    scad_content = "union() {\n"
+    for v in voxels:
+        xyz = v.get("xyz", [0, 0, 0])
+        x, y, z = xyz[0], xyz[1], xyz[2]
+        scad_content += f'    translate([{x}, {y}, {z}]) cube([1, 1, 1]);\n'
+    scad_content += "}\n"
+    
+    import os
+    os.makedirs("results", exist_ok=True)
+    output_path = "results/6_Visualization_" + aiEngineName + "_" + str(len(voxels)) + ".png"
+    vc.render_scadText_to_png(scad_content, output_path)
+    print(f"Saved visualization to {output_path}")
+
+    return f'<img src="{os.path.basename(output_path)}" alt="Voxel Grid Visualization" style="max-width: 100%;">'
+
+def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
     sizes = [6, 8, 12]
     counts = [50, 100, 200]
     if subPass < 0 or subPass >= len(sizes):

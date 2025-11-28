@@ -1,5 +1,10 @@
+title = "Hyper-snake Challenge"
+
+promptChangeSummary = "Dimensions increase from 3D to 6D"
+subpassParamSummary = ["3D grid 4x4x4", "4D grid 5x5x5x5", "5D grid 4x4x4x4x4", "6D grid 3x3x3x3x3x3"]
+
 prompt = """
-Do you remember the snake game on Nokia phones? This is hyper-snake!
+Do you remember the snake game, where you have to direct a snake around a 2D space to avoid hitting itself? This is hyper-snake!
 
 You are a snake in a PARAM_AD space grid of size PARAM_B. You can move to any adjacent cell in the grid, along any of the
 available PARAM_A dimensions, but you can not move to a cell which you have visited before, nor can you move "diagonally",
@@ -11,21 +16,29 @@ Return the path of the snake as a list of cells, the first element of which is P
 """
 
 structure = {
-    "type": "object",
-    "properties": {
-        "path": {
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pos": {
             "type": "array",
             "items": {
-                "type": "array",
-                "items": {
-                    "type": "number"
-                }
+              "type": "integer"
             }
-        }
-    },
-    "propertyOrdering": [
-        "path"
-    ]
+          }
+        },
+        "propertyOrdering": [
+          "pos"
+        ]
+      }
+    }
+  },
+  "propertyOrdering": [
+    "path"
+  ]
 }
 
 def prepareSubpassPrompt(index):
@@ -35,7 +48,7 @@ def prepareSubpassPrompt(index):
     if index == 3: return prompt.replace("PARAM_A", "6").replace("PARAM_B", "(3,3,3,3,3,3)").replace("PARAM_C", "[0, 0,0,0,0,0]")
     raise StopIteration
 
-def gradeAnswer(answer : dict, subPassIndex : int):
+def gradeAnswer(answer : dict, subPassIndex : int, aiEngineName : str):
     # Define test parameters based on subPassIndex
     if subPassIndex == 0:
         dimensions = 3
@@ -67,20 +80,20 @@ def gradeAnswer(answer : dict, subPassIndex : int):
         return 0
     
     # Check first position matches start
-    if len(path[0]) != dimensions:
+    if len(path[0]["pos"]) != dimensions:
         return 0
     
-    if list(path[0]) != start_pos:
+    if list(path[0]["pos"]) != start_pos:
         return 0
     
     # Track visited cells to detect repeats
     visited = set()
-    visited.add(tuple(path[0]))
+    visited.add(tuple(path[0]["pos"]))
     
     # Validate each move
     for i in range(1, len(path)):
-        curr_pos = path[i]
-        prev_pos = path[i-1]
+        curr_pos = path[i]["pos"]
+        prev_pos = path[i-1]["pos"]
         
         # Check dimensionality
         if len(curr_pos) != dimensions:
@@ -119,3 +132,18 @@ def gradeAnswer(answer : dict, subPassIndex : int):
         total_cells *= size
     
     return len(path) / total_cells
+
+def resultToNiceReport(answer, subPassIndex, aiEngineName):
+    # Calculate total cells for the current subpass
+    if subPassIndex == 0:
+        total_cells = 4 * 4 * 4
+    elif subPassIndex == 1:
+        total_cells = 5 * 5 * 5 * 5
+    elif subPassIndex == 2:
+        total_cells = 4 * 4 * 4 * 4 * 4
+    elif subPassIndex == 3:
+        total_cells = 3 * 3 * 3 * 3 * 3 * 3
+    else:
+        total_cells = 0
+    
+    return f"Visited {len(answer['path'])} cells out of {total_cells} total cells."

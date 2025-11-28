@@ -1,3 +1,6 @@
+import re
+
+title = "Fit a curve to partition 2D ascii patterns via cubic polynomials"
 
 prompt = """
 
@@ -5,19 +8,31 @@ Here is an GRIDSIZExGRIDSIZE grid representing a space partition:
 
 GRIDDETAILS
 
-0, 0 is the top left, x is horizontal, y is vertical.
+0, 0 is the top left, x is horizontal, y is vertical. Coordinates are in integers.
 
 Using the formula:
 
 let cell = 
 
-   # if ax^3 + bx^2 + cx + d + ey^3 + fy^2 + gy + h > 0
-   . if ax^3 + bx^2 + cx + d + ey^3 + fy^2 + gy + h <= 0
+   # if f(x,y) > 0
+   . if f(x,y) <= 0
 
-(where a, b, c, d, e, f, g, and h are possibly complex numbers).
+where f(x,y) is a polynomial of whatever degree you need to solve this. You can include cross terms like x*y, x**2*y, x*y**2, etc.
 
-return values of a,b,c,d,e,f,g, and h such that the formula when evaluated at all grid cells returns output matching the grid above,
-if you believe no solution is possible, approximate the grid as best as possible and return a best-fit result.
+Return the formula as python function f(x,y) that uses ONLY:
+- arithmetic operations (+, -, *, /)
+- powers (**) 
+- parentheses for grouping
+- integer coordinates x, y
+- the words "def" and "return"
+
+Do not use type annotations, casts, conditionals, branches or comments or anything else.
+
+You can use the following example as a template:
+
+def f(x, y):
+    return x**2 + 3*y**2 - 4*x*y - 145
+
 """
 
 grids = [
@@ -30,7 +45,7 @@ grids = [
 #####...
 #######.
 ########
-""",
+""".strip(),
 """
 ########....
 ######......
@@ -44,7 +59,7 @@ grids = [
 ............
 ............
 ............
-""",
+""".strip(),
 """
 ........................
 ........................
@@ -70,7 +85,7 @@ grids = [
 ........................
 ........................
 ........................
-""",
+""".strip(),
 """
 ........
 ........
@@ -80,96 +95,10 @@ grids = [
 .##..##.
 ##....##
 #......#
-"""
+""".strip()
 ]
 
-structure = {
-  "type": "object",
-  "properties": {
-    "a": {
-      "type": "object",
-      "properties": {
-        "real": { "type": "number" },
-        "imaginary": { "type": "number" }
-      },
-      "propertyOrdering": [ "real", "imaginary" ],
-      "required": [ "real" ]
-    },
-    "b": {
-      "type": "object",
-      "properties": {
-        "real": { "type": "number" },
-        "imaginary": { "type": "number" }
-      },
-      "propertyOrdering": [ "real", "imaginary" ],
-      "required": [ "real" ]
-    },
-    "c": {
-      "type": "object",
-      "properties": {
-        "real": { "type": "number" },
-        "imaginary": { "type": "number" }
-      },
-      "propertyOrdering": [ "real", "imaginary" ],
-      "required": [ "real" ]
-    },
-    "d": {
-      "type": "object",
-      "properties": {
-        "real": { "type": "number" },
-        "imaginary": { "type": "number" }
-      },
-      "propertyOrdering": [ "real", "imaginary" ],
-      "required": [ "real" ]
-    },
-    "e": {
-      "type": "object",
-      "properties": {
-        "real": { "type": "number" },
-        "imaginary": { "type": "number" }
-      },
-      "propertyOrdering": [ "real", "imaginary" ],
-      "required": [ "real" ]
-    },
-    "f": {
-      "type": "object",
-      "properties": {
-        "real": { "type": "number" },
-        "imaginary": { "type": "number" }
-      },
-      "propertyOrdering": [ "real", "imaginary" ],
-      "required": [ "real" ]
-    },
-    "g": {
-      "type": "object",
-      "properties": {
-        "real": { "type": "number" },
-        "imaginary": { "type": "number" }
-      },
-      "propertyOrdering": [ "real", "imaginary" ],
-      "required": [ "real" ]
-    },
-    "h": {
-      "type": "object",
-      "properties": {
-        "real": { "type": "number" },
-        "imaginary": { "type": "number" }
-      },
-      "propertyOrdering": [ "real", "imaginary" ],
-      "required": [ "real" ]
-    }
-  },
-  "propertyOrdering": [
-    "a",
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "g",
-    "h"
-  ]
-}
+structure = None
 
 
 def prepareSubpassPrompt(index):
@@ -180,29 +109,61 @@ def prepareSubpassPrompt(index):
     raise StopIteration
 
 
-def gradeAnswer(answer : str, subPass : int):
-    a = complex(answer["a"]["real"], answer["a"]["imaginary"])
-    b = complex(answer["b"]["real"], answer["b"]["imaginary"])
-    c = complex(answer["c"]["real"], answer["c"]["imaginary"])
-    d = complex(answer["d"]["real"], answer["d"]["imaginary"])
-    e = complex(answer["e"]["real"], answer["e"]["imaginary"])
-    f = complex(answer["f"]["real"], answer["f"]["imaginary"])
-    g = complex(answer["g"]["real"], answer["g"]["imaginary"])
-    h = complex(answer["h"]["real"], answer["h"]["imaginary"])
+subpassParamSummary = ["<pre>" + g + "</pre>" for g in grids]
+
+def gradeAnswer(answer : str, subPass : int, aiEngineName : str):
+    validPass = answer
+    validPass = validPass.replace("def", "").strip()
+    validPass = validPass.replace("f", "").strip()
+    validPass = validPass.replace("return", "").strip()
+    validPass = validPass.replace("x", "").strip()
+    validPass = validPass.replace("y", "").strip()
+    
+    if re.search(r'[A-Za-z]', validPass):
+        print(f"Invalid characters in answer: {answer}. It contained \"{validPass}\". Score is 0")
+        return 0.0
     
     gridSize = 8 if subPass == 0 else 12 if subPass == 1 else 24 if subPass == 2 else 8
     
+    g = {}
+    exec(answer.strip(), globals=g)
+    
+    f = g["f"]
+
     grid = grids[subPass].splitlines()
     score = 0
 
+    print(f"Grid size: {gridSize}")
+    print(grid)
+
     for y in range(gridSize):
         for x in range(gridSize):
-            p = a * x**3 + b * x**2 + c * x + d + e * y**3 + f * y**2 + g * y + h
-            if p > 0:
-                if grid[y][x] == "#":
-                    score += 1
-            else:
-                if grid[y][x] == ".":
-                    score += 1
+            try:
+                p = f(x, y)  # use the evaluated function
+                if p > 0:
+                    if grid[y][x] == "#":
+                        score += 1
+                else:
+                    if grid[y][x] == ".":
+                        score += 1
+            except Exception as e:
+                print(f"Error evaluating f({x}, {y}): {e}")
+                continue
                     
     return score / (gridSize * gridSize)
+
+def resultToNiceReport(answer: str, subPass: int, aiEngineName: str):
+  gridSize = 8 if subPass == 0 else 12 if subPass == 1 else 24 if subPass == 2 else 8
+  gridRow = " " * gridSize
+  grid = [gridRow] * gridSize
+  
+  g = {}
+  exec(answer.strip(), globals=g)
+
+  f = g["f"]
+
+  for y in range(gridSize):
+      for x in range(gridSize):
+          grid[y] = grid[y][:x] + ("#" if f(x, y) > 0 else ".") + grid[y][x+1:]
+
+  return f"<td>{answer.replace('\n','<br/>')}</td><td><pre>{'<br/>'.join(grid)}</pre></td>"

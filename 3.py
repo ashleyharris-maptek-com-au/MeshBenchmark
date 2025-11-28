@@ -1,3 +1,5 @@
+title = "CSG Union of Rectangular Prism and Cube"
+
 prompt = """
 
 You can output polyhedrons in a json format. This is a simple cube, every face has 4 vertices, and there are 6 faces:
@@ -20,7 +22,8 @@ Return a polyhedron that is the union of the two solid objects.
 - Ensure faces have normals encoded in a consistent direction.
 - Ensure no geometry occurs inside the polyhedron, and no faces cross through it.
 - Note that some faces may have more than 4 vertices.
-- Your score will be 0 if the output is not watertight.
+- Your output should have no degenerate faces or redundant vertices. 
+- The task is a failure if the output is not watertight.
 """
 
 structure = {
@@ -83,6 +86,13 @@ module reference()
 }
 """
 
+promptChangeSummary = "Cube and rectangle move further apart in x."
+
+subpassParamSummary = [
+  "10cm apart in X ", 
+  "20cm apart in X ",
+  "30cm apart in X "]
+
 def prepareSubpassPrompt(index):
     if index == 0: return prompt.replace("PARAM", "5")
     if index == 1: return prompt.replace("PARAM", "10")
@@ -110,112 +120,3 @@ polyhedron(
     scad += ");\n"
     return "module result(){ " + scad + " }"
 
-
-gemini3Answer = [
-    {
-  "polyhedron": {
-    "vertex": [
-      {
-        "xyz": [10.0, -5.0, -10.0]
-      },
-      {
-        "xyz": [10.0, 15.0, -10.0]
-      },
-      {
-        "xyz": [10.0, 15.0, 20.0]
-      },
-      {
-        "xyz": [10.0, -5.0, 20.0]
-      },
-      {
-        "xyz": [0.0, -5.0, 20.0]
-      },
-      {
-        "xyz": [0.0, 15.0, 20.0]
-      },
-      {
-        "xyz": [0.0, 15.0, -10.0]
-      },
-      {
-        "xyz": [-12.5, -12.5, -12.5]
-      },
-      {
-        "xyz": [2.5, -12.5, -12.5]
-      },
-      {
-        "xyz": [2.5, 2.5, -12.5]
-      },
-      {
-        "xyz": [-12.5, 2.5, -12.5]
-      },
-      {
-        "xyz": [-12.5, -12.5, 2.5]
-      },
-      {
-        "xyz": [2.5, -12.5, 2.5]
-      },
-      {
-        "xyz": [-12.5, 2.5, 2.5]
-      },
-      {
-        "xyz": [2.5, 2.5, -10.0]
-      },
-      {
-        "xyz": [2.5, -5.0, -10.0]
-      },
-      {
-        "xyz": [2.5, -5.0, 2.5]
-      },
-      {
-        "xyz": [0.0, 2.5, 2.5]
-      },
-      {
-        "xyz": [0.0, 2.5, -10.0]
-      },
-      {
-        "xyz": [0.0, -5.0, 2.5]
-      }
-    ],
-    "faces": [
-      {
-        "vertex": [0, 1, 2, 3]
-      },
-      {
-        "vertex": [8, 9, 14, 15, 16, 12]
-      },
-      {
-        "vertex": [13, 10, 7, 11]
-      },
-      {
-        "vertex": [6, 18, 17, 19, 4, 5]
-      },
-      {
-        "vertex": [2, 1, 6, 5]
-      },
-      {
-        "vertex": [9, 10, 13, 17, 18, 14]
-      },
-      {
-        "vertex": [7, 8, 12, 11]
-      },
-      {
-        "vertex": [0, 3, 4, 19, 16, 15]
-      },
-      {
-        "vertex": [4, 3, 2, 5]
-      },
-      {
-        "vertex": [11, 12, 16, 19, 17, 13]
-      },
-      {
-        "vertex": [7, 10, 9, 8]
-      },
-      {
-        "vertex": [0, 15, 14, 18, 6, 1]
-      }
-    ]
-  }
-},
-{
-},
-{}]

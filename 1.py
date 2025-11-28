@@ -1,7 +1,9 @@
+title = "Lay out pipe to make a H shape."
+
 prompt = """
 You are given 5 rigid lengths of pipe, each 5 meters long and 10cm in diameter. 
 
-One pipe is fixed with it's center at the origin (0,0) and a rotation of 0, meaning it's length is along the x-axis, and it
+One pipe is fixed with its center at the origin (0,0) and a rotation of 0, meaning its length is along the x-axis, and it
 spans from -2.5,-0.05 to 2.5, 0.05.
 
 Arrange the remaining 4 pipes on a 2D plane such that the the pipes resemble a "H" shape when viewed from above.
@@ -57,33 +59,3 @@ def resultToScad(result):
       str(pipe["rotationDegrees"]) + "]) cube([5,0.1,.1], center=true);\n"
 
   return scad + "}}"
-
-gemini3Answer = [{
-        "pipes": [
-            {
-                "xCentre":0,
-                "yCentre": 0,
-                "rotationDegrees": 0
-            },
-            {
-                "xCentre": -2.55,
-                "yCentre": 2.5,
-                "rotationDegrees": 90
-            },
-            {
-                "xCentre": 2.55,
-                "yCentre": 2.5,
-                "rotationDegrees": 90
-            },
-            {
-                "xCentre": -2.55,
-                "yCentre": -2.5,
-                "rotationDegrees": 90
-            },
-            {
-                "xCentre": 2.55,
-                "yCentre": -2.5,
-                "rotationDegrees": 90
-            }
-        ]
-    }]
