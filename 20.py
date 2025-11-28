@@ -67,6 +67,26 @@ def pythonCodeToImage(code : str, size : int = 512):
     return image
 
 def gradeAnswer(answer : str, subPass : int, aiEngineName : str):
+    if len(answer) > 1024:
+        return "Too long"
+
+    for banned in [
+        "import", "from", "exec", "eval", "compile", "open", "os", "subprocess", "sys", 
+        "builtins", "file", "modules"]:
+        if banned in answer:
+            print("Banned word: " + banned)
+            return 0
+
+    size = 512
+
     ref = loadReferenceImage()
-    test = pythonCodeToImage(answer)
-    
+    test = pythonCodeToImage(answer,size)
+        
+    correct = 0
+
+    for x in range(size):
+        for y in range(size):
+            if ref.getpixel((x, y)) == test.getpixel((x, y)):
+                correct += 1
+
+    return correct / (size * size)
