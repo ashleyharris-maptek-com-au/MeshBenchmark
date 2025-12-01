@@ -7,17 +7,21 @@ You have an unlimited number of lego(tm) bricks, each of individual size 31.8mm 
 Assemble the bricks such that they resemble a 3D hemispherical shell, with inner radius PARAM_Acm and outer radius PARAM_Bcm, 
 the centre of the hemisphere is at the origin (0,0,0).
 
-Since it's impossible to create a perfect curve, a better result is one which is closer to the ideal curve, with
+Since it's impossible to create a perfect curve, the best score is one which is closer to the ideal curve, with
 scoring being calculated based on the volume difference between the ideal curve and the actual brick structure. 
 The structure needs to be buildable in 3D, so bricks can not overlap or be floating in mid air. A great answer does not 
 contain any holes or missing bricks.
 
-Return a list of the bricks (location in xyz mm relative to the origin and rotation in degrees).
+Return a list of the bricks (location in xyz mm relative to the origin and rotation in degrees). 
+You may also provide your reasoning in a seperate field, but it is not graded.
 """
 
 structure = {
   "type": "object",
   "properties": {
+    "reasoning": {
+      "type": "string"
+    },
     "bricks": {
       "type": "array",
       "items": {
@@ -36,13 +40,24 @@ structure = {
         "propertyOrdering": [
           "Centroid",
           "RotationDegrees"
-        ]
+        ],
+        "required": [
+          "Centroid",
+          "RotationDegrees"
+        ],
+        "additionalProperties": False
       }
     }
   },
   "propertyOrdering": [
+    "reasoning",
     "bricks"
-  ]
+  ],
+  "required": [
+    "reasoning",
+    "bricks"
+  ],
+  "additionalProperties": False
 }
 
 referenceScad = """

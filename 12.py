@@ -1,5 +1,6 @@
 import VolumeComparison as vc
 import itertools
+import math
 
 title = "Fit a loop into a square that's perimeter is smaller than the total length"
 
@@ -44,11 +45,20 @@ structure = {
                 "propertyOrdering": [
                     "x",
                     "y"
+                ],
+                "additionalProperties": False,
+                "required": [
+                    "x",
+                    "y"
                 ]
             }
         }
     },
     "propertyOrdering": [
+        "points"
+    ],
+    "additionalProperties": False,
+    "required": [
         "points"
     ]
 }
@@ -68,7 +78,7 @@ def gradeAnswer(answer: dict, subPassIndex: int, aiEngineName: str):
     boundary_sizes = [2, 3, 4, 10, 20, 40]
     
     if subPassIndex < 0 or subPassIndex >= len(pipe_counts):
-        return 0
+        return 0, "Invalid subPassIndex"
     
     expected_pipes = pipe_counts[subPassIndex]
     boundary = boundary_sizes[subPassIndex]
@@ -77,8 +87,7 @@ def gradeAnswer(answer: dict, subPassIndex: int, aiEngineName: str):
     # Extract points from answer
     points = answer.get("points") if isinstance(answer, dict) else None
     if not isinstance(points, list):
-        print("Answer must contain a 'points' array")
-        return 0
+        return 0, "Answer must contain a 'points' array"
     
     # Parse points
     parsed_points = []
@@ -94,32 +103,27 @@ def gradeAnswer(answer: dict, subPassIndex: int, aiEngineName: str):
     
     # Check correct number of points (N pipes in a closed loop = N vertices)
     if len(parsed_points) != expected_pipes:
-        print(f"Expected {expected_pipes} points (for {expected_pipes} pipe segments in closed loop), got {len(parsed_points)}")
-        return 0
+        return 0, f"Expected {expected_pipes} points (for {expected_pipes} pipe segments in closed loop), got {len(parsed_points)}"
     
     # Check all points are within bounds [0, boundary]
     for i, (x, y) in enumerate(parsed_points):
         if x < 0 or x > boundary or y < 0 or y > boundary:
-            print(f"Point {i} ({x}, {y}) is outside boundary [0, {boundary}]")
-            return 0
+            return 0, f"Point {i} ({x}, {y}) is outside boundary [0, {boundary}]"
     
     # Check all consecutive segments are 1 unit long (within tolerance)
-    import math
     for i in range(len(parsed_points) - 1):
         x1, y1 = parsed_points[i]
         x2, y2 = parsed_points[i + 1]
         dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
         if abs(dist - 1.0) > tolerance:
-            print(f"Segment {i} from ({x1}, {y1}) to ({x2}, {y2}) has length {dist:.4f}, expected 1.0 ± {tolerance}")
-            return 0
+            return 0, f"Segment {i} from ({x1}, {y1}) to ({x2}, {y2}) has length {dist:.4f}, expected 1.0 ± {tolerance}"
     
     # Check that it forms a loop (first and last points are 1 unit apart)
     x1, y1 = parsed_points[-1]
     x2, y2 = parsed_points[0]
     dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     if abs(dist - 1.0) > tolerance:
-        print(f"Loop does not close: distance from last point to first is {dist:.4f}, expected 1.0 ± {tolerance}")
-        return 0
+        return 0, f"Loop does not close: distance from last point to first is {dist:.4f}, expected 1.0 ± {tolerance}"
     
     # Helper function to check if two line segments intersect
     def segments_intersect(p1, p2, p3, p4):
@@ -160,8 +164,7 @@ def gradeAnswer(answer: dict, subPassIndex: int, aiEngineName: str):
                 continue
             
             if segments_intersect(segments[i][0], segments[i][1], segments[j][0], segments[j][1]):
-                print(f"Segment {i} crosses segment {j}")
-                return 0
+                return 0, f"Segment {i} crosses segment {j}"
     
     # Check for backtracking (consecutive segments that are nearly opposite in direction)
     for i in range(len(segments)):
@@ -183,12 +186,10 @@ def gradeAnswer(answer: dict, subPassIndex: int, aiEngineName: str):
             
             # Dot product close to -1 means vectors are opposite (backtracking)
             dot = v1x * v2x + v1y * v2y
-            if dot < -0.9:  # Allow some tolerance for near-backtracking
-                print(f"Segment {i} backtracks on segment {(i + 1) % len(segments)}")
-                return 0
+            if dot < -0.99:  # Allow some tolerance for near-backtracking
+                return 0, f"Segment {i} backtracks on segment {(i + 1) % len(segments)}"
     
-    print(f"Valid loop with {len(parsed_points)} points, all within bounds and 1 unit apart")
-    return 1
+    return 1, f"Valid loop with {len(parsed_points)} points, all within bounds and 1 unit apart"
 
 
 def resultToNiceReport(result : dict, subPass, aiEngineName : str):
@@ -202,6 +203,7 @@ def resultToNiceReport(result : dict, subPass, aiEngineName : str):
     result['points'].append(result['points'][0])
 
     for a,b in itertools.pairwise(result['points']):
+      if round(math.sqrt((b['x'] - a['x'])**2 + (b['y'] - a['y'])**2)) == 1:
         scad_content += "hull(){\n"
         scad_content += f"    translate([{a['x']}, {a['y']}]) sphere(0.01);\n"
         scad_content += f"    translate([{b['x']}, {b['y']}]) sphere(0.01);\n"

@@ -39,11 +39,20 @@ structure = {
                 "propertyOrdering": [
                     "a",
                     "b"
+                ],
+                "additionalProperties": False,
+                "required": [
+                    "a",
+                    "b"
                 ]
             }
         }
     },
     "propertyOrdering": [
+        "lines"
+    ],
+    "additionalProperties": False,
+    "required": [
         "lines"
     ]
 }
@@ -78,7 +87,7 @@ def gradeAnswer(answer : dict, subPassIndex : int, aiEngineName : str):
     # Get the lines from the answer
     lines = answer.get("lines") if isinstance(answer, dict) else None
     if not isinstance(lines, list):
-        return 0
+        return 0, "Answer must contain a 'lines' array"
     
     # Create and parse the grid
     grid_str = createGrid(subPassIndex)
@@ -127,13 +136,13 @@ def gradeAnswer(answer : dict, subPassIndex : int, aiEngineName : str):
     # Check if each region contains only one unique letter
     total_regions = len(region_letters)
     if total_regions == 0:
-        return 0
+        return 0, "No regions found"
     
     correct_regions = sum(1 for letters in region_letters.values() if len(letters) == 1)
     
     # Return the fraction of regions that are correctly partitioned
     score = correct_regions / total_regions
-    return score
+    return score, f"{correct_regions}/{total_regions} regions correctly partitioned using {len(equations)} lines"
 
 def resultToNiceReport(answer, subPassIndex, aiEngineName : str):
     grid_str = createGrid(subPassIndex)

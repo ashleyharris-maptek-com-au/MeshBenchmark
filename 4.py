@@ -31,23 +31,56 @@ Score will be deducted for any shadow outside of the square, for reduntant tetra
 """
 
 structure = {
-    "type": "array",
-    "items": {
-        "type": "object",
-        "properties": {
-            "x": { "type": "number" },
-            "y": { "type": "number" },
-            "z": { "type": "number" },
-            "q0": { "type": "number" },
-            "q1": { "type": "number" },
-            "q2": { "type": "number" },
-            "q3": { "type": "number" }
+    "type": "object",
+    "properties": {
+      "tetrahedrons": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "z": {
+              "type": "number"
+            },
+            "q0": {
+              "type": "number"
+            },
+            "q1": {
+              "type": "number"
+            },
+            "q2": {
+              "type": "number"
+            },
+            "q3": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "x",
+            "y",
+            "z",
+            "q0",
+            "q1",
+            "q2",
+            "q3"
+          ],
+          "additionalProperties": False
         }
-    }
+      }
+    },
+    "required": [
+      "tetrahedrons"
+    ],
+    "additionalProperties": False
 }
 
 subpassParamSummary = [
-    "Cover a square of side length 4",
+    "Cover a square of side length 4. \n\n(Note that the shadow has been linearly extruded to a height of 1 to simplify volume comparison)",
     "Cover a circle of diameter 4",
     "Cover a square of side length 6, with a hole in the centre of side length 2"
 ]
@@ -113,7 +146,7 @@ module tetrahedron(){
 def resultToScad(result):
     scad = "module result(){ " 
     scad += "linear_extrude(height=1){ projection() { minkowski(){cube(0.001); union() { "
-    for transform in result:
+    for transform in result["tetrahedrons"]:
         scad += "translate([" + str(transform["x"]) + "," + \
             str(transform["y"]) + "," + str(transform["z"]) + "]) rotate(" + \
             str(quaternionToPitchRollYawInDegrees(transform["q0"], transform["q1"], transform["q2"], transform["q3"])) + ") tetrahedron();\n"

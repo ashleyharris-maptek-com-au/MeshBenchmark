@@ -31,19 +31,41 @@ Return the transform array of tetrahedra in order to create a:
 """
 
 structure = {
-    "type": "array",
-    "items": {
-        "type": "object",
-        "properties": {
-            "x": { "type": "number" },
-            "y": { "type": "number" },
-            "z": { "type": "number" },
-            "q0": { "type": "number" },
-            "q1": { "type": "number" },
-            "q2": { "type": "number" },
-            "q3": { "type": "number" }
+    "type": "object",
+    "properties": {
+        "tetrahedra": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "x": { "type": "number" },
+                    "y": { "type": "number" },
+                    "z": { "type": "number" },
+                    "q0": { "type": "number" },
+                    "q1": { "type": "number" },
+                    "q2": { "type": "number" },
+                    "q3": { "type": "number" }
+                },
+                "additionalProperties": False,
+                "required": [
+                    "x",
+                    "y",
+                    "z",
+                    "q0",
+                    "q1",
+                    "q2",
+                    "q3"
+                ]
+            }
         }
-    }
+    },
+    "propertyOrdering": [
+        "tetrahedra"
+    ],
+    "required": [
+        "tetrahedra"
+    ],
+    "additionalProperties": False
 }
 
 subpassParamSummary = [
@@ -163,7 +185,7 @@ module tetrahedron(){
 def resultToScad(result):
     scad = "module result(){ " 
     scad += "minkowski(){cube(0.001); union() { "
-    for transform in result:
+    for transform in result["tetrahedra"]:
         scad += "translate([" + str(transform["x"]) + "," + \
             str(transform["y"]) + "," + str(transform["z"]) + "]) rotate(" + \
             str(quaternionToPitchRollYawInDegrees(transform["q0"], transform["q1"], transform["q2"], transform["q3"])) + ") tetrahedron();\n"

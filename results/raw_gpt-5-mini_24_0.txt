@@ -1,0 +1,1 @@
+{'reasoning': 'I computed the convex hull using a monotonic chain (sorting by x then building lower and upper hulls). The hull vertices in counterclockwise order are the points with indices [2, 7, 11, 12, 5, 6, 4, 15].', 'hull': [2, 7, 11, 12, 5, 6, 4, 15]}

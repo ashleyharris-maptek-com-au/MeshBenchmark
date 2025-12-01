@@ -1,0 +1,1 @@
+{'reasoning': 'I identified points that appear to lie on the outer boundary (convex hull) of the set and listed them in counterclockwise order beginning at the leftmost point (index 34).', 'hull': [34, 85, 125, 26, 110, 126, 28, 95, 120, 112]}

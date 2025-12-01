@@ -40,14 +40,20 @@ structure = {
           "XyzMax"
         ],
         "required": [
+          "XyzMin",
           "XyzMax"
-        ]
+        ],
+        "additionalProperties": False
       }
     }
   },
   "propertyOrdering": [
     "boxes"
-  ]
+  ],
+  "required": [
+    "boxes"
+  ],
+  "additionalProperties": False
 }
 
 prismList = [
@@ -88,11 +94,9 @@ def gradeAnswer(answer, subPass, aiEngineName):
       volume = (box["XyzMax"][0] - box["XyzMin"][0]) * (box["XyzMax"][1] - box["XyzMin"][1]) * (box["XyzMax"][2] - box["XyzMin"][2])
       answerVolume += volume
 
-    print("Answer volume: " + str(answerVolume))
-    print("Expected volume: " + str(expectedVolume))
+    reasoning = f"Answer volume: {answerVolume}, Expected volume: {expectedVolume}"
     if answerVolume != expectedVolume:
-      print("Volume mismatch: expected " + str(expectedVolume) + ", got " + str(answerVolume))
-      return 0
+      return 0, reasoning + f"\nVolume mismatch: expected {expectedVolume}, got {answerVolume}"
 
     # count the number of boxes of each size
     boxCountBySize = defaultdict(int)
@@ -104,22 +108,19 @@ def gradeAnswer(answer, subPass, aiEngineName):
     # check to make sure that the number of boxes of each size is correct
     for boxCount, x,y,z in prismList[0:subPass + 1]:
         if boxCountBySize[(x,y,z)] != boxCount:
-          print("Box count mismatch for " + str(x) + "x" + str(y) + "x" + str(z) + ": expected " + str(boxCount) + ", got " + str(boxCountBySize[(x,y,z)]))
-          return 0
+          return 0, reasoning + f"\nBox count mismatch for {x}x{y}x{z}: expected {boxCount}, got {boxCountBySize[(x,y,z)]}"
 
     # check to see if any boxes overlap
     for box in answer["boxes"]:
       for otherBox in answer["boxes"]:
         if box != otherBox:
           if box["XyzMin"][0] < otherBox["XyzMax"][0] and box["XyzMax"][0] > otherBox["XyzMin"][0] and box["XyzMin"][1] < otherBox["XyzMax"][1] and box["XyzMax"][1] > otherBox["XyzMin"][1] and box["XyzMin"][2] < otherBox["XyzMax"][2] and box["XyzMax"][2] > otherBox["XyzMin"][2]:
-            print("Box overlap detected")
-            return 0
+            return 0, reasoning + "\nBox overlap detected"
 
     # check to see if all coordinates are positive
     for box in answer["boxes"]:
       if box["XyzMin"][0] < 0 or box["XyzMin"][1] < 0 or box["XyzMin"][2] < 0:
-        print("Box with negative coordinates detected")
-        return 0
+        return 0, reasoning + "\nBox with negative coordinates detected"
 
     maxPoint = [0,0,0]
     for box in answer["boxes"]:
@@ -128,7 +129,8 @@ def gradeAnswer(answer, subPass, aiEngineName):
       maxPoint[2] = max(maxPoint[2], box["XyzMax"][2])
 
     enclosingVolume = maxPoint[0] * maxPoint[1] * maxPoint[2]
-    return answerVolume / enclosingVolume
+    score = answerVolume / enclosingVolume
+    return score, reasoning + f"\nPacking efficiency: {score*100:.1f}% (enclosing volume: {enclosingVolume})"
 
 def resultToNiceReport(result, subPass, aiEngineName : str):
 

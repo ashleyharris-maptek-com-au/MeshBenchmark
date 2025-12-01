@@ -25,13 +25,29 @@ Return the canvas as a string, with:
 - (space) representing unpainted pixels, the ground, sky, pentagram or anything else.
 """
 
-structure = None # We just take a string here.
+structure = {
+    "type" : "object",
+    "properties" : {
+        "reasoning" : { "type" : "string"},
+        "painting" : { "type" : "string"}
+    },
+    "additionalProperties": False,
+    "propertyOrdering": [
+        "reasoning",
+        "painting"
+    ],
+    "required": [
+        "reasoning",
+        "painting"
+    ]
+}
 
 def prepareSubpassPrompt(index):
-    if index == 0: return prompt.replace("PARAM_A", "32")
-    if index == 1: return prompt.replace("PARAM_A", "64")
-    if index == 2: return prompt.replace("PARAM_A", "128")
-    if index == 3: return prompt.replace("PARAM_A", "256")
+    if index == 0: return prompt.replace("PARAM_A", "16")
+    if index == 1: return prompt.replace("PARAM_A", "32")
+    if index == 2: return prompt.replace("PARAM_A", "64")
+    if index == 3: return prompt.replace("PARAM_A", "128")
+    if index == 4: return prompt.replace("PARAM_A", "256")
     raise StopIteration
 
 def generateReferencePicture(aiEngineName : str):
@@ -121,16 +137,16 @@ def generateReferenceAscii(gridSize : int, aiEngineName : str):
     
     return '\n'.join(ascii_lines)
 
-def gradeAnswer(answer: str, subPass: int, aiEngineName: str) -> float:
+def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
     # Get the reference ASCII for the given subpass
-    gridSize = 32 if subPass == 0 else 64 if subPass == 1 else 128 if subPass == 2 else 256
+    gridSize = 16 if subPass == 0 else 32 if subPass == 1 else 64 if subPass == 2 else 128 if subPass == 3 else 256
     reference = generateReferenceAscii(gridSize, aiEngineName)
     
-    answer_lines = answer.strip().split('\n')
+    answer_lines = answer["painting"].strip().split('\n')
     reference_lines = reference.strip().split('\n')
     
     if len(answer_lines) != len(reference_lines):
-        return 0.0
+        return 0.0, f"Line count mismatch: got {len(answer_lines)}, expected {len(reference_lines)}"
     
     correct = 0
     total = 0
@@ -143,24 +159,28 @@ def gradeAnswer(answer: str, subPass: int, aiEngineName: str) -> float:
                 correct += 1
             total += 1
     
-    return correct / total if total > 0 else 0.0
+    score = correct / total if total > 0 else 0.0
+    return score, f"Matched {correct}/{total} characters ({score*100:.1f}%)"
 
-def resultToNiceReport(answer: str, subPass: int, aiEngineName: str):
+def resultToNiceReport(answer: dict, subPass: int, aiEngineName: str):
     if subPass < 2:
       html = "<div style='font:monospace;font-size:12px;line-height:12px;'>"
-    else:
+    elif subPass < 4:
       html = "<div style='font:monospace;font-size:4px;line-height:4px;'>"
+    else:
+      html = "<div style='font:monospace;font-size:1px;line-height:1px;'>"
 
 
     # Get the reference ASCII for the given subpass
     gridSize = 32 if subPass == 0 else 64 if subPass == 1 else 128 if subPass == 2 else 256
     reference = generateReferenceAscii(gridSize, aiEngineName)    
     
-    answer_lines = answer.lstrip("\n").rstrip().split('\n')
+    answer_lines = answer["painting"].lstrip("\n").rstrip().split('\n')
     reference_lines = reference.lstrip("\n").rstrip().split('\n')
     
     if len(answer_lines) != len(reference_lines):
-        html += f"Answer has {len(answer_lines)} lines, reference has {len(reference_lines)} lines.</p>"
+        html += "<td><pre style='font:monospace;font-size:4px;line-height:4px;'>" + "\n".join(answer_lines) + "</pre>"
+        html += f"</td><td>Answer has {len(answer_lines)} lines, reference has {len(reference_lines)} lines.</td>"
         return html
     
     for a_line, r_line in zip(answer_lines, reference_lines):

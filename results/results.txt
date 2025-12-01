@@ -1,1 +1,2 @@
-Placebo: 0.0
+Placebo: 0.9999999980394381
+GPT5Nano: 0.5

@@ -1,9 +1,9 @@
 import random
 
-title = "Tetris™ but with only the L-Piece"
+title = "Tetris(tm) but with only the L-Piece"
 
 prompt = """
-You are playing Tetris™, and are cursed to only get the L-shaped tetrimino for all time.
+You are playing Tetris(tm), and are cursed to only get the L-shaped tetrimino for all time.
 
 The L shaped piece initially arrives in this orientation (with indent representing grid position):
 
@@ -64,13 +64,22 @@ structure = {
         "propertyOrdering": [
           "translationCount",
           "rotationCount"
-        ]
+        ],
+        "required": [
+          "translationCount",
+          "rotationCount"
+        ],
+        "additionalProperties": False
       }
     }
   },
   "propertyOrdering": [
     "moves"
-  ]
+  ],
+  "required": [
+    "moves"
+  ],
+  "additionalProperties": False
 }
 
 
@@ -81,22 +90,22 @@ def prepareSubpassPrompt(index):
     if index == 3: return prompt.replace("PARAM_A", "40").replace("PARAM_B", "30")
     raise StopIteration
 
-remainsOfLastRun = None
+remainsOfLastRun = [None] * 4
 
 def gradeAnswer(answer : dict, subPassIndex : int, aiEngineName : str):
     global remainsOfLastRun
-    remainsOfLastRun = None
+    remainsOfLastRun[subPassIndex] = None
     widths = [10, 16, 20, 40]
     required = [10, 15, 20, 30]
     if subPassIndex < 0 or subPassIndex >= len(widths):
-        return 0
+        return 0, "Invalid subPassIndex"
     W = widths[subPassIndex]
     H = 30
     target = required[subPassIndex]
 
     moves = answer.get("moves") if isinstance(answer, dict) else None
     if not isinstance(moves, list):
-        return 0
+        return 0, "Answer must contain a 'moves' array"
 
     # Ensure that we end with a pile of blocks up, as if a player walks away,
     # as tetris has no good ending.
@@ -176,32 +185,32 @@ def gradeAnswer(answer : dict, subPassIndex : int, aiEngineName : str):
             cleared += removed
 
     # Store the grid state for potential use in reporting
-    remainsOfLastRun = grid
+    remainsOfLastRun[subPassIndex] = grid
 
     if target <= 0:
-        return 0
+        return 0, "Invalid target"
     score = cleared / float(target)
     if score > 1:
         score = 1
     if score < 0:
         score = 0
-    return score
+    return score, f"Cleared {cleared}/{target} rows ({score*100:.1f}%) in {len(moves)} moves"
 
 def resultToNiceReport(result, subPassIndex, aiEngineName : str):
-    region_colours = {0 : [0,0,0]}
+    region_colours = {0 : [1,1,1]}
     
-    # Use the grid from the last run
-    grid = remainsOfLastRun
+    # Use the grid from the grade answer pass, so we don't have to redo the entire game.
+    grid = remainsOfLastRun[subPassIndex]
     size = len(grid)
     
     out = "<span style='font-family: monospace;"
     
-    if size < 20: out += "font-size:20px; line-height:20px"
+    if size < 50: out += "font-size:32px; line-height:32px"
     else: out += "font-size:10px; line-height:10px"
 
     out += "'>"
     
-    for y in range(size):
+    for y in range(10, size):
         for x in range(len(grid[y])):
             cell = grid[y][x]
             if cell not in region_colours:

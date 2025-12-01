@@ -1,6 +1,8 @@
 from textwrap import dedent
 import hashlib
 
+configAndSettingsHash = hashlib.sha256("Placebo").hexdigest()
+
 def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
     h = hashlib.sha256(prompt.strip().encode()).hexdigest()
     
@@ -33,7 +35,8 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
                 "yCentre": -2.5,
                 "rotationDegrees": 90
             }
-        ]
+        ],
+        "Reasoning": "This was manually calculated. Half of 10cm is 5cm, so the 10cm wide pipes center is offset by 5cm."
     }
 
     if h == "1a77d1817254df5c0d6a3d340d389744ab77e002685fd25578550a3da7f5482d":
@@ -150,7 +153,8 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
             {"Centroid": [0, 0, 62.4], "RotationDegrees": 0},
             {"Centroid": [0, 16, 62.4], "RotationDegrees": 0},
             {"Centroid": [0, -16, 62.4], "RotationDegrees": 0}
-        ]
+        ],
+        "Reasoning": "I generated this from the Gemini 2.5 pro API playground while developing the test. It's a bit 'meh'"
         }
 
     if h == "b999904f5b38b765fa59ba4cf4ed3ad93fa77cdee60126375adca350bff8e55d":
@@ -416,7 +420,8 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
                     "vertex": [0, 15, 14, 18, 6, 1]
                 }
                 ]
-            }
+            },
+            "Reasoning": "I generated this from the Gemini 2.5 API playground while developing the test.  It appears correct for the 1st test."
         }
 
     if h in ["9e73ddadee00ffc7691fc719f63c1f04e7c14e02250ae3204c7d900cbfde671e",
@@ -812,9 +817,8 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
             {"x" : -1.500000, "y" : 2.598076, "z" : 0.000000, "q0" : 0.000000, "q1" : 0.000000, "q2" : 0.000000, "q3" : 1.000000},
         ]
 
-    if h == "":
-        return 
-        """
+    if h == "0fbf410f5c365dbc0e05c62d5c9651f94a8f218ea98f601adadbf013ea97ae4e":
+        return """
 def m(l,b):
  r=math.radians
  return (l+180)/360,.5-math.log(math.tan(math.pi/4+r(b)/2))/(2*math.pi)

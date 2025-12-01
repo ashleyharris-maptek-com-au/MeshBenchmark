@@ -12,9 +12,24 @@ The grain size and moisture content results in an angle of repose of 33 degrees.
 
 The silo is 10 yards in dimeter, and negligible internal wind / air current.
 
-Return an OpenSCAD file containing the shape of the sand pile: Use metric within OpenSCAD. 1 unit = 1 meter."""
+Return an OpenSCAD file containing the shape of the sand pile: Use metric within OpenSCAD. 1 unit = 1 meter.
+
+Keep the OpenSCAD file as simple as possible, using the fewest number of lines possible. 
+
+Do not output anything else than the OpenSCAD file, as commentary doesn't compile.
+"""
 
 structure = None
+
+subpassParamSummary = [
+  """
+  Some things to watch out for:<ul>
+    <li>The nozzle opening is 25NB, or 33.7mm internal diameter. The cone's top wont be a pin-prick.</li>
+    <li>33. degrees is pretty flat, so you can visually fail most output from this.</li>
+    <li>The walls of the silo require this to be a cylinder with a cone on top.</li>
+  </ul>
+  """
+]
 
 referenceScad = """
 module reference()

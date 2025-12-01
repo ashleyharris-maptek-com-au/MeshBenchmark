@@ -1,0 +1,51 @@
+// Tallest pyramid buildable with 2,500,000 stones (each a 500 mm cube).
+// Rules: each upper stone's four base corners rest on the centers of four stones below,
+// layers form nested square slabs. This file models each layer as a single contiguous
+// slab (union of that layer's cubes) for a precise, millimetre-accurate, viewable CAD model.
+//
+// Units: millimetres.
+//
+// The script computes the maximum number of layers L such that sum_{k=1..L} k^2 <= total_stones
+// and builds L slabs of thickness = stone_side, side = k*stone_side, stacked and centered.
+//
+// No other output.
+
+stone = 500;           // side of one stone in mm
+total_stones = 2500000;
+
+// closed-form sum of squares: 1^2 + 2^2 + ... + L^2 = L*(L+1)*(2L+1)/6
+function sumsq(L) = L*(L + 1)*(2*L + 1) / 6;
+
+// recursive search for largest L with sumsq(L) <= n
+function findL(n, L=1) = sumsq(L) > n ? L - 1 : findL(n, L + 1);
+
+// compute layers and usage
+layers = findL(total_stones);
+used_stones = sumsq(layers);
+remaining_stones = total_stones - used_stones;  // leftover stones not used in perfect stepped pyramid
+
+// Parameters for viewer convenience (not required): center pyramid at origin, north = +Y
+// Build: for k = 0 .. layers-1, layer size n = layers - k
+module pyramid_layers(layers_count) {
+    union() {
+        for (k = [0 : layers_count - 1]) {
+            n = layers_count - k;
+            // Each layer is a slab of size (n*stone x n*stone x stone)
+            // Place slab center at Z = stone*(k + 0.5), centered in X/Y at origin
+            translate([0, 0, stone * (k + 0.5)])
+                cube([n * stone, n * stone, stone], center = true);
+        }
+    }
+}
+
+// Optional: small axes indicator (uncomment if desired)
+// module axes(len=2000) {
+//     color([1,0,0]) translate([0,0,0]) cube([len,10,10]); // +X (east) red
+//     color([0,1,0]) translate([0,0,0]) cube([10,len,10]); // +Y (north) green
+//     color([0,0,1]) translate([0,0,0]) cube([10,10,len]); // +Z blue
+// }
+
+// Render pyramid
+pyramid_layers(layers);
+
+// End of file.

@@ -26,13 +26,14 @@ Return the formula as python function f(x,y) that uses ONLY:
 - integer coordinates x, y
 - the words "def" and "return"
 
-Do not use type annotations, casts, conditionals, branches or comments or anything else.
+Do not use type annotations, casts, conditionals, branches, additional variables, comments or anything else.
 
 You can use the following example as a template:
 
 def f(x, y):
     return x**2 + 3*y**2 - 4*x*y - 145
 
+DO NOT OUTPUT ANYTHING ELSE THAN THE FUNCTION.
 """
 
 grids = [
@@ -98,7 +99,22 @@ grids = [
 """.strip()
 ]
 
-structure = None
+structure = {
+    "type" : "object",
+    "properties" : {
+        "reasoning" : { "type" : "string"},
+        "function" : { "type" : "string"}
+    },
+    "additionalProperties": False,
+    "propertyOrdering": [
+        "reasoning",
+        "function"
+    ],
+    "required": [
+        "reasoning",
+        "function"
+    ]
+}
 
 
 def prepareSubpassPrompt(index):
@@ -111,7 +127,8 @@ def prepareSubpassPrompt(index):
 
 subpassParamSummary = ["<pre>" + g + "</pre>" for g in grids]
 
-def gradeAnswer(answer : str, subPass : int, aiEngineName : str):
+def gradeAnswer(answer : dict, subPass : int, aiEngineName : str):
+    answer = answer["function"]
     validPass = answer
     validPass = validPass.replace("def", "").strip()
     validPass = validPass.replace("f", "").strip()
@@ -120,21 +137,21 @@ def gradeAnswer(answer : str, subPass : int, aiEngineName : str):
     validPass = validPass.replace("y", "").strip()
     
     if re.search(r'[A-Za-z]', validPass):
-        print(f"Invalid characters in answer: {answer}. It contained \"{validPass}\". Score is 0")
-        return 0.0
+        return 0.0, f"Invalid characters in answer: {answer}. It contained \"{validPass}\". Score is 0"
     
     gridSize = 8 if subPass == 0 else 12 if subPass == 1 else 24 if subPass == 2 else 8
     
     g = {}
-    exec(answer.strip(), globals=g)
+    try:
+        exec(answer.strip(), g)
+    except Exception as e:
+        return 0.0, f"Error evaluating AI-generated python function: {e}"
     
     f = g["f"]
 
     grid = grids[subPass].splitlines()
     score = 0
-
-    print(f"Grid size: {gridSize}")
-    print(grid)
+    errors = []
 
     for y in range(gridSize):
         for x in range(gridSize):
@@ -147,18 +164,26 @@ def gradeAnswer(answer : str, subPass : int, aiEngineName : str):
                     if grid[y][x] == ".":
                         score += 1
             except Exception as e:
-                print(f"Error evaluating f({x}, {y}): {e}")
+                errors.append(f"Error evaluating f({x}, {y}): {e}")
                 continue
-                    
-    return score / (gridSize * gridSize)
+    
+    final_score = score / (gridSize * gridSize)
+    reasoning = f"Grid size: {gridSize}, matched {score}/{gridSize*gridSize} cells"
+    if errors:
+        reasoning += f"\n{len(errors)} evaluation errors occurred"
+    return final_score, reasoning
 
-def resultToNiceReport(answer: str, subPass: int, aiEngineName: str):
+def resultToNiceReport(answer: dict, subPass: int, aiEngineName: str):
+  answer = answer["function"]
   gridSize = 8 if subPass == 0 else 12 if subPass == 1 else 24 if subPass == 2 else 8
   gridRow = " " * gridSize
   grid = [gridRow] * gridSize
   
   g = {}
-  exec(answer.strip(), globals=g)
+  try:
+    exec(answer.strip(), g)
+  except Exception as e:
+    return f"<td>{answer.replace('\n','<br/>')}</td><td>Error evaluating AI-generated python function: {e}</td>"
 
   f = g["f"]
 
@@ -166,4 +191,4 @@ def resultToNiceReport(answer: str, subPass: int, aiEngineName: str):
       for x in range(gridSize):
           grid[y] = grid[y][:x] + ("#" if f(x, y) > 0 else ".") + grid[y][x+1:]
 
-  return f"<td>{answer.replace('\n','<br/>')}</td><td><pre>{'<br/>'.join(grid)}</pre></td>"
+  return f"<td style='font-size: 8px'><div style='max-width:800px'>{answer.replace('\n','<br/>')}</div></td><td><pre>{'<br/>'.join(grid)}</pre></td>"

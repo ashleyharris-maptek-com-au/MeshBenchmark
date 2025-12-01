@@ -4,6 +4,7 @@ import os
 import base64
 import html
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from CacheLayer import CacheLayer
 
 def runTest(index: int, aiEngineHook : callable, aiEngineName : str) -> Dict[str, Any]:
     """
@@ -21,7 +22,7 @@ def runTest(index: int, aiEngineHook : callable, aiEngineName : str) -> Dict[str
     if not os.path.exists(str(index) + ".py"):
         raise StopIteration
     
-    exec(open("" + str(index) + ".py").read(), g)
+    exec(open("" + str(index) + ".py", encoding="utf-8").read(), g)
     
     prompts = []
     structure = g["structure"]
@@ -50,8 +51,10 @@ def runTest(index: int, aiEngineHook : callable, aiEngineName : str) -> Dict[str
         for future in as_completed(future_to_index):
             idx = future_to_index[future]
             results[idx] = future.result()
+            open("results/raw_" + aiEngineName + "_" + str(index) + "_" + str(idx) + ".txt", "w",encoding="utf-8").write(str(results[idx]))
     
-    # Handle placebo mode
+    # In placebo mode, make sure we test all the grading functions even if the questions are currently
+    # too hard for me to create an answer.
     if aiEngineName == "Placebo":
         first_result = next((r for r in results if r is not None), None)
         if first_result is not None:
@@ -64,19 +67,26 @@ def runTest(index: int, aiEngineHook : callable, aiEngineName : str) -> Dict[str
             "subpass": subPass,
             "score": 0,
         }
-        
+
+        if isinstance(result, dict) and "reasoning" in result:
+            subpass_data["reasoning"] = result["reasoning"]
+
         if not result:
             print(f"No answer generated for subpass {subPass}")
             subpass_data["score"] = 0
         elif "resultToImage" in g:
-            score = g["gradeAnswer"](result, subPass, aiEngineName)
+            score, explanation = g["gradeAnswer"](result, subPass, aiEngineName)
             output_path = g["resultToImage"](result, subPass, aiEngineName)
             if "resultToNiceReport" in g:
                 subpass_data["output_nice"] = g["resultToNiceReport"](result, subPass, aiEngineName)
             else:
                 subpass_data["output_text"] = result
                 subpass_data["output_image"] = output_path
+
+            if "getReferenceImage" in g:
+                subpass_data["reference_image"] = g["getReferenceImage"](subPass, aiEngineName)
             subpass_data["score"] = score
+            subpass_data["scoreExplantion"] = explanation
 
         elif "referenceScad" in g:
             # Some tests require an OpenSCAD comparison to check if the generated
@@ -87,12 +97,18 @@ def runTest(index: int, aiEngineHook : callable, aiEngineName : str) -> Dict[str
             score = comparison_result["score"]
             subpass_data["score"] = score
             subpass_data["output_image"] = comparison_result.get("output_image")
+            subpass_data["output_mouseover_image"] = comparison_result.get("output_mouseover_image")
             subpass_data["reference_image"] = comparison_result.get("reference_image")
             subpass_data["temp_dir"] = comparison_result.get("temp_dir")
+            subpass_data["scoreExplantion"] = comparison_result.get("scoreExplantion")
+            subpass_data["output_hyperlink"] = comparison_result.get("output_hyperlink")
+
         elif "gradeAnswer" in g:
             # Some tests require a custom grading function.
-            score = g["gradeAnswer"](result, subPass, aiEngineName)
+
+            score, explanation = g["gradeAnswer"](result, subPass, aiEngineName)
             subpass_data["score"] = score
+            subpass_data["scoreExplantion"] = explanation
 
             if "resultToNiceReport" in g:
                 subpass_data["output_nice"] = g["resultToNiceReport"](result, subPass, aiEngineName)
@@ -130,19 +146,51 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
         os.makedirs("results")
 
     # Create a results file for the html results of this engines test run
-    results_file = open("results/" + aiEngineName + ".html", "w", buffering=1)
+    results_file = open("results/" + aiEngineName + ".html", "w", buffering=1, encoding="utf-8")
     results_file.write("<html>\n<head>\n<style>\n")
-    results_file.write("""    table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; vertical-align: top; }
-    th { background-color: #4CAF50; color: white; }
-    .test-header { background-color: #45a049; font-weight: bold; }
-    .prompt-row { background-color: #f9f9f9; font-style: italic; }
-    .subpass-row { background-color: #ffffff; }
-    img { max-width: 100%; height: auto; border: 1px solid #ccc; }
-    .score-good { color: green; font-weight: bold; }
-    .score-bad { color: red; font-weight: bold; }
-    h1 { color: #333; }
-    h2 { color: #666; margin-top: 30px; }
+    results_file.write("""
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333;
+    --text-secondary: #666;
+    --border-color: #ddd;
+    --header-bg: #4CAF50;
+    --header-text: white;
+    --test-header-bg: #45a049;
+    --prompt-bg: #f9f9f9;
+    --subpass-bg: #ffffff;
+    --img-border: #ccc;
+    --score-good: #228B22;
+    --score-bad: #dc3545;
+}
+@media screen and (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --text-secondary: #aaa;
+        --border-color: #444;
+        --header-bg: #2d5a2d;
+        --header-text: #e0e0e0;
+        --test-header-bg: #3d6a3d;
+        --prompt-bg: #2a2a2a;
+        --subpass-bg: #1f1f1f;
+        --img-border: #555;
+        --score-good: #4CAF50;
+        --score-bad: #ff6b6b;
+    }
+}
+body { background-color: var(--bg-color); color: var(--text-color); }
+table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+th, td { border: 1px solid var(--border-color); padding: 12px; text-align: left; vertical-align: top; }
+th { background-color: var(--header-bg); color: var(--header-text); }
+.test-header { background-color: var(--test-header-bg); font-weight: bold; }
+.prompt-row { background-color: var(--prompt-bg); font-style: italic; }
+.subpass-row { background-color: var(--subpass-bg); }
+img { max-width: 100%; height: auto; border: 1px solid var(--img-border); }
+.score-good { color: var(--score-good); font-weight: bold; }
+.score-bad { color: var(--score-bad); font-weight: bold; }
+h1 { color: var(--text-color); }
+h2 { color: var(--text-secondary); margin-top: 30px; }
 """)
     results_file.write("</style>\n<meta charset='UTF-8'/> </head>\n<body>\n")
     results_file.write("<h1>Benchmark Results for " + aiEngineName + "</h1>\n")
@@ -152,6 +200,8 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
     overall_total_score = 0
     overall_max_score = 0
     
+    hackRunSingleTest = None
+
     while True:
         try:
             if not os.path.exists(str(testIndex) + ".py"):
@@ -159,9 +209,9 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
             test_result = {}
             # Load test metadata
             test_globals = {}
-            exec(open(str(testIndex) + ".py").read(), test_globals)
+            exec(open(str(testIndex) + ".py", encoding="utf-8").read(), test_globals)
             
-            if testIndex == 19:
+            if hackRunSingleTest is None or testIndex == hackRunSingleTest:
                 test_result = runTest(testIndex, aiEngineHook, aiEngineName)
             else:
                 test_result = {"total_score": 0, "subpass_count": 0, "subpass_results": []}
@@ -205,14 +255,13 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
         score_class = "score-good" if test_result['total_score'] >= max_score * 0.7 else "score-bad"
         
         results_file.write("  <tr class='test-header'>\n")
-        results_file.write(f"    <th colspan=2>{test_name}: {test_purpose}</th>\n")
-        results_file.write(f"    <th>Subpasses: {test_result['subpass_count']}</th>\n")
+        results_file.write(f"    <th colspan=3>{test_name}: {test_purpose}</th>\n")
         results_file.write(f"    <th class='{score_class}'>Score: {test_result['total_score']:.2f} / {max_score}</th>\n")
         results_file.write("  </tr>\n")
         
         # Prompt row: Typical prompt and how it changes
         results_file.write("  <tr class='prompt-row'>\n")
-        results_file.write("    <td colspan='3'><strong>Typical Prompt:</strong><br>")
+        results_file.write("    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br>")
         
         if "prepareSubpassPrompt" in test_globals:
             # Show first subpass prompt
@@ -227,7 +276,7 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
         else:
             results_file.write("No prompt available")
         
-        results_file.write("</td>\n")
+        results_file.write("</div></td>\n")
         results_file.write("    <td><strong>Prompt Changes:</strong><br>")
         
         if "promptChangeSummary" in test_globals:
@@ -245,7 +294,8 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
             results_file.write("  <tr class='subpass-row'>\n")
             
             # Subpass overview
-            results_file.write(f"    <td><strong>Subpass {subpass['subpass']}</strong><br>")
+            results_file.write(f"    <td rowspan=2><strong>Subpass {subpass['subpass']}</strong><br>")
+
             if "subpassParamSummary" in test_globals and subpass['subpass'] < len(test_globals["subpassParamSummary"]):
                 results_file.write(f"Parameters: {test_globals['subpassParamSummary'][subpass['subpass']]}<br>")
             elif "prepareSubpassPrompt" in test_globals:
@@ -261,13 +311,50 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
                     results_file.write("Subpass configuration")
             else:
                 results_file.write("Same as typical prompt")
+
+            results_file.write("<a href=\"raw_" + aiEngineName + "_" + str(testIndex-1) + "_" + str(subpass['subpass']) + ".txt\">View raw AI output</a><br>")
+
             results_file.write("</td>\n")
             
+            if "reasoning" in subpass:
+                results_file.write(f"<td colspan=2><strong>AI Reasoning: </strong>{html.escape(subpass['reasoning'])}</td>")
+            else:
+                results_file.write("<td colspan=2></td>")
+
+            # Score
+            score_class = "score-good" if subpass['score'] >= 0.7 else "score-bad"
+            results_file.write(f"    <td rowspan=2class='{score_class}'><strong>{subpass['score']:.4f}</strong>")
+            
+            if "scoreExplantion" in subpass:
+                results_file.write("<br><div style='font-size: 12px; font-style: italic; color: #666; margin-left: 20px; overflow-x: auto; max-width:200px;'>" + subpass['scoreExplantion'].replace("\n", "<br>") + "</div>")
+            
+            results_file.write("</td>\n")
+            results_file.write("  </tr>\n")
+
             # Images
             if 'output_image' in subpass and subpass['output_image']:
                 # Actual image
                 results_file.write("    <td>")
-                if os.path.exists(subpass['output_image']):
+
+                if "output_hyperlink" in subpass and subpass['output_hyperlink']:
+                    results_file.write(f"<a href='{subpass['output_hyperlink']}'>")
+                if ('output_mouseover_image' in subpass and
+                  subpass['output_mouseover_image'] and
+                os.path.exists(subpass['output_mouseover_image']) and  
+                  os.path.exists(subpass['output_image'])):
+                    with open(subpass['output_image'], 'rb') as img_file:
+                        img_data = base64.b64encode(img_file.read()).decode('utf-8')
+                    with open(subpass['output_mouseover_image'], 'rb') as img_file:
+                        img_data2 = base64.b64encode(img_file.read()).decode('utf-8')
+
+                    results_file.write(f"""
+                    <img src='data:image/png;base64,{img_data}' 
+                      data-mouseout='data:image/png;base64,{img_data}'
+                      data-mouseover='data:image/png;base64,{img_data2}'
+                      alt='Output' onmouseover="this.src=this.dataset.mouseover" onmouseout="this.src=this.dataset.mouseout">
+                    """)
+                        
+                elif os.path.exists(subpass['output_image']):
                     try:
                         with open(subpass['output_image'], 'rb') as img_file:
                             img_data = base64.b64encode(img_file.read()).decode('utf-8')
@@ -276,6 +363,9 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
                         results_file.write(f"<a href='../{subpass['output_image']}'>View Output Image</a>")
                 else:
                     results_file.write("Image not found")
+
+                if "output_hyperlink" in subpass and subpass['output_hyperlink']:
+                    results_file.write(f"</a>")
                 results_file.write("</td>\n")
                 
                 # Reference image
@@ -298,16 +388,13 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
                     results_file.write("    <td colspan='2'>" + subpass["output_nice"] + "</td>\n")
             elif "output_text" in subpass:
                 # Text output only
-                results_file.write("    <td colspan='2'><pre>" + html.escape(str(subpass["output_text"])) + "</pre></td>\n")
+                results_file.write("    <td colspan='2'><pre style='max-width: 1000px; overflow-x: auto;'>" + html.escape(str(subpass["output_text"])) + "</pre></td>\n")
             else:
                 # No images for this test type
                 results_file.write("    <td>N/A (LLM did not answer)</td>\n")
                 results_file.write("    <td>N/A (Test forfeited)</td>\n")
             
-            # Score
-            score_class = "score-good" if subpass['score'] >= 0.7 else "score-bad"
-            results_file.write(f"    <td class='{score_class}'><strong>{subpass['score']:.4f}</strong></td>\n")
-            results_file.write("  </tr>\n")
+
         
     
     # Overall summary
@@ -339,17 +426,17 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
     scores = {}
 
     if not os.path.exists("results/results.txt"):
-        with open("results/results.txt", "w") as f:
+        with open("results/results.txt", "w", encoding="utf-8") as f:
             f.write("\n")
 
-    with open("results/results.txt", "r") as f:
+    with open("results/results.txt", "r", encoding="utf-8") as f:
         for line in f:
             if ":" in line:
                 scores[line.split(":")[0].strip()] = line.split(":")[1].strip()
 
     scores[aiEngineName] = overall_total_score / overall_max_score
 
-    with open("results/results.txt", "w") as f:
+    with open("results/results.txt", "w", encoding="utf-8") as f:
         for key, value in scores.items():
             f.write(f"{key}: {value}\n")
 
@@ -549,6 +636,50 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
 
     
 
+
+
 if __name__ == "__main__":
+  if False:
     import AiEnginePlacebo
-    runAllTests(AiEnginePlacebo.PlaceboAIHook, "Placebo")
+
+    cacheLayer = CacheLayer(AiEnginePlacebo.configAndSettingsHash   ,
+                            AiEnginePlacebo.PlaceboAIHook)
+    
+    runAllTests(cacheLayer.AIHook, "Placebo")
+  
+  if os.environ.get("OPENAI_API_KEY") is not None:
+    import AiEngineOpenAiChatGPT
+
+    openAiModels = [
+        #"gpt-5-nano",
+        #"gpt-oss-120b", 
+        "gpt-5-mini",
+        #"gpt-5.1",
+        #"gpt-5-pro"
+    ]
+
+    for model in openAiModels:
+        AiEngineOpenAiChatGPT.Configure(model, False, False)
+
+        cacheLayer = CacheLayer(AiEngineOpenAiChatGPT.configAndSettingsHash   ,
+                                AiEngineOpenAiChatGPT.ChatGPTAIHook)
+        
+        runAllTests(cacheLayer.AIHook, model)
+
+        # Reasoning
+
+        AiEngineOpenAiChatGPT.Configure(model, 10, False)
+
+        cacheLayer = CacheLayer(AiEngineOpenAiChatGPT.configAndSettingsHash   ,
+                                AiEngineOpenAiChatGPT.ChatGPTAIHook)
+        
+        runAllTests(cacheLayer.AIHook, model + "-HighReasoning")
+
+        # Reasoning + Tools
+
+        AiEngineOpenAiChatGPT.Configure(model, 10, True)
+
+        cacheLayer = CacheLayer(AiEngineOpenAiChatGPT.configAndSettingsHash   ,
+                                AiEngineOpenAiChatGPT.ChatGPTAIHook)
+        
+        runAllTests(cacheLayer.AIHook, model + "-Reasoning-Tools")

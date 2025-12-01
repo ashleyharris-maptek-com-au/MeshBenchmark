@@ -46,6 +46,10 @@ structure = {
             },
             "propertyOrdering": [
               "xyz"
+            ],
+            "additionalProperties": False,
+            "required": [
+              "xyz"
             ]
           }
         },
@@ -63,6 +67,10 @@ structure = {
             },
             "propertyOrdering": [
               "vertex"
+            ],
+            "additionalProperties": False,
+            "required": [
+              "vertex"
             ]
           }
         }
@@ -70,10 +78,19 @@ structure = {
       "propertyOrdering": [
         "vertex",
         "faces"
+      ],
+      "additionalProperties": False,
+      "required": [
+        "vertex",
+        "faces"
       ]
     }
   },
   "propertyOrdering": [
+    "polyhedron"
+  ],
+  "additionalProperties": False,
+  "required": [
     "polyhedron"
   ]
 }

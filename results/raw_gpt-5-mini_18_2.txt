@@ -1,0 +1,20 @@
+// Pharaoh's Pyramid - OpenSCAD model
+// Stone side length: 500 mm (each stone is a 50 cm cube)
+// Total stones available: 600000
+// Layers used (max given stacking rule): 121
+// Total stones used = sum_{i=1..121} i^2 = 597761
+// Base side length = 121 * 500 mm = 60500 mm
+// Height = 121 * 500 mm = 60500 mm
+// Model represents each layer as a single contiguous slab of stones (exact volume to the millimeter)
+
+S = 500;        // stone side in mm
+L = 121;        // bottom layer has L x L stones, number of layers = L
+
+union() {
+    // build layers from bottom (k=0) up to top (k=L-1)
+    for (k = [0 : L-1]) {
+        let (n = L - k)    // n x n stones on this layer
+            translate([0, 0, k*S + S/2])    // center the slab in X/Y at origin; Z center at layer height
+                cube([n * S, n * S, S], center = true);
+    }
+}

@@ -4,7 +4,7 @@ import VolumeComparison as vc
 title="Hamiltonian Path on Grid"
 
 prompt = """
-You have a SIZE*SIZE grid of unit squares, with cell coordinates (x, y) where 1 ≤ x ≤ SIZE, 1 ≤ y ≤ SIZE.
+You have a SIZE*SIZE grid of unit squares, with cell coordinates (x, y) where 1 <= x <= SIZE, 1 <= y <= SIZE.
 
 TWIST
 
@@ -41,11 +41,19 @@ structure = {
         },
         "propertyOrdering": [
           "xy"
+        ],
+        "additionalProperties": False,
+        "required": [
+          "xy"
         ]
       }
     }
   },
   "propertyOrdering": [
+    "steps"
+  ],
+  "additionalProperties": False,
+  "required": [
     "steps"
   ]
 }
@@ -66,16 +74,9 @@ def prepareSubpassPrompt(index):
 
 
 def gradeAnswer(answer : dict, subPass : int, aiEngineName : str):
-    if subPass == 0 and len(answer["steps"]) != 16:
-        return 0
-    if subPass == 1 and len(answer["steps"]) != 64:
-        return 0
-    if subPass == 2 and len(answer["steps"]) != 144:
-        return 0
-    if subPass == 3 and len(answer["steps"]) != 256:
-        return 0
-    if subPass == 4 and len(answer["steps"]) != 254:
-        return 0
+    expected_steps = [16, 64, 144, 256, 254]
+    if subPass < len(expected_steps) and len(answer["steps"]) != expected_steps[subPass]:
+        return 0, f"Expected {expected_steps[subPass]} steps, got {len(answer['steps'])}"
 
     size = 4 if subPass == 0 else 8 if subPass == 1 else 12 if subPass == 2 else 16
 
@@ -88,26 +89,22 @@ def gradeAnswer(answer : dict, subPass : int, aiEngineName : str):
     for step in answer["steps"]:
 
         if step["xy"][0] <= 0 or step["xy"][0] > size or step["xy"][1] <= 0 or step["xy"][1] > size:
-            print("Out of bounds!")
-            return 0
+            return 0, "Out of bounds!"
         
         if subPass == 4 and (step["xy"][0] == 3 and step["xy"][1] == 3 or step["xy"][0] == 3 and step["xy"][1] == 4):
-            print("You forgot to skip cell 3,3 or 3,4!")
-            return 0
+            return 0, "You forgot to skip cell 3,3 or 3,4!"
 
         # check that the step is side-adjacent to the previous step
         xDiff = abs(step["xy"][0] - location[0])
         yDiff = abs(step["xy"][1] - location[1])
         if xDiff + yDiff != 1:
-            print("didn't step side-adjacent" + str(step["xy"]) + " from " + str(location))
-            return 0
+            return 0, f"didn't step side-adjacent {step['xy']} from {location}"
         location = tuple(step["xy"])
         if location in visited:
-            print("visited " + str(location) + " more than once!")
-            return 0
+            return 0, f"visited {location} more than once!"
         visited.add(location)
 
-    return 1
+    return 1, f"Valid Hamiltonian path with {len(answer['steps'])} steps"
 
 def resultToNiceReport(answer, subPass, aiEngineName):
     scadOutput = ""

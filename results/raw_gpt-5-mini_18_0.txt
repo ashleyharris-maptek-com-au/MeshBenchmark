@@ -1,0 +1,37 @@
+// Tallest pyramid using up to 20,000 stones (each stone is a 50 cm = 500 mm cube).
+// Constraint: each cube in a higher layer has its four base corners resting in the middle of four stones below,
+// which results in a classic stacked-square pyramid where each successive layer has one fewer cube per side.
+// Calculated base side length (number of cubes per side) = 38
+// Total stones used = sum_{n=1..38} n^2 = 19,019 (<= 20,000)
+// Pyramid centered at origin (0,0) over the tomb; +Y is north (faces aligned with axes).
+// All dimensions in millimetres.
+
+s = 500;         // cube side in mm
+N = 38;          // number of cubes along one side of the base
+total_stones = N*(N+1)*(2*N+1)/6; // 19019
+
+// Optional: uncomment to print values in the console when OpenSCAD renders
+// echo(str("cube side (mm): ", s));
+// echo(str("base cubes per side: ", N));
+// echo(str("total stones used: ", total_stones));
+
+module stone() {
+    // Use center=true so translate positions are cube centers
+    cube([s, s, s], center=true);
+}
+
+// Build pyramid: layers k=0..N-1, layer size = N - k, layer center heights = s/2 + k*s
+union() {
+    for (k = [0 : N-1]) {
+        let (size = N - k,
+             zc   = s/2 + k*s,          // center z of cubes in this layer
+             off  = (size - 1) / 2)
+        {
+            // create size x size grid for this layer, centered at origin
+            for (i = [0 : size-1])
+                for (j = [0 : size-1])
+                    translate([ (i - off) * s, (j - off) * s, zc ])
+                        stone();
+        }
+    }
+}

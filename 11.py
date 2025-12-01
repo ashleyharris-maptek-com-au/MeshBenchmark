@@ -32,11 +32,19 @@ structure = {
         },
         "propertyOrdering": [
           "pos"
+        ],
+        "additionalProperties": False,
+        "required": [
+          "pos"
         ]
       }
     }
   },
   "propertyOrdering": [
+    "path"
+  ],
+  "additionalProperties": False,
+  "required": [
     "path"
   ]
 }
@@ -67,24 +75,24 @@ def gradeAnswer(answer : dict, subPassIndex : int, aiEngineName : str):
         grid_size = (3, 3, 3, 3, 3, 3)
         start_pos = [0, 0, 0, 0, 0, 0]
     else:
-        return 0
+        return 0, "Invalid subPassIndex"
     
     # Extract path from answer
     if "path" not in answer:
-        return 0
+        return 0, "No path in answer"
     
     path = answer["path"]
     
     # Path must have at least one position
     if not path or len(path) == 0:
-        return 0
+        return 0, "Empty path"
     
     # Check first position matches start
     if len(path[0]["pos"]) != dimensions:
-        return 0
+        return 0, f"First position has wrong dimensions: {len(path[0]['pos'])} != {dimensions}"
     
     if list(path[0]["pos"]) != start_pos:
-        return 0
+        return 0, f"First position doesn't match start: {path[0]['pos']} != {start_pos}"
     
     # Track visited cells to detect repeats
     visited = set()
@@ -97,7 +105,7 @@ def gradeAnswer(answer : dict, subPassIndex : int, aiEngineName : str):
         
         # Check dimensionality
         if len(curr_pos) != dimensions:
-            return 0
+            return 0, f"Position {i} has wrong dimensions"
         
         # Count how many dimensions changed
         changes = []
@@ -107,22 +115,22 @@ def gradeAnswer(answer : dict, subPassIndex : int, aiEngineName : str):
         
         # Must change exactly one dimension
         if len(changes) != 1:
-            return 0
+            return 0, f"Move {i} changed {len(changes)} dimensions (must be 1)"
         
         # Must be a single cell move (+1 or -1)
         dim, delta = changes[0]
         if abs(delta) != 1:
-            return 0
+            return 0, f"Move {i} moved {abs(delta)} cells (must be 1)"
         
         # Check bounds
         for dim in range(dimensions):
             if curr_pos[dim] < 0 or curr_pos[dim] >= grid_size[dim]:
-                return 0
+                return 0, f"Position {i} is out of bounds"
         
         # Check for repeats
         pos_tuple = tuple(curr_pos)
         if pos_tuple in visited:
-            return 0
+            return 0, f"Position {pos_tuple} visited more than once"
         
         visited.add(pos_tuple)
     
@@ -131,7 +139,8 @@ def gradeAnswer(answer : dict, subPassIndex : int, aiEngineName : str):
     for size in grid_size:  
         total_cells *= size
     
-    return len(path) / total_cells
+    score = len(path) / total_cells
+    return score, f"Visited {len(path)}/{total_cells} cells ({score*100:.1f}%)"
 
 def resultToNiceReport(answer, subPassIndex, aiEngineName):
     # Calculate total cells for the current subpass

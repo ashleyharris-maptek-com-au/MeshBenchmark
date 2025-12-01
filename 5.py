@@ -16,10 +16,27 @@ only horizontal or vertical moves.
 
 The maze must be 'watertight', that is have walls touching the border of the grid all around, A and B must be within the maze.
 
-Return the maze as a string, with newlines between rows.
+Return the maze as a string, with newlines between rows. 
+Every row and column of your output must be PARAM_A characters long, and your output must be PARAM_A rows long.
+Outputting anything else than the maze will obviously result in a score of 0. 
 """
 
-structure = None # We just take a string here.
+structure = {
+    "type" : "object",
+    "properties" : {
+        "reasoning" : { "type" : "string"},
+        "maze" : { "type" : "string"}
+    },
+    "additionalProperties": False,
+    "propertyOrdering": [
+        "reasoning",
+        "maze"
+    ],
+    "required": [
+        "reasoning",
+        "maze"
+    ]
+}
 
 subpassParamSummary = [
     "16x16 maze",
@@ -35,21 +52,19 @@ def prepareSubpassPrompt(index):
     if index == 3: return prompt.replace("PARAM_A", "128")
     raise StopIteration
 
-def gradeAnswer(answer : str,subPass : int, aiEngineName : str):
-    answer = answer.strip()
+def gradeAnswer(answer : dict,subPass : int, aiEngineName : str):
+    answer = answer["maze"].strip()
     if answer.count("A") != 1 or answer.count("B") != 1:
-        print("Maze must have exactly one A and one B")
-        return 0
+        return 0, "Maze must have exactly one A and one B"
 
     spaces = answer.count(" ")
     stepCount = answer.count(".") + 2 # +2 for A and B
     walls = answer.count("#")
     
-    print("Maze has " + str(spaces) + " spaces, " + str(stepCount) + " steps, and " + str(walls) + " walls")
+    reasoning = f"Maze has {spaces} spaces, {stepCount} steps, and {walls} walls"
 
     if stepCount < spaces * 0.1:
-        print("Maze must have at least 10% of the maze area as steps")
-        return 0
+        return 0, reasoning + "\nMaze must have at least 10% of the maze area as steps"
 
     rows = answer.split("\n")
     cells = []
@@ -62,15 +77,13 @@ def gradeAnswer(answer : str,subPass : int, aiEngineName : str):
     # Check that all rows are the same width:
     for row in cells:
         if len(row) != expectedColumns:
-            print("Maze must have " + str(expectedColumns) + " columns")
-            return 0
+            return 0, reasoning + f"\nMaze must have {expectedColumns} columns, this has {len(row)}"
 
     width = expectedColumns
     height = expectedRows
 
     if height != len(cells):
-        print("Maze must have " + str(expectedRows) + " rows")
-        return 0
+        return 0, reasoning + f"\nMaze must have {expectedRows} rows, this has {len(cells)}"
 
     location = None
     for y in range(len(cells)):
@@ -102,14 +115,59 @@ def gradeAnswer(answer : str,subPass : int, aiEngineName : str):
         if y < height - 1: stack.append((x, y + 1))
         timeout -= 1
         if timeout == 0:
-            print("Maze is not solvable")
-            return 0
+            return 0, reasoning + "\nMaze is not solvable"
 
     # if there are any . left, the maze has loops
     for row in cells:
         for cell in row:
             if cell == ".":
-                print("Maze has loops")
-                return 0
+                return 0, reasoning + "\nMaze has loops"
 
-    return 1
+    return 1, reasoning + "\nMaze is valid"
+
+def resultToNiceReport(result, subPass, aiEngineName : str):
+    grid = result["maze"].strip().split("\n")
+    
+    out = "<span style='font-family: monospace;"
+    
+    if len(grid) < 50: out += "font-size:32px; line-height:32px"
+    else: out += "font-size:10px; line-height:10px"
+
+    out += "'>"
+    
+    expectedRows = 16 if subPass == 0 else 32 if subPass == 1 else 64 if subPass == 2 else 128
+    expectedColumns = expectedRows
+
+    overflowWarningShown = False
+
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            cell = grid[y][x]
+            if x > expectedColumns:
+                if not overflowWarningShown:
+                    out += "<span style='color: red;'>... (overflow hidden)</span>"
+                    overflowWarningShown = True
+                else:
+                    out += "<span style='color: red;'>...</span>"
+                break
+            if cell == "A":
+                out += "<span style='color: red;'>A</span>"
+            elif cell == "B":
+                out += "<span style='color: green;'>B</span>"
+            elif cell == "#":
+                out += "<span style='color: black;'>#</span>"
+            elif cell == ".":
+                out += "<span style='color: blue;'>.</span>"
+            elif cell == " ":
+                out += "<span style='color: white;'> </span>"
+            else:
+                out += cell
+        out += "<br>"
+
+    out += "</span>"
+    return out
+
+if __name__ == "__main__":
+    print(resultToNiceReport(
+        {"maze": 
+        "################\n#A.....#########\n######.########\n######.###...###\n######.###.#.###\n######.###.#.###\n##.....###.#.###\n##.#######.#.###\n##.#######.#.###\n##.#######.#.###\n##.........#.###\n############.###\n###B.........###\n################\n################\n################"}, 0, "Test"))

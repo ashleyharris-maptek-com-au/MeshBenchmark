@@ -1,0 +1,1 @@
+{'reasoning': 'Computed the convex hull using a standard monotonic chain (lower and upper hull) on the sorted points. The hull vertices in counterclockwise order are the indices listed below.', 'hull': [34, 49, 26, 28, 23]}

@@ -1,0 +1,67 @@
+// Pyramid plan for Pharaoh
+// Units: millimeters
+// Stone: cube 500 mm (50 cm) per side
+// Total available stones: 150000
+//
+// This model builds the tallest stepped pyramid possible under the rule that
+// each stone on a higher layer must sit with its four base corners on the
+// centers of four stones below (thus each layer is (k x k) with k decreasing by 1).
+// Only external (exposed) stones are modelled to keep the file compact while
+// preserving every external stone geometry required by the stonemason.
+//
+// OpenSCAD-friendly, precise to millimetre.
+
+stone = 500;            // stone side (mm)
+total_stones = 150000;  // budget
+
+// number of stones required for full pyramid of base size n:
+// S(n) = 1^2 + 2^2 + ... + n^2 = n*(n+1)*(2*n+1)/6
+function S(n) = n*(n+1)*(2*n+1)/6;
+
+// find maximal integer n with S(n) <= total_stones (search safe upper bound)
+n = max([ for (i=[1:300]) ( S(i) <= total_stones ? i : 0 ) ]);
+
+// derived quantities
+used_stones = S(n);
+height_mm = n * stone;
+
+// For external stone count: closed-form 2*n^2 - 2*n + 1 (counts outer perimeter stones of each layer)
+external_stones = (n == 1) ? 1 : (2*n*n - 2*n + 1);
+
+// Center pyramid at origin, faces aligned to axes (north is +y).
+// Base sits on z=0 (bottom of base stones at z=0).
+
+// The model: loop over layers l = 0..n-1; layer size k = n - l.
+// For each layer, only place stones at perimeter positions (exposed stones).
+translate([0,0,0])  // explicit origin
+union() {
+    for (l = [0 : n-1]) {
+        k = n - l;
+        zc = l*stone + stone/2; // center z of stones in this layer
+
+        // center offset so the layer is centered at (0,0)
+        // index i,j run 0..k-1
+        for (i = [0 : k-1]) {
+            for (j = [0 : k-1]) {
+                // include only perimeter stones (exposed)
+                if (i == 0 || j == 0 || i == k-1 || j == k-1) {
+                    xc = (i - (k-1)/2) * stone;
+                    yc = (j - (k-1)/2) * stone;
+                    translate([xc, yc, zc])
+                        cube(stone, center=true);
+                }
+            }
+        }
+    }
+}
+
+// Helpful but optional metadata as comments (do not print).
+//
+// Computed values:
+// base stones per side (n) = n
+// full stones used (sum of squares) = used_stones
+// external stones modelled = external_stones
+// pyramid height (mm) = height_mm
+//
+// For the given budget (150000 stones), the code computes the maximal n and
+// builds the outer shell of that pyramid.

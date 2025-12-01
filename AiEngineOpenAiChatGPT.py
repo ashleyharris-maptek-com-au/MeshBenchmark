@@ -15,7 +15,10 @@ The SDK documentation can be found at: https://platform.openai.com/docs
 """
 
 # Constants that fine tune which model, reasoning mode, and tools
-MODEL = "gpt-4o"  # Latest GPT-4 Omni model
+import hashlib
+
+
+MODEL = "gpt-5-nano" 
 
 # REASONING controls reasoning mode:
 # - False or 0: No special reasoning (standard mode)
@@ -39,6 +42,18 @@ REASONING = False
 # Note: Built-in tools require specific API access/models
 TOOLS = False
 
+configAndSettingsHash = hashlib.sha256(MODEL.encode() + str(REASONING).encode() + str(TOOLS).encode()).hexdigest()
+
+def Configure(Model, Reasing, Tools):
+    global MODEL
+    global REASONING
+    global TOOLS
+    global configAndSettingsHash
+    MODEL = Model
+    REASONING = Reasing
+    TOOLS = Tools
+    configAndSettingsHash = hashlib.sha256(MODEL.encode() + str(REASONING).encode() + str(TOOLS).encode()).hexdigest()
+
 import os
 import json
 
@@ -53,10 +68,10 @@ def ChatGPTAIHook(prompt: str, structure: dict | None) -> dict | str:
     """
     from openai import OpenAI
     
-    # Initialize the client - it will automatically use OPENAI_API_KEY environment variable
-    client = OpenAI()
-    
     try:
+        # Initialize the client - it will automatically use OPENAI_API_KEY environment variable
+        client = OpenAI(timeout=1800)
+    
         # Determine model to use
         model_to_use = MODEL
         
@@ -67,11 +82,12 @@ def ChatGPTAIHook(prompt: str, structure: dict | None) -> dict | str:
         # Build message parameters
         message_params = {
             "model": model_to_use,
-            "messages": [{"role": "user", "content": prompt}]
+            "messages": [{"role": "user", "content": prompt}],
+            "service_tier": "flex"
         }
         
         # Add reasoning effort for o1 models
-        if "o1" in model_to_use and isinstance(REASONING, int) and REASONING > 0:
+        if isinstance(REASONING, int) and REASONING > 0:
             # Map 1-10 scale to low/medium/high
             if REASONING <= 3:
                 message_params["reasoning_effort"] = "low"
@@ -93,7 +109,7 @@ def ChatGPTAIHook(prompt: str, structure: dict | None) -> dict | str:
             }
         
         # Add tools if specified (not available for o1 models)
-        if TOOLS is True and "o1" not in model_to_use:
+        if TOOLS is True:
             # Enable all built-in tools
             # Note: These require appropriate API access and may use Assistants/Responses API
             message_params["tools"] = [
@@ -102,7 +118,7 @@ def ChatGPTAIHook(prompt: str, structure: dict | None) -> dict | str:
                 {"type": "file_search"}
             ]
             message_params["tool_choice"] = "auto"
-        elif TOOLS and TOOLS is not False and "o1" not in model_to_use:
+        elif TOOLS and TOOLS is not False:
             # Convert function list to OpenAI tool format if needed
             tools_list = []
             for tool in (TOOLS if isinstance(TOOLS, list) else [TOOLS]):
@@ -151,7 +167,7 @@ def ChatGPTAIHook(prompt: str, structure: dict | None) -> dict | str:
                 message_params["tool_choice"] = "auto"
         
         # Make the API call
-        response = client.chat.completions.create(**message_params)
+        response = client.chat.completions.create(timeout=1800, **message_params)
         
         # Extract the response
         message = response.choices[0].message
@@ -162,6 +178,8 @@ def ChatGPTAIHook(prompt: str, structure: dict | None) -> dict | str:
             # For now, just return the text response
             pass
         
+        print(message.content)
+
         # Extract content
         if structure is not None:
             # Parse JSON response

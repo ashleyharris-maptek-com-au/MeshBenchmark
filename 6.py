@@ -28,11 +28,19 @@ structure = {
         },
         "propertyOrdering": [
           "xyz"
+        ],
+        "additionalProperties": False,
+        "required": [
+          "xyz"
         ]
       }
     }
   },
   "propertyOrdering": [
+    "voxels"
+  ],
+  "additionalProperties": False,
+  "required": [
     "voxels"
   ]
 }
@@ -40,7 +48,9 @@ structure = {
 subpassParamSummary = [
     "Cover a 6x6x6 grid with 50 voxels",
     "Cover a 8x8x8 grid with 100 voxels", 
-    "Cover a 12x12x12 grid with 200 voxels"
+    "Cover a 12x12x12 grid with 200 voxels",
+    "Cover a 16x16x16 grid with 400 voxels",
+    "Cover a 24x24x24 grid with 1000 voxels",
 ]
 
 promptChangeSummary = "Progressively larger grids with more voxels across subpasses"
@@ -49,6 +59,8 @@ def prepareSubpassPrompt(index):
     if index == 0: return prompt.replace("PARAM_A", "50").replace("PARAM_B", "6")
     if index == 1: return prompt.replace("PARAM_A", "100").replace("PARAM_B", "8")
     if index == 2: return prompt.replace("PARAM_A", "200").replace("PARAM_B", "12")
+    if index == 3: return prompt.replace("PARAM_A", "400").replace("PARAM_B", "16")
+    if index == 4: return prompt.replace("PARAM_A", "1000").replace("PARAM_B", "24")
     raise StopIteration
 
 def resultToNiceReport(result, subPass, aiEngineName):
@@ -71,17 +83,15 @@ def resultToNiceReport(result, subPass, aiEngineName):
     return f'<img src="{os.path.basename(output_path)}" alt="Voxel Grid Visualization" style="max-width: 100%;">'
 
 def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
-    sizes = [6, 8, 12]
-    counts = [50, 100, 200]
+    sizes = [6, 8, 12, 16, 24]
+    counts = [50, 100, 200, 400, 1000]
     if subPass < 0 or subPass >= len(sizes):
-        print("Invalid subPass")
-        return 0
+        return 0, "Invalid subPass"
     N = sizes[subPass]
     expected = counts[subPass]
     vox = answer.get("voxels")
     if not isinstance(vox, list):
-        print("voxels must be a list")
-        return 0
+        return 0, "voxels must be a list"
 
     def to_int_coord(v):
         if abs(v - round(v)) > 1e-9:
@@ -154,30 +164,26 @@ def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
     for it in vox:
         p = parse_item(it)
         if p is None:
-            print("Invalid voxel entry:", it)
-            return 0
+            return 0, f"Invalid voxel entry: {it}"
         pts.append(p)
 
     if len(pts) != expected:
-        print("Incorrect voxel count", len(pts), "expected", expected)
-        return 0
+        return 0, f"Incorrect voxel count {len(pts)}, expected {expected}"
     S = set(pts)
     if len(S) != expected:
-        print("Duplicate voxel coordinates detected")
-        return 0
+        for i in range(len(pts)):
+            if pts[i] in pts[i+1:]:
+                return 0, "Duplicate voxel coordinates detected. Voxel " + str(pts[i]) + " is repeated."
 
     xy = {(x, y) for (x, y, z) in S}
     xz = {(x, z) for (x, y, z) in S}
     yz = {(y, z) for (x, y, z) in S}
     if len(xy) != N * N:
-        print("XY projection has holes or gaps")
-        return 0
+        return 0, "XY projection has holes or gaps"
     if len(xz) != N * N:
-        print("XZ projection has holes or gaps")
-        return 0
+        return 0, "XZ projection has holes or gaps"
     if len(yz) != N * N:
-        print("YZ projection has holes or gaps")
-        return 0
+        return 0, "YZ projection has holes or gaps"
 
     def make_transform(perm, signs):
         def t(p):
@@ -198,8 +204,7 @@ def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
             t = make_transform(perm, signs)
             T = {t(p) for p in S}
             if T == S:
-                print("Shape has a trivial symmetry (rotation/reflection)")
-                return 0
+                return 0, "Shape has a trivial symmetry (rotation/reflection)"
 
-    return 1
+    return 1, f"Valid voxel configuration with {len(pts)} voxels, all projections solid, no symmetries"
         
