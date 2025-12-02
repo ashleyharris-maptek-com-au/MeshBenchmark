@@ -3,3 +3,5 @@ numpy>=2.0.0
 matplotlib>=3.7.1
 pandas>=2.0.0
 html
+Anthropic
+openai

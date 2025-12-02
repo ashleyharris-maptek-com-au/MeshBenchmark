@@ -3,7 +3,8 @@ import tempfile
 import json
 import hashlib
 import datetime
-
+import time
+import random
 class CacheLayer:
     def __init__(self, configAndSettingsHash, aiEngineHook):
         self.hash = configAndSettingsHash
@@ -22,11 +23,6 @@ class CacheLayer:
         if os.path.exists(cache_file):
           try:
             with open(cache_file, "r",encoding="utf-8") as f:
-              if structure is None:
-                cachedText = f.read()
-                if len(cachedText.strip()) > 0:
-                  return cachedText
-              else:
                 cachedJson = json.load(f)
                 if len(cachedJson) > 0:
                   return cachedJson
@@ -43,16 +39,12 @@ class CacheLayer:
         result = self.aiEngineHook(prompt, structure)
 
         if not result:
-          print("Empty result or Error 500, retrying...")
+          print("Empty result or Error 500, pausing and then retrying in a few minutes...")
+          time.sleep(60 + random.randint(0, 120))
           result = self.aiEngineHook(prompt, structure)
 
         print("Finished at " + str(datetime.datetime.now()))
 
         with open(cache_file, "w", encoding="utf-8") as f:
-          if structure is None:
-            if result is None:
-              return None
-            f.write(result)
-          else:
             json.dump(result, f)
         return result

@@ -218,6 +218,10 @@ minkowski(){
             )
 
         score -= (differenceVolume / referenceVolume) * 0.5
+
+        if "postProcessScore" in testGlobals:
+            score = testGlobals["postProcessScore"](score)
+
         score = max(0, score)
 
     if openscad_errors:

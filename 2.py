@@ -118,3 +118,8 @@ def volumeValidateDelta(result, resultVolume, referenceVolume, intersectionVolum
              " the expected volume is " + str(expectedBrickCount * 9.6 * 16 * 32))
     return -0.5
 
+
+def postProcessScore(score):
+  # Packing efficincy of rectangle prism in sphere is about 75%. I couldn't find an exact figure
+  # but it's close enough for this test.
+  return min(1,score / 0.75)

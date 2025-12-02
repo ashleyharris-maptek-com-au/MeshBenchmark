@@ -1,0 +1,63 @@
+I need to create a 5x5 maze where:
+- A is at height 5, B is at height 0
+- Only one solution exists
+- Path visits at least 20% of cells (at least 5 cells out of 25)
+- At least 2 jumps are required
+- Movement rules: step to adjacent cell if height diff ≤ 1, or jump 2 cells if same height with lower cell between
+
+Let me design a maze with a forced path:
+
+A5503
+55403
+04002
+34042
+345B0
+
+Let me trace the solution:
+- Start at A (0,0) height 5
+- Move to (0,1) height 5
+- Move to (1,1) height 5
+- Move to (1,0) height 5
+- Jump from (1,0) height 5 to (1,2) height 4 over (1,1)... wait, that doesn't work.
+
+Let me reconsider:
+
+A5005
+55104
+04043
+01042
+012B0
+
+Trace:
+- A at (0,0) h=5
+- (0,1) h=5
+- (1,1) h=5
+- (1,0) h=5
+- Jump to (3,0) h=0 over (2,0) h=0... needs same height
+- This doesn't work well.
+
+New approach:
+
+A5545
+05040
+05040
+05542
+014B0
+
+Trace from A(0,0) h=5:
+- (0,1) h=5
+- (0,2) h=5
+- (0,3) h=4
+- (1,3) h=4
+- Jump to (3,3) h=4 over (2,3) h=4... no, must be lower between
+- (2,3) h=5, (3,3) h=4 - step down
+- (3,4) h=2
+- (4,4) h=0 = B
+
+Let me try again:
+
+A5505
+05040
+05040
+45502
+314B0

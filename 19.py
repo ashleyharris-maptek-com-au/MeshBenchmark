@@ -186,7 +186,20 @@ def resultToScad(result):
     scad = "module result(){ " 
     scad += "minkowski(){cube(0.001); union() { "
     for transform in result["tetrahedra"]:
+      try:
+        # if any nans or infinites, skip
+        if any([math.isnan(x) or math.isinf(x) for x in transform.values()]):
+            print("Dropping a tetrahedron that wasn't finite: " + str(transform))
+            continue
+
+        # If quaternion is not normalised, skip it.
+        if abs(transform["q0"]**2 + transform["q1"]**2 + transform["q2"]**2 + transform["q3"]**2) - 1 > 0.0001:
+            print("Dropping a tetrahedron that wasn't normalised: " + str(transform))
+            continue
+
         scad += "translate([" + str(transform["x"]) + "," + \
             str(transform["y"]) + "," + str(transform["z"]) + "]) rotate(" + \
             str(quaternionToPitchRollYawInDegrees(transform["q0"], transform["q1"], transform["q2"], transform["q3"])) + ") tetrahedron();\n"
+      except Exception as e:
+        print("Dropping a tetrahedron that wasn't valid: " + str(transform) + " " + str(e))
     return scad + "}}}\n\n"

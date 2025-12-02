@@ -1,0 +1,50 @@
+```openscad
+// Pyramid parameters
+stone_size = 500; // 50cm in mm
+total_stones = 2500000;
+
+// Calculate maximum pyramid dimensions
+// For a solid step pyramid where each stone has corners at centers of stones below:
+// Layer n (from top, 0-indexed) has (2n+1)^2 stones
+// Total stones for h layers: sum from n=0 to h-1 of (2n+1)^2
+// This equals: h(2h^2+1)/3
+// Solving 2500000 = h(2h^2+1)/3 gives approximately h=100 layers
+
+height_layers = 100;
+base_width = (2 * height_layers - 1) * stone_size;
+
+// Smooth pyramid facade
+module smooth_pyramid() {
+    // Create smooth pyramid with proper slope
+    // Each layer steps in by stone_size/2 on each side
+    // Slope angle determined by layer step
+    
+    pyramid_height = height_layers * stone_size;
+    base_size = base_width;
+    
+    // Generate smooth pyramid by stacking tapered segments
+    polyhedron(
+        points = [
+            // Base corners
+            [-base_size/2, -base_size/2, 0],
+            [base_size/2, -base_size/2, 0],
+            [base_size/2, base_size/2, 0],
+            [-base_size/2, base_size/2, 0],
+            // Apex
+            [0, 0, pyramid_height]
+        ],
+        faces = [
+            [0, 1, 2, 3],  // base
+            [0, 4, 1],      // north face
+            [1, 4, 2],      // east face
+            [2, 4, 3],      // south face
+            [3, 4, 0]       // west face
+        ]
+    );
+}
+
+// Rotate to face north (+y)
+rotate([0, 0, 0]) {
+    smooth_pyramid();
+}
+```

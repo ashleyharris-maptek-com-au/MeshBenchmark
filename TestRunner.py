@@ -6,6 +6,12 @@ import html
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from CacheLayer import CacheLayer
 
+try:
+    import PIL,numpy,scipy
+except ImportError:
+    print("WARNIGN: pillow, numpy and scipy are required by some tests. Please install them.")
+    exit(1)
+
 def runTest(index: int, aiEngineHook : callable, aiEngineName : str) -> Dict[str, Any]:
     """
     Run a test and return results including score and any generated images.
@@ -50,8 +56,9 @@ def runTest(index: int, aiEngineHook : callable, aiEngineName : str) -> Dict[str
         results = [None] * len(prompts)
         for future in as_completed(future_to_index):
             idx = future_to_index[future]
-            results[idx] = future.result()
+            results[idx], chainOfThought = future.result()
             open("results/raw_" + aiEngineName + "_" + str(index) + "_" + str(idx) + ".txt", "w",encoding="utf-8").write(str(results[idx]))
+            open("results/cot_" + aiEngineName + "_" + str(index) + "_" + str(idx) + ".txt", "w",encoding="utf-8").write(str(chainOfThought))
     
     # In placebo mode, make sure we test all the grading functions even if the questions are currently
     # too hard for me to create an answer.
@@ -313,6 +320,7 @@ h2 { color: var(--text-secondary); margin-top: 30px; }
                 results_file.write("Same as typical prompt")
 
             results_file.write("<a href=\"raw_" + aiEngineName + "_" + str(testIndex-1) + "_" + str(subpass['subpass']) + ".txt\">View raw AI output</a><br>")
+            results_file.write("<a href=\"cot_" + aiEngineName + "_" + str(testIndex-1) + "_" + str(subpass['subpass']) + ".txt\">View chain of thought</a><br>")
 
             results_file.write("</td>\n")
             
@@ -668,6 +676,13 @@ if __name__ == "__main__":
 
         # Reasoning
 
+        AiEngineOpenAiChatGPT.Configure(model, 5, False)
+
+        cacheLayer = CacheLayer(AiEngineOpenAiChatGPT.configAndSettingsHash   ,
+                                AiEngineOpenAiChatGPT.ChatGPTAIHook)
+        
+        runAllTests(cacheLayer.AIHook, model + "-Reasoning")
+
         AiEngineOpenAiChatGPT.Configure(model, 10, False)
 
         cacheLayer = CacheLayer(AiEngineOpenAiChatGPT.configAndSettingsHash   ,
@@ -681,5 +696,47 @@ if __name__ == "__main__":
 
         cacheLayer = CacheLayer(AiEngineOpenAiChatGPT.configAndSettingsHash   ,
                                 AiEngineOpenAiChatGPT.ChatGPTAIHook)
+        
+        runAllTests(cacheLayer.AIHook, model + "-Reasoning-Tools")
+  else:
+    print("No OpenAI API key found - skipping openai tests")
+
+  if os.environ.get("ANTHROPIC_API_KEY") is not None:
+    import AiEngineAnthropicClaude
+
+    anthropicModels = [
+        "claude-sonnet-4-5"
+    ]
+
+    for model in anthropicModels:
+        AiEngineAnthropicClaude.Configure(model, False, False)
+
+        cacheLayer = CacheLayer(AiEngineAnthropicClaude.configAndSettingsHash,
+                                AiEngineAnthropicClaude.ClaudeAIHook)
+        
+        runAllTests(cacheLayer.AIHook, model)
+
+        # Reasoning
+
+        AiEngineAnthropicClaude.Configure(model, 5, False)
+
+        cacheLayer = CacheLayer(AiEngineAnthropicClaude.configAndSettingsHash,
+                                AiEngineAnthropicClaude.ClaudeAIHook)
+        
+        runAllTests(cacheLayer.AIHook, model + "-Reasoning")
+
+        AiEngineAnthropicClaude.Configure(model, 10, False)
+
+        cacheLayer = CacheLayer(AiEngineAnthropicClaude.configAndSettingsHash,
+                                AiEngineAnthropicClaude.ClaudeAIHook)
+        
+        runAllTests(cacheLayer.AIHook, model + "-HighReasoning")
+
+        # Reasoning + Tools
+
+        AiEngineAnthropicClaude.Configure(model, 10, True)
+
+        cacheLayer = CacheLayer(AiEngineAnthropicClaude.configAndSettingsHash,
+                                AiEngineAnthropicClaude.ClaudeAIHook)
         
         runAllTests(cacheLayer.AIHook, model + "-Reasoning-Tools")

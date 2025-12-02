@@ -37,7 +37,7 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
             }
         ],
         "Reasoning": "This was manually calculated. Half of 10cm is 5cm, so the 10cm wide pipes center is offset by 5cm."
-    }
+    }, "Placebo thinking... hmmm..."
 
     if h == "1a77d1817254df5c0d6a3d340d389744ab77e002685fd25578550a3da7f5482d":
       return {
@@ -155,7 +155,7 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
             {"Centroid": [0, -16, 62.4], "RotationDegrees": 0}
         ],
         "Reasoning": "I generated this from the Gemini 2.5 pro API playground while developing the test. It's a bit 'meh'"
-        }
+        }, "Placebo thinking... hmmm..."
 
     if h == "b999904f5b38b765fa59ba4cf4ed3ad93fa77cdee60126375adca350bff8e55d":
         # Question 2, subpass 1
@@ -310,7 +310,7 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
             { "Centroid": [ 0, 16, 110.4 ], "RotationDegrees": 0 },
             { "Centroid": [ 0, -16, 110.4 ], "RotationDegrees": 0 }
             ]
-        }
+        }, "Placebo thinking... hmmm..."
 
     if h in [
         "930c6e1538bb651872c517cb657ac56976cd08b940980c48be62da0a61a1f7a8",
@@ -422,7 +422,7 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
                 ]
             },
             "Reasoning": "I generated this from the Gemini 2.5 API playground while developing the test.  It appears correct for the 1st test."
-        }
+        }, "Placebo thinking... hmmm..."
 
     if h in ["9e73ddadee00ffc7691fc719f63c1f04e7c14e02250ae3204c7d900cbfde671e",
              "c4ba3af199a7cee6f160152dc2e596b9b4aeda2bab8b3252170a03838bb1e343",
@@ -495,7 +495,7 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
                 {"x" : 0.500000, "y" : -2.598076, "z" : 0.000000, "q0" : 0.000000, "q1" : 0.000000, "q2" : 0.000000, "q3" : 1.000000},
                 {"x" : 1.500000, "y" : -2.598076, "z" : 0.000000, "q0" : 0.000000, "q1" : 0.000000, "q2" : 0.000000, "q3" : 1.000000},
                 {"x" : 2.500000, "y" : -2.598076, "z" : 0.000000, "q0" : 0.000000, "q1" : 0.000000, "q2" : 0.000000, "q3" : 1.000000}
-                ]
+                ], "Placebo thinking... hmmm..."
 
     if h == '4ec098719613af4f77793beffc8324b8d5d561206c1edbb09175af5f13583c34':
         # Question 5 subpass 0
@@ -516,7 +516,7 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
             #   #...      ##
             ################
             ################
-                """).strip()
+                """).strip(), "Placebo thinking... hmmm..."
 
     if h == "7ce26dc6b41137ef5598b8bd045ce675a714f89d93621640f781b231e22ebb30":
         return {
@@ -572,7 +572,7 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
                 {"xyz": [5, 4, 3]},
                 {"xyz": [5, 5, 4]}
               ]
-            }
+            }, "Placebo thinking... hmmm..."
 
     if h == "953c1a17d7a9c14cadd44942f291f6084308f5e29796984716d3c65b3f68b35e":
         return dedent("""
@@ -582,20 +582,20 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
             45551
             01010
         """
-        )
+        ), "Placebo thinking... hmmm..."
 
     if h == "4d38874bab4d3e2c1943216a7d2b75d8745a77387aa4bf18b3a8c9b64551d8ca":
         return dedent("""
             def f(x,y):
                 return -162*x*x*x - 854*x*x + 945*x + 653*y*y*y - 1881*y*y - 145*y + 2829
-        """.strip())
+        """.strip()), "Placebo thinking... hmmm..."
 
 
     if h == "14de40d06d620c8e898c9aa289b6e8cefc28db5a0b77f47e35697aacbed0a667":
         return dedent("""
             def f(x,y):
                 return -5 * x - 4 * y + 30
-        """.strip())
+        """.strip()), "Placebo thinking... hmmm..."
 
     if h == "b95339286451148c0cb2797d43a29a7560e2abf20f94238c14d84173e0bf0fe3":
         return {
@@ -617,7 +617,7 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
                 { "xy": [2, 2] },
                 { "xy": [1, 2] }
             ]
-            }
+            }, "Placebo thinking... hmmm..."
 
     if h == "a4b11c00377b6658bc85341c17bf29173a8db227048f47dc664be0000bc90de3":
         return """
@@ -653,7 +653,7 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
        ""'''
         "''
          '
-        """.rstrip().lstrip("\n")
+        """.rstrip().lstrip("\n"), "Placebo thinking... hmmm..."
         
     if h == "b6b9e8e242e9a29cba115d4421bb5baf5d3be9371e7bac10ef162ea3f7476b8e":
         return {
@@ -723,7 +723,7 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
                 { "pos": [1, 0, 3] },
                 { "pos": [0, 0, 3] }
             ]
-            }
+            }, "Placebo thinking... hmmm..."
 
     if h == "3615798fb71a1ef05c70e7d3663d18dc2300ada153e259e7cc0001c712c901dc":
         return {
@@ -732,7 +732,7 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
                 {"x": 1.0, "y" : 0.0},
                 {"x": 0.5, "y" : 0.8660254038 }
             ]
-        }
+        }, "Placebo thinking... hmmm..."
 
     if h == "79b61603d0169c516ed73490f4a53fbe4de9fd3455986f639445428195ec6ea3":
         return { "people": [
@@ -741,13 +741,13 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
                 {"xy" : [-10,-11]},
                 {"xy" : [-10,-4.5]}
             ]
-        }
+        }, "Placebo thinking... hmmm..."
 
     if h == "da05bd008e3e50e15fbf80e05800a34677515723141985e41855b34ca5a87fd9":
         # Question 14 _ 0
         return {
             "lines": [{"a": -0.5, "b": 4}, {"a": 0, "b": 7}]
-        }
+        }, "Placebo thinking... hmmm..."
 
     if h == "e15cd2f415bc44a301fab0fcbadbe397a46575c70361a8f5df47d9a40a3b76c9":
         # Question 14 _ 1 Just test we can do squares
@@ -757,7 +757,7 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
                 {"a" : 0, "b" : 8},
 
             ]
-        }
+        }, "Placebo thinking... hmmm..."
 
     if h in ["65005dd7285e22ba61db002a6e82cfc43b7525b27eea14655f7967f4460b8d86",
              "54d67aa2d94ee2a1391ecbf9b0f2de2a7bd4d1348f60a128fc723f786814f5c2",
@@ -782,7 +782,7 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
                     {"translationCount": 5, "rotationCount": 0},
                     {"translationCount": 1, "rotationCount": 1},
                     ]
-                }
+                }, "Placebo thinking... hmmm..."
 
     if h == "01956a7a56f56435c831265792360719e0b05c155160bf0eaf3d7a1f92873efe":
         # ChatGPT 5.1 Thinking returned this, this is wrong, the volume is correct, but:
@@ -793,13 +793,13 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
 
         return """
             cylinder(h=6.981743147997059, r1=4.533997014063981, r2=0, $fn=50);
-        """
+        """, "Placebo thinking... hmmm..."
 
     if h in ["91ccb279941937df81a302c117e67586a1d63c477f92585abbc540883e9b16a7",
              "afda666b86b1fa2f9bab7816db7786fbe563f079bf440944b7631f07579c5743",
              "f3cbb75532fd330657e6238f603ce84b325ca322eba2342c4947e7e703329f7b",
              "86cd0c5e1fd11a405cc027d4db50f91c4d27f7d9c81d8d12f8613624536636ff"]:
-        return "rotate([0,0,45]) cylinder(r1=30, r2=0,h=30, $fn=4);"
+        return "rotate([0,0,45]) cylinder(r1=30, r2=0,h=30, $fn=4);", "Placebo thinking... hmmm..."
 
     if h == "780ac9d70a12589ad9dcff02a5d50a6d5ce94ef42d05fc312044d6b91e58ccbb":
         return { "boxes" : [
@@ -810,12 +810,12 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
             {"XyzMin": [0,0,8], "XyzMax": [5,3,10]},
             {"XyzMin": [0,0,10], "XyzMax": [5,3,12]},
             {"XyzMin": [0,0,12], "XyzMax": [5,3,14]},
-        ]}
+        ]}, "Placebo thinking... hmmm..."
 
     if h == "23a9783ba0a22a989fe8de2436a8a5435f7406da2774969d4b3a433d7c59a7fd":
         return [
             {"x" : -1.500000, "y" : 2.598076, "z" : 0.000000, "q0" : 0.000000, "q1" : 0.000000, "q2" : 0.000000, "q3" : 1.000000},
-        ]
+        ], "Placebo thinking... hmmm..."
 
     if h == "0fbf410f5c365dbc0e05c62d5c9651f94a8f218ea98f601adadbf013ea97ae4e":
         return """
@@ -835,4 +835,4 @@ def h(x,y,P):
   if((y1>y)!=(y2>y))and(x<(x2-x1)*(y-y1)/(y2-y1)+x1):c=not c
  return c
 def f(x,y):return 1 if h(x,y,PA)or h(x,y,PT)else-1
-"""
+""", "Placebo thinking... hmmm... Ash opens ChatGPT website and copy/pasted this... hmmm..."

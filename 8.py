@@ -171,6 +171,13 @@ def gradeAnswer(answer : dict, subPass : int, aiEngineName : str):
     reasoning = f"Grid size: {gridSize}, matched {score}/{gridSize*gridSize} cells"
     if errors:
         reasoning += f"\n{len(errors)} evaluation errors occurred"
+  
+    if final_score < 0.75:
+        final_score = 0
+
+    # Penalize "close but not quite right" answers a bit.
+    final_score = final_score**4
+
     return final_score, reasoning
 
 def resultToNiceReport(answer: dict, subPass: int, aiEngineName: str):

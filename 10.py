@@ -3,7 +3,7 @@ import VolumeComparison as vc
 
 title = "Painting a 3D scene in ASCII, with lighting."
 
-subpassParamSummary = ["32x32", "64x64", "128x128", "256x256"]
+subpassParamSummary = ["16x16", "32x32", "64x64", "128x128", "256x256"]
 
 promptChangeSummary = "Higher and higher resolution ASCII art."
 
@@ -172,7 +172,7 @@ def resultToNiceReport(answer: dict, subPass: int, aiEngineName: str):
 
 
     # Get the reference ASCII for the given subpass
-    gridSize = 32 if subPass == 0 else 64 if subPass == 1 else 128 if subPass == 2 else 256
+    gridSize = 16 if subPass == 0 else 32 if subPass == 1 else 64 if subPass == 2 else 128 if subPass == 3 else 256
     reference = generateReferenceAscii(gridSize, aiEngineName)    
     
     answer_lines = answer["painting"].lstrip("\n").rstrip().split('\n')

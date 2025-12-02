@@ -25,7 +25,6 @@ MODEL = "gpt-5-nano"
 # - "o1-preview": Use o1-preview model with extended reasoning
 # - "o1-mini": Use o1-mini model (faster reasoning)
 # - Integer (1-10): Reasoning effort level (for o1 models)
-# Note: o1 models have built-in reasoning, set MODEL to "o1-preview" or "o1-mini"
 REASONING = False
 
 # TOOLS enables tool capabilities:
@@ -169,6 +168,8 @@ def ChatGPTAIHook(prompt: str, structure: dict | None) -> dict | str:
         # Make the API call
         response = client.chat.completions.create(timeout=1800, **message_params)
         
+        chainOfThought = ""
+
         # Extract the response
         message = response.choices[0].message
         
@@ -185,11 +186,11 @@ def ChatGPTAIHook(prompt: str, structure: dict | None) -> dict | str:
             # Parse JSON response
             content = message.content
             if content:
-                return json.loads(content)
-            return {}
+                return json.loads(content), chainOfThought
+            return {}, chainOfThought
         else:
             # Return text response
-            return message.content or ""
+            return message.content or "", chainOfThought
             
     except Exception as e:
         print(f"Error calling OpenAI API: {e}")

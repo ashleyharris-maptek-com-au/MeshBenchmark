@@ -1,0 +1,6 @@
+```openscad
+$fn=100;
+r=tan(33)*60.96;
+cylinder(h=60.96,r1=r,r2=0);
+translate([0,0,-0.01])cylinder(h=0.02,r=4.572);
+```
