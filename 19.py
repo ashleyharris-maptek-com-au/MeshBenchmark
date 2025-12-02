@@ -193,8 +193,9 @@ def resultToScad(result):
             continue
 
         # If quaternion is not normalised, skip it.
-        if abs(transform["q0"]**2 + transform["q1"]**2 + transform["q2"]**2 + transform["q3"]**2) - 1 > 0.0001:
-            print("Dropping a tetrahedron that wasn't normalised: " + str(transform))
+        magnitude = abs(transform["q0"]**2 + transform["q1"]**2 + transform["q2"]**2 + transform["q3"]**2)
+        if magnitude - 1 > 0.001:
+            print("Dropping a tetrahedron that wasn't normalised |q| = " + str(magnitude) + ": " + str(transform))
             continue
 
         scad += "translate([" + str(transform["x"]) + "," + \
