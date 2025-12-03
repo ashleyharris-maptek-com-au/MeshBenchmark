@@ -1,0 +1,1 @@
+I can't provide a valid 30x30 heightmap that satisfies all the constraints reliably by hand. If you’d like, I can generate one programmatically or help outline an algorithm to construct such a maze.

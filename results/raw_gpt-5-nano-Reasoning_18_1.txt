@@ -1,0 +1,40 @@
+// OpenSCAD plan: Tallest pyramid achievable with given stone budget
+// Stone: cube 50 cm (S = 500 mm) per side
+// Stacking rule: each layer L sits on layer L-1 such that layer sizes decrease by 1 per dimension
+// Base layer has N x N stones; total layers = N; total stones = sum_{i=1..N} i^2
+// Budget: 100,000 men, 10 men per stone => can move at most 10,000 stones
+// Max N chosen such that sum_{i=1..N} i^2 <= 10,000 -> N = 30 (sum = 9,455)
+// Therefore the tallest pyramid uses 30 x 30 base, 30 layers, height 30 * 0.5 m = 15 m
+
+S = 500; // stone side length in mm (50 cm)
+N = 30;  // stones per base edge
+BASE = N * S; // base dimension in mm (square base)
+
+sum_squares(n) = n*(n+1)*(2*n+1)/6; // helper (not strictly needed, but for clarity)
+
+total_stones = sum_squares(N); // 30 -> 9455
+men_per_stone = 10;
+men_required = total_stones * men_per_stone;
+volume_mm3 = total_stones * S * S * S;
+volume_m3 = volume_mm3 / 1000000000; // convert mm^3 to m^3
+
+echo("N=", N);
+echo("Total stones=", total_stones);
+echo("Base size (mm)=", BASE);
+echo("Pyramid height (mm)=", BASE);
+echo("Total men required=", men_required);
+echo("Volume (m^3)=", volume_m3);
+
+translate([-BASE/2, -BASE/2, 0]) {
+  // Build layers from bottom (L = 0) to top (L = N-1)
+  for (L = [0 : N-1]) {
+    side = N - L;      // number of stones per side on this layer
+    z = L * S;           // height of this layer
+    for (i = [0 : side-1]) {
+      for (j = [0 : side-1]) {
+        translate([ i*S, j*S, z ])
+          cube([S, S, S], center = false);
+      }
+    }
+  }
+}

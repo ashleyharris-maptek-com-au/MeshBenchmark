@@ -33,6 +33,7 @@ In this case, the character:
 The maze must use only 0-9, A & B to represent height, and must only have one solution.
 A & B must appear in the grid once each.
 The path must visit at least 20% of all cells.
+No single elevation can occupy more than 20% of the grid.
 """
 
 suffix = \
@@ -202,6 +203,20 @@ def gradeAnswer(answer : str, subPass : int, aiEngineName : str):
                 return 0, f"Invalid character in maze: {char}"
             grid_row.append(char)
         grid.append(grid_row)
+    
+
+    # Check that no elevation occupies more than 20% of the grid
+    elevation_counts = {}
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
+            height = height_map.get((i, j))
+            if height is not None:
+                elevation_counts[height] = elevation_counts.get(height, 0) + 1
+    
+    total_cells = len(grid) * len(grid[0])
+    for height, count in elevation_counts.items():
+        if count / total_cells > 0.2:
+            return 0, f"Elevation {height} occupies more than 20% of the grid"
     
     # Find all valid paths from A to B using DFS
     def get_height(pos):

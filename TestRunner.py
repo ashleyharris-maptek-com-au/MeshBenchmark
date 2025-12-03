@@ -3,6 +3,8 @@ from typing import Dict, List, Any
 import os
 import base64
 import html
+import time
+
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from CacheLayer import CacheLayer
 
@@ -30,6 +32,14 @@ def runTest(index: int, aiEngineHook : callable, aiEngineName : str) -> Dict[str
     
     exec(open("" + str(index) + ".py", encoding="utf-8").read(), g)
     
+    if "skip" in g:
+        return {
+            "average_score": 0,
+            "total_score": 0,
+            "subpass_count": 0,
+            "subpass_results": []
+        }
+
     prompts = []
     structure = g["structure"]
 
@@ -56,7 +66,12 @@ def runTest(index: int, aiEngineHook : callable, aiEngineName : str) -> Dict[str
         results = [None] * len(prompts)
         for future in as_completed(future_to_index):
             idx = future_to_index[future]
-            results[idx], chainOfThought = future.result()
+            try:
+                results[idx], chainOfThought = future.result()
+            except Exception as e:
+                print("Failed to get result for subpass " + str(idx) + " - " + str(e))
+                results[idx] = ""
+                chainOfThought = ""
             open("results/raw_" + aiEngineName + "_" + str(index) + "_" + str(idx) + ".txt", "w",encoding="utf-8").write(str(results[idx]))
             open("results/cot_" + aiEngineName + "_" + str(index) + "_" + str(idx) + ".txt", "w",encoding="utf-8").write(str(chainOfThought))
     
@@ -152,6 +167,13 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
     if not os.path.exists("results"):
         os.makedirs("results")
 
+    hackRunSingleTest = None
+
+    if hackRunSingleTest is None and os.path.exists("results/" + aiEngineName + ".html"):
+        # Don't run if it's less than 7 days old, unless we're in single test mode.
+        if os.path.getmtime("results/" + aiEngineName + ".html") > time.time() - 7 * 24 * 60 * 60:
+            return
+
     # Create a results file for the html results of this engines test run
     results_file = open("results/" + aiEngineName + ".html", "w", buffering=1, encoding="utf-8")
     results_file.write("<html>\n<head>\n<style>\n")
@@ -207,7 +229,6 @@ h2 { color: var(--text-secondary); margin-top: 30px; }
     overall_total_score = 0
     overall_max_score = 0
     
-    hackRunSingleTest = None
 
     while True:
         try:
@@ -459,7 +480,8 @@ h2 { color: var(--text-secondary); margin-top: 30px; }
     plt.title("Mesh Benchmark Results")
     plt.xlabel("Engine")
     plt.ylabel("Score")
-    plt.savefig("results/topLevelResults.png")
+    plt.tight_layout()
+    plt.savefig("results/topLevelResults.png",dpi=600)
     plt.close()
     
     # Generate index.html landing page
@@ -500,6 +522,9 @@ h2 { color: var(--text-secondary); margin-top: 30px; }
             border-radius: 10px;
             margin-bottom: 30px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .graph-container h2 {
+            color: #333;
         }
         .graph-container img {
             max-width: 100%;
@@ -573,6 +598,35 @@ h2 { color: var(--text-secondary); margin-top: 30px; }
             background-color: #dcfce7;
             color: #166534;
         }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a1a2e;
+                color: #e0e0e0;
+            }
+            .graph-container, .results-table {
+                background: #16213e;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            }
+            .graph-container h2 {
+                color: #e0e0e0;
+            }
+            td {
+                border-bottom-color: #2a2a4a;
+            }
+            tr:hover {
+                background-color: #1f2b4a;
+            }
+            .footer {
+                color: #888;
+            }
+            a {
+                color: #8b9fea;
+            }
+            .badge-best {
+                background-color: #1a4d2e;
+                color: #6ee7a0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -582,7 +636,7 @@ h2 { color: var(--text-secondary); margin-top: 30px; }
     </div>
     
     <div class="graph-container">
-        <h2 style="margin-top: 0; color: #333;">Performance Overview</h2>
+        <h2 style="margin-top: 0;">Performance Overview</h2>
         <img src="topLevelResults.png" alt="Benchmark Results Graph">
     </div>
     
@@ -659,10 +713,10 @@ if __name__ == "__main__":
     import AiEngineOpenAiChatGPT
 
     openAiModels = [
-        #"gpt-5-nano",
+        "gpt-5-nano",
         #"gpt-oss-120b", 
         "gpt-5-mini",
-        #"gpt-5.1",
+        "gpt-5.1",
         #"gpt-5-pro"
     ]
 
@@ -676,12 +730,12 @@ if __name__ == "__main__":
 
         # Reasoning
 
-        AiEngineOpenAiChatGPT.Configure(model, 5, False)
+        #AiEngineOpenAiChatGPT.Configure(model, 5, False)
 
-        cacheLayer = CacheLayer(AiEngineOpenAiChatGPT.configAndSettingsHash   ,
-                                AiEngineOpenAiChatGPT.ChatGPTAIHook)
-        
-        runAllTests(cacheLayer.AIHook, model + "-Reasoning")
+        #cacheLayer = CacheLayer(AiEngineOpenAiChatGPT.configAndSettingsHash   ,
+        #                        AiEngineOpenAiChatGPT.ChatGPTAIHook)
+        #
+        #runAllTests(cacheLayer.AIHook, model + "-Reasoning")
 
         AiEngineOpenAiChatGPT.Configure(model, 10, False)
 
@@ -701,6 +755,8 @@ if __name__ == "__main__":
   else:
     print("No OpenAI API key found - skipping openai tests")
 
+
+
   if os.environ.get("ANTHROPIC_API_KEY") is not None:
     import AiEngineAnthropicClaude
 
@@ -718,12 +774,12 @@ if __name__ == "__main__":
 
         # Reasoning
 
-        AiEngineAnthropicClaude.Configure(model, 5, False)
+        #AiEngineAnthropicClaude.Configure(model, 5, False)
 
-        cacheLayer = CacheLayer(AiEngineAnthropicClaude.configAndSettingsHash,
-                                AiEngineAnthropicClaude.ClaudeAIHook)
-        
-        runAllTests(cacheLayer.AIHook, model + "-Reasoning")
+        #cacheLayer = CacheLayer(AiEngineAnthropicClaude.configAndSettingsHash,
+        #                        AiEngineAnthropicClaude.ClaudeAIHook)
+        #
+        #runAllTests(cacheLayer.AIHook, model + "-Reasoning")
 
         AiEngineAnthropicClaude.Configure(model, 10, False)
 

@@ -1,37 +1,43 @@
-// Tallest pyramid using up to 20,000 stones (each stone is a 50 cm = 500 mm cube).
-// Constraint: each cube in a higher layer has its four base corners resting in the middle of four stones below,
-// which results in a classic stacked-square pyramid where each successive layer has one fewer cube per side.
-// Calculated base side length (number of cubes per side) = 38
-// Total stones used = sum_{n=1..38} n^2 = 19,019 (<= 20,000)
-// Pyramid centered at origin (0,0) over the tomb; +Y is north (faces aligned with axes).
-// All dimensions in millimetres.
+// Pharaoh's Pyramid plan (OpenSCAD)
+// Units: meters
+// Cube side length: s = 0.500 m (50 cm)
+// Base layer cube count per side: N = 38
+// Total stones used = sum_{k=1..N} k^2 = 19019 (of 20000 available)
+// Pyramid height = N * s = 38 * 0.5 = 19.0 m
+// Pyramid faces north (+Y). Pyramid is centered at origin (0,0) over the tomb.
+// Each cube is placed so each stone above sits with its 4 base corners on the centers of 4 stones below.
 
-s = 500;         // cube side in mm
-N = 38;          // number of cubes along one side of the base
-total_stones = N*(N+1)*(2*N+1)/6; // 19019
+// Parameters
+s = 0.500;        // side length of one stone (m)
+N = 38;           // number of stones along one side of the base layer
 
-// Optional: uncomment to print values in the console when OpenSCAD renders
-// echo(str("cube side (mm): ", s));
-// echo(str("base cubes per side: ", N));
-// echo(str("total stones used: ", total_stones));
+// Precompute base offset so the entire pyramid is centered at (0,0).
+// a0 is the X/Y coordinate of the first cube center on the bottom layer.
+a0 = -((N - 1) / 2) * s;
 
-module stone() {
-    // Use center=true so translate positions are cube centers
-    cube([s, s, s], center=true);
-}
+// Module to generate the stepped pyramid using cubes placed on integer layers.
+// Each layer k (0 = bottom) has M = N - k cubes per side.
+// The layer offset is a0 + k*(s/2) because each successive layer's centers are shifted by s/2.
+module pyramid()
+{
+    for (k = [0 : N - 1]) {
+        M = N - k;
+        layer_offset = a0 + k * (s / 2); // center coordinate (first cube center) for this layer
 
-// Build pyramid: layers k=0..N-1, layer size = N - k, layer center heights = s/2 + k*s
-union() {
-    for (k = [0 : N-1]) {
-        let (size = N - k,
-             zc   = s/2 + k*s,          // center z of cubes in this layer
-             off  = (size - 1) / 2)
-        {
-            // create size x size grid for this layer, centered at origin
-            for (i = [0 : size-1])
-                for (j = [0 : size-1])
-                    translate([ (i - off) * s, (j - off) * s, zc ])
-                        stone();
+        // place M x M cubes for layer k; cubes sit on top of layer k-1 (or on ground for k=0)
+        for (ix = [0 : M - 1]) {
+            cx = layer_offset + ix * s; // center x of this cube
+            for (iy = [0 : M - 1]) {
+                cy = layer_offset + iy * s; // center y of this cube
+                // Place cube with its base at z = k*s and size s, s, s.
+                // Use translate to position corner at (center - s/2).
+                translate([round((cx - s/2) * 1000) / 1000, round((cy - s/2) * 1000) / 1000, round((k * s) * 1000) / 1000])
+                    cube([s, s, s], center = false);
+            }
         }
     }
 }
+
+// For the masons, produce the outer shell view in solid mode.
+// The geometry is precise to the millimeter (coordinates are rounded to 0.001 m).
+pyramid();

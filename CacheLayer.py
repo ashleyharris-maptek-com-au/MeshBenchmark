@@ -14,7 +14,8 @@ class CacheLayer:
     def AIHook(self, prompt: str, structure: dict | None) -> dict | str:
         h = (hashlib.sha256(prompt.strip().encode()).hexdigest(),
              hashlib.sha256(str(structure).encode()).hexdigest(),
-             self.hash)
+             self.hash,
+             datetime.datetime.now().strftime("%b %Y"))
 
         h = hashlib.sha256(str(h).encode()).hexdigest()
 

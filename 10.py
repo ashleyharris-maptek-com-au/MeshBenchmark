@@ -145,9 +145,20 @@ def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
     answer_lines = answer["painting"].strip().split('\n')
     reference_lines = reference.strip().split('\n')
     
-    if len(answer_lines) != len(reference_lines):
+    if abs(len(answer_lines) - len(reference_lines)) > 5:
         return 0.0, f"Line count mismatch: got {len(answer_lines)}, expected {len(reference_lines)}"
+
+    warnings = ""
+
+    if len(answer_lines) != len(reference_lines):
+        warnings += f"Line count mismatch: got {len(answer_lines)}, expected {len(reference_lines)}"
     
+    while len(answer_lines) < len(reference_lines):
+        answer_lines.append(' ' * gridSize)
+    
+    while len(reference_lines) < len(answer_lines):
+        reference_lines.append(' ' * gridSize)
+
     correct = 0
     total = 0
     
@@ -160,7 +171,9 @@ def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
             total += 1
     
     score = correct / total if total > 0 else 0.0
-    return score, f"Matched {correct}/{total} characters ({score*100:.1f}%)"
+    if warnings:
+        score /= 2
+    return score, warnings + f"Matched {correct}/{total} characters ({score*100:.1f}%)"
 
 def resultToNiceReport(answer: dict, subPass: int, aiEngineName: str):
     if subPass < 2:
@@ -178,10 +191,19 @@ def resultToNiceReport(answer: dict, subPass: int, aiEngineName: str):
     answer_lines = answer["painting"].lstrip("\n").rstrip().split('\n')
     reference_lines = reference.lstrip("\n").rstrip().split('\n')
     
-    if len(answer_lines) != len(reference_lines):
+    if abs(len(answer_lines) - len(reference_lines)) > 5:
+
+        answer_lines = [l[0:min(len(l), gridSize)] for l in answer_lines]
+
         html += "<td><pre style='font:monospace;font-size:4px;line-height:4px;'>" + "\n".join(answer_lines) + "</pre>"
         html += f"</td><td>Answer has {len(answer_lines)} lines, reference has {len(reference_lines)} lines.</td>"
         return html
+
+    while len(answer_lines) < len(reference_lines):
+        answer_lines.append(' ' * gridSize)
+    
+    while len(reference_lines) < len(answer_lines):
+        reference_lines.append(' ' * gridSize)
     
     for a_line, r_line in zip(answer_lines, reference_lines):
         a_line = a_line.ljust(gridSize, ' ')

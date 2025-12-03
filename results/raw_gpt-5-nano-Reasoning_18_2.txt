@@ -1,0 +1,32 @@
+// Tallest pyramid plan (OpenSCAD)
+// All dimensions in millimeters (mm)
+// 50 cm side stones (STONE = 500 mm)
+// Base: 30 x 30 stones
+// Layer above offset by 25 cm (HALF = 250 mm) in both x and y
+// Each layer reduces by 1 stone per side (square pyramidal stack)
+// Total layers = 30, total stones = sum_{k=1}^{30} k^2 = 9455
+// Total height = 30 * 500 mm = 15000 mm
+// Pyramid centered on the origin (tomb center); facing north (+Y)
+
+base_n = 30;
+STONE = 500;        // stone size in mm (50 cm)
+HALF = STONE/2;     // 250 mm
+CENTER = base_n*STONE/2; // 7500 mm, to center pyramid at origin
+
+union() {
+  // Build layer by layer
+  for (L = [0 : base_n - 1]) {
+    layer_n = base_n - L;  // number of stones per side on this layer
+    z = L * STONE;         // height of this layer
+    for (i = [0 : layer_n - 1]) {
+      for (j = [0 : layer_n - 1]) {
+        // Position with half-stone offset per layer
+        x = i*STONE + L*HALF;
+        y = j*STONE + L*HALF;
+        // Center pyramid on origin
+        translate([x - CENTER, y - CENTER, z])
+          cube([STONE, STONE, STONE], center = false);
+      }
+    }
+  }
+}

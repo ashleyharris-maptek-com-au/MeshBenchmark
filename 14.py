@@ -138,11 +138,27 @@ def gradeAnswer(answer : dict, subPassIndex : int, aiEngineName : str):
     if total_regions == 0:
         return 0, "No regions found"
     
+    # Find all regions across the entire grid (including empty ones)
+    all_regions = set()
+    for y in range(size):
+        for x in range(size):
+            all_regions.add(get_region_id(x, y))
+    
+    # Count empty regions (regions with no letters)
+    empty_regions = len(all_regions) - len(region_letters)
+
     correct_regions = sum(1 for letters in region_letters.values() if len(letters) == 1)
     
-    # Return the fraction of regions that are correctly partitioned
+    # Penalize for empty regions - each empty region reduces the score
     score = correct_regions / total_regions
-    return score, f"{correct_regions}/{total_regions} regions correctly partitioned using {len(equations)} lines"
+    if empty_regions > 0:
+        penalty = empty_regions * 0.1  # 10% penalty per empty region
+        score = max(0, score - penalty)
+    
+    msg = f"{correct_regions}/{total_regions} regions correctly partitioned using {len(equations)} lines"
+    if empty_regions > 0:
+        msg += f" ({empty_regions} empty regions, -{empty_regions * 10}% penalty)"
+    return score, msg
 
 def resultToNiceReport(answer, subPassIndex, aiEngineName : str):
     grid_str = createGrid(subPassIndex)

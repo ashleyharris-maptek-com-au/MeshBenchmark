@@ -78,5 +78,24 @@ def resultToScad(result):
   return scad + "}}"
 
 subpassParamSummary =[ 
-  "Note that we're defining pipes by their centroid. " +
-  " And a 5m long pipe at the origin TOUCHES x = +/- 2.5m, so a 10cm wide pipe perpindicular to it needs an additional 5cm of space."]
+"""Every AI I've tested has failed to solve this problem. 
+<pre>
+Closeup of typical failed result:       Closeup of correct result:
+(note the overlap between vertical      (Note all 3 pipes touch but 
+pipes and the horizontal pipe)           don't overlap.)
+
+|  i  |                                 |  i  |
+|  i  |                                 |  i  |
+|  X--X---------                        |  i  X---------------
+|  i??|                                 |  i  |
+|  i??|                                 |  i  |
+X--XXXX - - - -                         X-----X - - - - - - - 
+|  i??|                                 |  i  |
+|  i??|                                 |  i  |
+|  X--X---------                        |  i  X---------------
+|  i  |                                 |  i  |
+|  i  |                                 |  i  |
+</pre>
+
+"""
+]

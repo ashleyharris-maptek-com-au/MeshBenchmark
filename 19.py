@@ -185,6 +185,7 @@ module tetrahedron(){
 def resultToScad(result):
     scad = "module result(){ " 
     scad += "minkowski(){cube(0.001); union() { "
+    printedTetrahedra = 0
     for transform in result["tetrahedra"]:
       try:
         # if any nans or infinites, skip
@@ -201,6 +202,13 @@ def resultToScad(result):
         scad += "translate([" + str(transform["x"]) + "," + \
             str(transform["y"]) + "," + str(transform["z"]) + "]) rotate(" + \
             str(quaternionToPitchRollYawInDegrees(transform["q0"], transform["q1"], transform["q2"], transform["q3"])) + ") tetrahedron();\n"
+        printedTetrahedra += 1
       except Exception as e:
         print("Dropping a tetrahedron that wasn't valid: " + str(transform) + " " + str(e))
+
+
+    if printedTetrahedra == 0:
+        print("Test 19: No valid tetrahedra were provided by the LLM.")
+        return ""
+
     return scad + "}}}\n\n"

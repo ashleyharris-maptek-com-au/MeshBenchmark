@@ -1,0 +1,32 @@
+// OpenSCAD plan: Tallest pyramid achievable with stone budget
+// Stones: 2,500,000 available; each 0.5 m cube; each stone requires 10 men.
+// Army: 100,000 men -> can move at most floor(100000/10) = 10,000 stones.
+// Pyramid stacking rule: each upper stone sits on the centers of four stones below (2x2 block).
+// The maximum height occurs with a square base N x N where total stones = sum_{i=1}^N i^2 <= 10,000.
+// This yields N = 30 (sum = 9,455 stones). Height = 30 * 0.5 m = 15 m; base = 15 m x 15 m.
+
+limit = 10000;      // total movable stones
+stone = 500;          // stone edge length in mm (0.5 m)
+N = 0;
+
+// Determine maximum N such that sum of squares <= limit
+for (n = [1:1:100]) {
+    s = n * (n + 1) * (2 * n + 1) / 6; // sum_{i=1}^n i^2
+    if (s <= limit) N = n;
+}
+
+echo(str("Base side (stones): ", N, "  -> Height (mm): ", N * stone, "  -> Stones used: ", N * (N + 1) * (2 * N + 1) / 6));
+
+// Build pyramid: layers from bottom (layer=0) to top (layer=N-1)
+for (layer = [0 : N - 1]) {
+    s = N - layer;            // number of stones along one axis on this layer
+    z = layer * stone;          // vertical position of this layer's base (mm)
+    for (i = [0 : s - 1]) {
+        for (j = [0 : s - 1]) {
+            x = - (s * stone) / 2 + i * stone + stone / 2;
+            y = - (s * stone) / 2 + j * stone + stone / 2;
+            translate([x, y, z])
+                cube([stone, stone, stone], center = false);
+        }
+    }
+}

@@ -1,5 +1,7 @@
 title = "Subdivided binary tree walk."
 
+skip = True
+
 prompt = """
 You are given a list of dimensions, these represent a series of recursive subdivisions of a 0,0,0->1,1,1 unit cube.
 

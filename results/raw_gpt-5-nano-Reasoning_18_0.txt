@@ -1,0 +1,40 @@
+// OpenSCAD plan: Tallest pyramid built from discrete 50 cm stones.
+// All dimensions in millimeters (mm).
+// Stone edge length: L = 500 mm (50 cm)
+L = 500;
+
+// Base layer side length in stones: N = 30 (30x30 bottom layer)
+N = 30;
+
+// The pyramid is built as N layers of progressively smaller square grids.
+// Layer k (k = 0 bottom to N-1 top) has (N - k) x (N - k) stones.
+// Each layer is offset horizontally by k * (L/2) to ensure each stone sits
+// on four stones of the layer below, per the construction rule.
+function r(k) = (((k * 13) % 256) / 256);
+function g(k) = (((k * 17) % 256) / 256);
+function b(k) = (((k * 5) % 256) / 256);
+
+module stone_at(x, y, z, k) {
+  // Color by layer for visualization; actual geometry is a discrete stone.
+  color([r(k), g(k), b(k), 1])
+    translate([x, y, z])
+      cube([L, L, L], center = false);
+}
+
+// Build the pyramid layer by layer
+// Bottom layer (k=0): N x N = 30 x 30 stones
+// Next layer (k=1): 29 x 29 stones, offset by L/2, height z = L
+// ...
+// Top layer (k=N-1): 1 x 1 stone, offset by (N-1)*(L/2), height z = (N-1)*L
+for (k = [0 : N-1]) {
+  m = N - k;                 // stones per side in this layer
+  offset = k * (L / 2);      // horizontal offset to align above four below
+  z = k * L;                   // vertical position of this layer
+  for (i = [0 : m - 1]) {
+    for (j = [0 : m - 1]) {
+      x = i * L + offset;
+      y = j * L + offset;
+      stone_at(x, y, z, k);
+    }
+  }
+}

@@ -1,1 +1,1 @@
-{'reasoning': 'I computed the convex hull using the monotone chain (Andrew) algorithm: sort points by x, build the upper and lower hulls, and concatenate them. The hull vertices (given as input indices) in counterclockwise order around the hull are returned below.', 'hull': [2, 15, 16, 17, 29, 28, 26, 7]}
+{'reasoning': 'I used a gift-wrapping (Jarvis march) reasoning to find the convex hull points in counterclockwise order starting from the leftmost point (index 18).', 'hull': [18, 15, 0, 24, 8, 31, 30, 2, 28, 7]}

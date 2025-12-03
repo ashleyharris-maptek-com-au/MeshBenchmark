@@ -1,5 +1,6 @@
 import numpy as np
 import VolumeComparison as vc
+import random
 
 title = "Fluid simulation"
 prompt = """
@@ -28,7 +29,8 @@ subpassParamSummary = [
     "there is a lake of at least 2 voxels at z > 5",
     "there is an underground lake of at least 10 voxels in volume, that isn't visible from above",
     "there are 3 lakes on 3 different z levels",
-    "there is a lake at least 6 voxels deep"
+    "there is a lake at least 6 voxels deep",
+    "there are 2 lakes, each over 200 voxels in volume"
 ]
 
 structure = {
@@ -75,7 +77,7 @@ structure = {
 }
 
 def getWorldSize(subPass):
-    sizes = [16, 24, 32, 40, 48, 56]
+    sizes = [16, 24, 32, 40, 48, 56, 64]
     return sizes[subPass] if subPass < len(sizes) else 56
 
 def prepareSubpassPrompt(index):
@@ -85,9 +87,10 @@ def prepareSubpassPrompt(index):
     if index == 3: return prompt.replace("PARAM_A", "40") + subpassParamSummary[index]
     if index == 4: return prompt.replace("PARAM_A", "48") + subpassParamSummary[index]
     if index == 5: return prompt.replace("PARAM_A", "56") + subpassParamSummary[index]
+    if index == 6: return prompt.replace("PARAM_A", "16") + subpassParamSummary[index]
     raise StopIteration
 
-LastVoxelWorld = [None] * 6
+LastVoxelWorld = [None] * 7
 
 def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
     global LastVoxelWorld
@@ -125,16 +128,18 @@ def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
 
     # Simulate rainfall - spawn water at top centre
     centre = WORLD_SIZE // 2
-    RAIN_AMOUNT = 1000
+    RAIN_AMOUNT = 10000
     
     def is_edge(x, y, z):
         """Check if position is at world edge (water escapes)"""
         return x == 0 or x == WORLD_SIZE - 1 or y == 0 or y == WORLD_SIZE - 1 or z == 0
     
     def simulate_water_drop():
-        """Simulate a single water drop from the top centre"""
-        x, y, z = centre, centre, WORLD_HEIGHT - 1
-        
+        """Simulate a single water drop from the top"""
+        if random.randint(0,1) == 1:
+            x, y, z = WORLD_SIZE//2, WORLD_SIZE//2, WORLD_HEIGHT - 1
+        else:
+            x, y, z = random.randint(0, WORLD_SIZE - 1), random.randint(0, WORLD_SIZE - 1), WORLD_HEIGHT - 1
         while True:
             # Check if at edge - water escapes
             if is_edge(x, y, z):
@@ -320,6 +325,15 @@ def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
             return 1, f"Found water column {max_depth} deep"
         return max_depth / 6, f"Deepest water column: {max_depth}/6"
     
+    elif subPass == 6:
+        # Search for 2 lakes, each over 200 voxels in volume
+        bodies = find_water_bodies()
+        qualifying = [b for b in bodies if len(b) >= 200]
+        count = len(qualifying)
+        if count >= 2:
+            return 1, f"Found {count} bodies of water each at least 2x2"
+        return count / 2, f"Found {count}/2 qualifying water bodies"
+    
     return 0, "Unknown subpass"
 
 def resultToNiceReport(result, subPass, aiEngineName):
@@ -358,6 +372,6 @@ if __name__ == "__main__":
             "material": "Air"
         }
     ]
-    }, 0, "Test")
+    }, 6, "Test")
 
     resultToNiceReport("", 0, "Test")

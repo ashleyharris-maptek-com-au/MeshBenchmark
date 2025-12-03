@@ -1,0 +1,11 @@
+// Sand pile inside a 10 yd diameter silo (OpenSCAD)
+siloR = 4.572; // silo radius in meters
+V = 5*0.764555 + 1500*0.028316846592 + 100 + 20*44*0.003785411784; // total sand volume (m^3)
+tanT = tan(33 * PI / 180); // tan(theta) with theta=33°
+R = V / (PI * siloR * siloR * tanT) + (2/3) * siloR; // cone base radius
+h = R * tanT; // cone height
+H = h + 1; // silo height buffer for visualization
+intersection() {
+  cylinder(h = h, r1 = R, r2 = 0, center = false); // sand cone inside silo
+  cylinder(h = H, r = siloR, center = false);    // silo interior boundary
+}

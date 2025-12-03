@@ -1,67 +1,113 @@
-// Pyramid plan for Pharaoh
-// Units: millimeters
-// Stone: cube 500 mm (50 cm) per side
-// Total available stones: 150000
+// Tallest step pyramid the pharaoh can build given constraints
+// Units: meters (SI). All coordinates and sizes are exact to millimeter (3 decimal places).
 //
-// This model builds the tallest stepped pyramid possible under the rule that
-// each stone on a higher layer must sit with its four base corners on the
-// centers of four stones below (thus each layer is (k x k) with k decreasing by 1).
-// Only external (exposed) stones are modelled to keep the file compact while
-// preserving every external stone geometry required by the stonemason.
+// Constraints applied:
+//  - Available cut stones: 150000 (not limiting here)
+//  - Army: 100000 men, each stone needs 10 men -> at most 10000 stones may be handled
+//  - Stability rule: each stone above must have its four bottom corners resting on centers of four stones below.
+//    This produces a square, stepped pyramid with layer sizes n, n-1, ..., 1 (in stones).
 //
-// OpenSCAD-friendly, precise to millimetre.
+// Computation:
+//  - With a cube stone side s = 0.500 m, and maximum stones <= 10000, the largest integer base size n
+//    satisfying sum_{k=1..n} k^2 <= 10000 is n = 30 (sum = 9455 stones).
+//  - Total stone count used: 9455
+//  - Pyramid physical dimensions:
+//      base side length = n * s = 30 * 0.5 = 15.000 m
+//      height (top of top stone) = n * s = 15.000 m
+//
+// This OpenSCAD file produces:
+//  - The full stepped pyramid built from individual stone cubes (each 0.500 m cube), positioned precisely.
+//  - The smooth exterior pyramid (a continuous 4-face pyramid) whose base is the same square and whose apex
+//    is at the overall pyramid top. This represents the marble facade shape that will cover the external stones.
+//
+// Notes for the stonemason's CAD:
+//  - Every stone is placed precisely (centers and sizes given to millimeter precision).
+//  - The facade polyhedron is exact and can be used to derive each exposed stone's cover wedge geometry.
+//
+// No other output or explanatory text is included; the file below is pure OpenSCAD.
 
-stone = 500;            // stone side (mm)
-total_stones = 150000;  // budget
+/////////////////////////////////////////////////////////////
+// Parameters (change only if recomputing with different constraints)
+s = 0.500;              // stone cube side length in meters (500 mm)
+n_layers = 30;          // number of layers (base is n_layers x n_layers stones)
+stone_count = n_layers*(n_layers+1)*(2*n_layers+1)/6; // sum of squares: total stones used
 
-// number of stones required for full pyramid of base size n:
-// S(n) = 1^2 + 2^2 + ... + n^2 = n*(n+1)*(2*n+1)/6
-function S(n) = n*(n+1)*(2*n+1)/6;
+// Derived sizes
+base_side = n_layers * s;   // meters
+height_total = n_layers * s; // meters
 
-// find maximal integer n with S(n) <= total_stones (search safe upper bound)
-n = max([ for (i=[1:300]) ( S(i) <= total_stones ? i : 0 ) ]);
+// Small epsilon to avoid coincident-face rendering issues (kept extremely small)
+eps = 1e-6;
 
-// derived quantities
-used_stones = S(n);
-height_mm = n * stone;
+// Module: single stone (cube) centered on its local origin
+module stone() {
+    // Using center = true places the cube center at the translate location we supply
+    cube([s, s, s], center = true);
+}
 
-// For external stone count: closed-form 2*n^2 - 2*n + 1 (counts outer perimeter stones of each layer)
-external_stones = (n == 1) ? 1 : (2*n*n - 2*n + 1);
-
-// Center pyramid at origin, faces aligned to axes (north is +y).
-// Base sits on z=0 (bottom of base stones at z=0).
-
-// The model: loop over layers l = 0..n-1; layer size k = n - l.
-// For each layer, only place stones at perimeter positions (exposed stones).
-translate([0,0,0])  // explicit origin
-union() {
-    for (l = [0 : n-1]) {
-        k = n - l;
-        zc = l*stone + stone/2; // center z of stones in this layer
-
-        // center offset so the layer is centered at (0,0)
-        // index i,j run 0..k-1
-        for (i = [0 : k-1]) {
-            for (j = [0 : k-1]) {
-                // include only perimeter stones (exposed)
-                if (i == 0 || j == 0 || i == k-1 || j == k-1) {
-                    xc = (i - (k-1)/2) * stone;
-                    yc = (j - (k-1)/2) * stone;
-                    translate([xc, yc, zc])
-                        cube(stone, center=true);
-                }
+// Module: the stepped pyramid from individual stones
+module stepped_pyramid() {
+    // For each layer k = 0 .. n_layers-1 (ground layer k=0)
+    // layer_size = n_layers - k (stones per side in that layer)
+    // stone center coordinates:
+    //   x = (i - (layer_size-1)/2) * s  for i in 0..layer_size-1
+    //   y = (j - (layer_size-1)/2) * s  for j in 0..layer_size-1
+    //   z = s/2 + k*s                    center height for layer k
+    for (k = [0 : n_layers - 1]) {
+        layer_size = n_layers - k;
+        // precompute offset term (centering) to millimetre precision
+        offset = (layer_size - 1) / 2.0 * s;
+        zc = (s/2) + k * s;
+        for (i = [0 : layer_size - 1]) {
+            xi = (i * s) - offset;
+            for (j = [0 : layer_size - 1]) {
+                yj = (j * s) - offset;
+                translate([xi, yj, zc])
+                    stone();
             }
         }
     }
 }
 
-// Helpful but optional metadata as comments (do not print).
+// Module: smooth exterior pyramid (facade) that exactly covers the stepped pyramid
+module smooth_facade() {
+    L = base_side; // base side length in meters
+    H = height_total;
+    // Base corners (z=0), ordered CCW looking from above
+    p0 = [-L/2, -L/2, 0];
+    p1 = [ L/2, -L/2, 0];
+    p2 = [ L/2,  L/2, 0];
+    p3 = [-L/2,  L/2, 0];
+    apex = [0, 0, H];
+    // Use polyhedron with base quad and four triangular faces
+    polyhedron(
+        points = [p0, p1, p2, p3, apex],
+        faces = [
+            [0,1,2,3], // base
+            [0,4,1],
+            [1,4,2],
+            [2,4,3],
+            [3,4,0]
+        ]
+    );
+}
+
+// Visual assembly:
+// - Show stepped stones in a neutral stone color
+// - Show smooth facade as a slightly translucent outer shell (for reference to the mason)
 //
-// Computed values:
-// base stones per side (n) = n
-// full stones used (sum of squares) = used_stones
-// external stones modelled = external_stones
-// pyramid height (mm) = height_mm
-//
-// For the given budget (150000 stones), the code computes the maximal n and
-// builds the outer shell of that pyramid.
+// If the CAD user prefers only the facade, they can comment out the stepped_pyramid() line.
+
+translate([0,0,0])
+union() {
+    // Stepped stones
+    // Slightly offset by an epsilon on z to avoid coplanar face glitches when both objects are rendered together.
+    color([0.75, 0.70, 0.65])  // sandstone-like color
+        stepped_pyramid();
+
+    // Smooth facade (translucent to allow inspection of stones)
+    // The small translate in Z by +eps avoids coincident-face rendering issues in some viewers.
+    color([1, 1, 1, 0.35])   // white marble color with transparency
+        translate([0, 0, eps])
+            smooth_facade();
+}

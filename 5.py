@@ -126,13 +126,31 @@ def gradeAnswer(answer : dict,subPass : int, aiEngineName : str):
     return 1, reasoning + "\nMaze is valid"
 
 def resultToNiceReport(result, subPass, aiEngineName : str):
+
+    if len(result["maze"].strip()) == 0:
+        return "Empty maze"
+    
+    charMap = {}
+    for c in result["maze"]:
+        if c not in charMap:
+            charMap[c] = len(charMap)
+
+    charMap.pop("\n", None)
+    charMap.pop(" ", None)
+    charMap.pop("#", None)
+    charMap.pop(".", None)
+    charMap.pop("A", None)
+    charMap.pop("B", None)
+
+    if charMap:
+        return "Unknown characters in maze:\n" + str(charMap.keys())
+
     grid = result["maze"].strip().split("\n")
     
     out = "<span style='font-family: monospace;"
     
-    if len(grid) < 50: out += "font-size:32px; line-height:32px"
+    if subPass < 2: out += "font-size:32px; line-height:32px"
     else: out += "font-size:10px; line-height:10px"
-
     out += "'>"
     
     expectedRows = 16 if subPass == 0 else 32 if subPass == 1 else 64 if subPass == 2 else 128

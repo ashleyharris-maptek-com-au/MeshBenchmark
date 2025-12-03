@@ -4,6 +4,8 @@ import numpy as np
 
 title = "2D Delaunay Triangulation"
 
+skip = True
+
 prompt = """
 You are given a set of points in 2D space. Triangulate the points using Delaunay Triangulation and return the triangles in order.
 """

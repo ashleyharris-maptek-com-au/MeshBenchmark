@@ -1,0 +1,42 @@
+// OpenSCAD plan: Tallest pyramid under a 10000-stone budget (10 men per stone, 100000 men total)
+// Stone size: 50 cm per side (s = 500 mm)
+// Stacking rule: each stone sits with its four base corners on the centers of four stones below (layer offsets by 0.5*s per layer)
+//
+// Budget analysis:
+// Base side stones N = 30 -> total stones = sum_{i=1}^{30} i^2 = 9455 <= 10000
+// N = 31 would require 10416 stones > budget, so tallest possible is N = 30 (30 layers)
+// Total stones used: 9455
+// Volume per stone: (0.5 m)^3 = 0.125 m^3
+// Total volume: 9455 * 0.125 m^3 = 1181.875 m^3
+// This leaves 545 stones unused (budget allows up to 10000 stones; 9455 used).
+
+N = 30;        // base side count (stones per side on bottom layer)
+S = 500;       // stone side length in mm (50 cm)
+base = N * S;    // footprint size on one axis in mm
+
+// Center the pyramid over the tomb (origin at tomb center).
+translate([-base/2, -base/2, 0]) {
+  // Layered pyramid: layer k has (N-k) x (N-k) stones
+  for (k = [0 : N-1]) {
+    M = N - k;
+    // Optional visual cue: color gradient by layer (to help the stonemason)
+    c = [0.15 + 0.02*(k/1.0), 0.38, 0.60 - 0.25*(k/1.0)];
+    color(c) {
+      for (i = [0 : M-1]) {
+        for (j = [0 : M-1]) {
+          x = (i + k/2.0) * S;
+          y = (j + k/2.0) * S;
+          z = k * S + S/2;
+          translate([x, y, z])
+            cube([S, S, S], center = true);
+        }
+      }
+    }
+  }
+}
+
+// Notes for the stonemason (optional references in code comments only):
+// - All dimensions are in millimeters (OpenSCAD default units).
+// - The outer facade would be cut with wedges of marble to approximate a smooth pyramid surface.
+//   The provided model shows the raw stacked-stone arrangement; wedge-cut plans can be derived by
+//   projecting the outer surface of this voxel pyramid and computing planar facets on the exterior stones.

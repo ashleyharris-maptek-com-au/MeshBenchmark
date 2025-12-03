@@ -1,1 +1,1 @@
-{'reasoning': 'I computed the convex hull using a monotonic chain (sorting by x then building lower and upper hulls). The hull vertices in counterclockwise order are the points with indices [2, 7, 11, 12, 5, 6, 4, 15].', 'hull': [2, 7, 11, 12, 5, 6, 4, 15]}
+{'reasoning': 'I computed the convex hull using the monotonic chain (Andrew) algorithm: sort points by x, build lower and upper hulls by checking cross products, then concatenate to get the hull in order around the polygon.', 'hull': [15, 7, 2, 12, 8, 0]}

@@ -1,0 +1,2 @@
+$fn=64;
+cylinder(h=3.92048, r1=6.03701, r2=0, center=false);

@@ -1,0 +1,31 @@
+// OpenSCAD plan: Tallest pyramid given 2,500,000 stones (50 cm side cubes)
+// Each stone volume: 0.5 m x 0.5 m x 0.5 m = 0.125 m^3
+// Pyramid built as stacked square prisms (layers) to respect resting rule:
+// Layer l has (N - l) x (N - l) stones, each of side S = 50 cm (500 mm)
+// Total stones used for N = 195 bottom layer: sum_{k=1..195} k^2 = 195*196*391/6 = 2,490,670
+// This fits within 2,500,000; N = 196 would require 2,529,086 stones (exceeds budget)
+
+N = 195;      // number of stones per side on the bottom layer
+S = 500;      // stone edge length in mm (50 cm)
+
+module layer_prism(l) {
+    n = N - l;                 // side length in stones for this layer
+    edge = n * S;              // side length in mm
+    // Center pyramid at origin on X and Y, stack along Z
+    translate([-edge/2, -edge/2, l * S])
+        cube([edge, edge, S], center = false);
+}
+
+// Build pyramid by stacking 195 horizontal prisms
+for (l = [0 : N - 1]) {
+    layer_prism(l);
+}
+
+// Summary (printed to console for millimeter-precision planning)
+sum2 = N * (N + 1) * (2 * N + 1) / 6; // total stones
+vol_mm3 = sum2 * S * S * S;
+vol_m3 = vol_mm3 / 1e9;
+echo("Total stones used: ", sum2);
+echo("Total stone volume: ", vol_m3, " m^3");
+echo("Base footprint per side: ", N * S, " mm (", N * S / 1000, " m)");
+echo("Total pyramid height: ", N * S, " mm (", N * S / 1000, " m)");

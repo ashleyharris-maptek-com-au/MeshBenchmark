@@ -1,1 +1,5 @@
-cylinder(h=6.979, r1=4.53, r2=0, $fn=64);
+$fn=128;
+union(){
+ cylinder(h=1.288875, r=4.572);
+ translate([0,0,1.288875]) cylinder(h=2.969292, r1=4.572, r2=0);
+}

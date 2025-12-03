@@ -9,7 +9,8 @@ subpassParamSummary = [
     "20 people, 4m building",
     "40 people, 6m building", 
     "80 people, 8m building",
-    "150 people, 10m building"
+    "150 people, 10m building",
+    "200 people, 7m building",
 ]
 
 prompt = """
@@ -65,6 +66,7 @@ def prepareSubpassPrompt(index):
     if index == 2: return prompt.replace("PARAM_A", "40").replace("PARAM_B", "6")
     if index == 3: return prompt.replace("PARAM_A", "80").replace("PARAM_B", "8")
     if index == 4: return prompt.replace("PARAM_A", "150").replace("PARAM_B", "10")
+    if index == 5: return prompt.replace("PARAM_A", "200").replace("PARAM_B", "7")
     raise StopIteration
 
 def resultToImage(result, subPass, aiEngineName : str, fromAbove : bool = False):
@@ -77,6 +79,8 @@ def resultToImage(result, subPass, aiEngineName : str, fromAbove : bool = False)
         buildingWidth = 8
     elif subPass == 4:
         buildingWidth = 10
+    elif subPass == 5:
+        buildingWidth = 7
 
     openScadData = f"translate([0, 0, 5]) color([0,1,0,0.9]) cube([{buildingWidth}, {buildingWidth}, 10], center=true);\n"
 
@@ -99,8 +103,10 @@ def gradeAnswer(result, subPass, aiEngineName : str):
         buildingWidth = 8
     elif subPass == 4:
         buildingWidth = 10
+    elif subPass == 5:
+        buildingWidth = 7
 
-    expectedPopulationSize = [4, 20, 40, 80, 150][subPass]
+    expectedPopulationSize = [4, 20, 40, 80, 150, 200][subPass]
     actualPopulationSize = len(result.get("people", []))
     if actualPopulationSize != expectedPopulationSize:
         return 0.0, f"Expected {expectedPopulationSize} people, got {actualPopulationSize}"

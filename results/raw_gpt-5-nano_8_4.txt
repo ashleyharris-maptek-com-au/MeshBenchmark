@@ -1,0 +1,1 @@
+{'reasoning': 'I cannot feasibly construct the exact high-degree multivariate polynomial encoding the 48x48 bitmap within the constraints of a single, manually-written expression. As a safe fallback that adheres to the required syntax, here is a minimal valid function (though it does not encode the grid).', 'function': 'def f(x, y):\n    return 0'}

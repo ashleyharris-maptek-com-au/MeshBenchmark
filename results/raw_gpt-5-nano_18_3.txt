@@ -1,0 +1,44 @@
+// Pharaoh Pyramid OpenSCAD Plan
+// Objective: Tallest pyramid within stone budget under stacking rule:
+// - Stones are 50 mm cubes
+// - Each stone above rests on four stones below (2x2 block below)
+// - Total stones available: 2,500,000; but manpower limits to 100,000/10 = 10,000 stones
+// - Resulting pyramid uses S(a) = a(a+1)(2a+1)/6 stones for base side a
+// - Choose maximum a such that S(a) <= 10,000
+// - Coordinates in mm (SI units); top stone sits at origin; every layer offset by stone size
+
+max_stones = 10000; // 100,000 men / 10 men per stone
+stone = 50;         // mm per cube side (50 mm)
+
+a = 0;
+for (n = [1 : 100]) {
+    s = n*(n+1)*(2*n+1)/6; // total stones for base side n
+    if (s <= max_stones) a = n;
+}
+
+echo("Computed base side length a = ", a);
+stonesUsed = a*(a+1)*(2*a+1)/6;
+echo("Total stones used = ", stonesUsed);
+
+module block(pos=[0,0,0]) {
+    translate(pos)
+        cube([stone, stone, stone], center=false);
+}
+
+// Build pyramid: layers L = 0 .. a-1
+// Layer L contains n = a - L stones per side
+// Position for each stone:
+// x = - (n*stone)/2 + (i + 0.5)*stone, i = 0..n-1
+// y = - (n*stone)/2 + (j + 0.5)*stone, j = 0..n-1
+// z = L * stone
+for (L = [0 : a - 1]) {
+    n = a - L;
+    for (i = [0 : n - 1]) {
+        x = - (n*stone)/2 + (i + 0.5)*stone;
+        for (j = [0 : n - 1]) {
+            y = - (n*stone)/2 + (j + 0.5)*stone;
+            z = L * stone;
+            block([x, y, z]);
+        }
+    }
+}

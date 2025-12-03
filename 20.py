@@ -1,6 +1,7 @@
 import sys, base64, io
 from PIL import Image
 import numpy as np
+import re
 
 title = "Can you trace a rough map of Australia with under 1kb of data?"
 
@@ -12,6 +13,7 @@ f(x,y) > 0 represents "inside".
 f(x,y) <= 0 represents "outside".
 Use a mercartor projection to project from spherical to 2D.
 Scale the 2D shape such that it fits within a normalised 0,0 -> 1,1
++y is north. +x is east.
 Comments are a waste of bytes, do not use them.
 Coding standards & best practices are not enforced. Go nuts.
 Will be executed in PYTHON_VERSION
@@ -101,6 +103,14 @@ def pythonCodeToImage(code : str, size : int = 512):
 
     return image
 
+def safeToRun(str : str):
+    for banned in [
+        "import", "from", "exec", "eval", "compile", "open", "os", "subprocess", "sys", 
+        "builtins", "file", "modules"]:
+        if re.search(r"\b" + banned + r"\b", str):
+            return False
+    return True
+
 def gradeAnswer(result : dict, subPass : int, aiEngineName : str):
     answer = result["minifiedCode"]
     if subPass == 0 and len(answer) > 1024:
@@ -110,11 +120,8 @@ def gradeAnswer(result : dict, subPass : int, aiEngineName : str):
     if subPass == 2 and len(answer) > 4096:
         return 0, f"Code too long: {len(answer)} bytes (max 4096)"
 
-    for banned in [
-        "import", "from", "exec", "eval", "compile", "open", "os", "subprocess", "sys", 
-        "builtins", "file", "modules"]:
-        if banned in answer:
-            return 0, f"Banned word found: {banned}"
+    if not safeToRun(answer):
+        return 0, "Banned word found"
 
     size = 512
 
@@ -136,6 +143,9 @@ def gradeAnswer(result : dict, subPass : int, aiEngineName : str):
     return score, f"Matched {correct}/{size*size} pixels ({raw_accuracy*100:.1f}% accuracy, score: {score:.4f})"
 
 def resultToImage(result, subPass, aiEngineName : str):
+    if not safeToRun(result["minifiedCode"]):
+        return "Error: Banned word found - not executing."
+
     try:
         test = pythonCodeToImage(result["minifiedCode"],512)
     except Exception as e:

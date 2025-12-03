@@ -14,16 +14,18 @@ Get your API key from: https://ai.google.dev/
 The SDK documentation can be found at: https://googleapis.github.io/python-genai/
 """
 
+import hashlib
+
 # Constants that fine tune which model, whether reasoning is used and how much, and whether tools
 # are made available.
 MODEL = "gemini-2.5-flash"
 
-# REASONING controls the thinking budget for extended reasoning:
-# - 0: Thinking disabled (fastest, no reasoning)
-# - -1: Dynamic thinking (model decides based on complexity)
-# - 1-24576: Fixed thinking token budget (higher = more reasoning)
-# Recommended: Start with low values (128-1024) for development, increase for production
-REASONING = 1
+# REASONING controls reasoning effort on a 0-10 scale:
+# - 0 or False: Thinking disabled (fastest, no reasoning)
+# - 1-3: Low reasoning (maps to ~128-1024 token budget)
+# - 4-7: Medium reasoning (maps to ~2048-8192 token budget)  
+# - 8-10: High reasoning (maps to ~12288-24576 token budget)
+REASONING = False
 
 # TOOLS enables tool capabilities (both built-in and custom):
 # - False: No tools available
@@ -41,6 +43,18 @@ REASONING = 1
 #   TOOLS = ["code_execution", my_function]    # Mix built-in + custom
 TOOLS = False
 
+configAndSettingsHash = hashlib.sha256(MODEL.encode() + str(REASONING).encode() + str(TOOLS).encode()).hexdigest()
+
+def Configure(Model, Reasoning, Tools):
+    global MODEL
+    global REASONING
+    global TOOLS
+    global configAndSettingsHash
+    MODEL = Model
+    REASONING = Reasoning
+    TOOLS = Tools
+    configAndSettingsHash = hashlib.sha256(MODEL.encode() + str(REASONING).encode() + str(TOOLS).encode()).hexdigest()
+
 import os
 import json
 from google import genai
@@ -48,13 +62,15 @@ from google.genai import types
 
 def GeminiAIHook(prompt : str, structure : dict | None) -> dict | str:
     """
-This function is called by the test runner to get the AI's response to a prompt.
-
-Prompt is the question to ask the AI.
-Structure contains the JSON schema for the expected output. If it is None, the output is just a string.
-
-There is no memory between calls to this function, the 'conversation' doesn't persist.
-"""
+    This function is called by the test runner to get the AI's response to a prompt.
+    
+    Prompt is the question to ask the AI.
+    Structure contains the JSON schema for the expected output. If it is None, the output is just a string.
+    
+    There is no memory between calls to this function, the 'conversation' doesn't persist.
+    
+    Returns tuple of (result, chainOfThought).
+    """
     # Initialize the client - it will automatically use the GEMINI_API_KEY or GOOGLE_API_KEY
     # environment variable
     client = genai.Client()
@@ -69,21 +85,23 @@ There is no memory between calls to this function, the 'conversation' doesn't pe
             config_params['response_schema'] = structure
         
         # Add thinking/reasoning configuration if REASONING is set
-        # For gemini-2.5 models, use thinking_budget parameter
-        if REASONING is not None and REASONING != 0:
-            if "2.5" in MODEL or "2.0" in MODEL:
-                # For Gemini 2.x models: use thinking_budget
-                # 0 = off, -1 = dynamic, 1-24576 = fixed token budget
-                config_params['thinking_config'] = types.ThinkingConfig(
-                    thinking_budget=REASONING if REASONING != 1 else 128
-                )
-            elif "3" in MODEL:
-                # For Gemini 3+ models: use thinking_level
-                # Map numeric values to level strings
-                level = "high" if REASONING > 512 else "low"
-                config_params['thinking_config'] = types.ThinkingConfig(
-                    thinking_level=level
-                )
+        # Map 0-10 scale to Gemini's thinking_budget (0-24576)
+        if REASONING and REASONING != 0:
+            # Map 1-10 to appropriate token budgets
+            if isinstance(REASONING, int) and REASONING > 0:
+                if REASONING <= 3:
+                    thinking_budget = 128 * (2 ** (REASONING - 1))  # 128, 256, 512
+                elif REASONING <= 7:
+                    thinking_budget = 1024 * (2 ** (REASONING - 4))  # 1024, 2048, 4096, 8192
+                else:
+                    thinking_budget = 8192 * (2 ** (REASONING - 7))  # 8192, 16384, 24576 (capped)
+                thinking_budget = min(thinking_budget, 24576)  # Cap at max
+            else:
+                thinking_budget = 1024  # Default for truthy non-int values
+            
+            config_params['thinking_config'] = types.ThinkingConfig(
+                thinking_budget=thinking_budget
+            )
         
         # Add tools if specified (supports built-in and custom tools)
         if TOOLS and TOOLS is not False:
@@ -111,23 +129,61 @@ There is no memory between calls to this function, the 'conversation' doesn't pe
         # Create config object
         config = types.GenerateContentConfig(**config_params) if config_params else None
         
-        # Generate content
-        response = client.models.generate_content(
+        # Generate content with streaming to capture thinking in real-time
+        chainOfThought = ""
+        output_text = ""
+        current_thinking_line = ""
+        
+        stream = client.models.generate_content_stream(
             model=MODEL,
             contents=prompt,
             config=config
         )
         
+        for chunk in stream:
+            # Process each candidate in the chunk
+            for candidate in chunk.candidates:
+                if candidate.content and candidate.content.parts:
+                    for part in candidate.content.parts:
+                        # Check if this is a thinking part
+                        if hasattr(part, 'thought') and part.thought:
+                            # This is thinking content
+                            thought_text = part.text if hasattr(part, 'text') else ""
+                            current_thinking_line += thought_text
+                            # Print complete lines as they arrive
+                            while "\n" in current_thinking_line:
+                                line, current_thinking_line = current_thinking_line.split("\n", 1)
+                                print(f"Thinking: {line}", flush=True)
+                                chainOfThought += line + "\n"
+                        elif hasattr(part, 'text') and part.text:
+                            # This is regular output content
+                            output_text += part.text
+        
+        # Flush any remaining thinking content
+        if current_thinking_line:
+            print(f"Thinking: {current_thinking_line}", flush=True)
+            chainOfThought += current_thinking_line
+        
+        # Strip trailing newline from chain of thought
+        chainOfThought = chainOfThought.rstrip("\n")
+        
+        if chainOfThought:
+            print()  # Blank line after thinking
+        
+        print(output_text)
+        
         # Parse and return response
         if structure is not None:
-            return json.loads(response.text)
+            if output_text:
+                return json.loads(output_text), chainOfThought
+            return {}, chainOfThought
         else:
-            return response.text
+            return output_text or "", chainOfThought
             
     except Exception as e:
         print(f"Error calling Gemini API: {e}")
         # Return appropriate empty response based on structure
         if structure is not None:
-            return {}
+            return {}, ""
         else:
-            return ""
+            return "", ""

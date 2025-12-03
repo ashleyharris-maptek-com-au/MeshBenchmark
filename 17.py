@@ -28,6 +28,8 @@ subpassParamSummary = [
     <li>33. degrees is pretty flat, so you can visually fail most output from this.</li>
     <li>The walls of the silo require this to be a cylinder with a cone on top.</li>
   </ul>
+
+  LLM provided curves and reference geometry is both normalised to 9 degree segments
   """
 ]
 
@@ -45,4 +47,12 @@ def resultToScad(result):
     result = result.split("```")[1]
     result = result.partition("\n")[2] # Drop the first line as it might be "```openscad"
 
+  import re
+  result = re.sub(r"\$fn\s*=\s*\d+", "$fn=50", result)
+
   return "module result(){ union(){" + result + "}}"
+
+def postProcessScore(score):
+  # Dumb solutions like a single cone do intersect the reference geometry a decent amount,
+  # so we penalise scores far below 1.
+  return score ** 5

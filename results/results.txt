@@ -1,2 +1,3 @@
-Placebo: 0.9999999980394381
-GPT5Nano: 0.5
+Human w/chatgpt: 0.342
+gpt-5-mini: 0.1921693015639555
+gpt-5-nano: 0.15497502981367153

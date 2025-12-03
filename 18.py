@@ -20,7 +20,7 @@ Generate an OpenSCAD plan showing the tallest pyramid the pharoh can build with 
 of stone. This plan must be precise with its volume accurate to the milimeter including every step
 yet optimised enough to be viewable on the stonemason's CAD software.
 
-Use Metric SI units.
+Use Metric SI units in all working and in the final OpenSCAD file.
 
 Do not output anything else than the OpenSCAD file, as that will cause compilation errors.
 """
@@ -37,10 +37,10 @@ structure = None
 promptChangeSummary = """
 Hundreds of thousands of stones, then millions. 
 The AI needs to merge adjacent stones and work with merged
-layers in order to solve this.
+layers in order to solve this.<br><br>
 
-If it manages to bruteforce a solution, OpenSCAD will either crash from std::bad_alloc or timeout
-after 60 seconds, both causing failure.
+If it attempts to bruteforce a solution by rendering millions of bricks as individual cubes, 
+OpenSCAD will either crash from std::bad_alloc or timeout after 600 seconds, both causing failure.
 """
 
 subpassParamSummary = [

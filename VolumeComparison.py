@@ -36,6 +36,22 @@ def compareVolumeAgainstOpenScad(
         referenceScad = testGlobals["referenceScad"]
 
     resultAsScad = resultToScad(result)
+
+    if resultAsScad == "":
+        return {
+            "score": 0,
+            "output_image": None,
+            "output_mouseover_image": None,
+            "output_hyperlink": resultAsScad,
+            "reference_image": None,
+            "temp_dir": None,
+            "scoreExplantion": "Result was empty",
+            "resultVolume": 0,
+            "referenceVolume": 0,
+            "intersectionVolume": 0,
+            "differenceVolume": 0
+        }
+
     scadModules = testGlobals.get("scadModules", "")
 
     # Generate cache key from inputs
@@ -48,6 +64,7 @@ def compareVolumeAgainstOpenScad(
         cached = _load_cache(cache_meta_path)
         if cached is not None:
             print(f"Cache hit for {cache_key[:12]}...")
+            cached["scoreExplantion"] += "Results were <a href='" + cache_meta_path + "'>cached</a>."
             return cached
 
     # Create cache directory for this comparison
@@ -147,9 +164,9 @@ minkowski(){
         if err:
             openscad_errors.append(err)
     
-    # Run result SCAD with 60s timeout - complex/infinite renders get aborted
+    # Run result SCAD with 10min timeout - complex/infinite renders get aborted
     try:
-        err = _run_openscad(result_scad, output_stl, timeout=60)
+        err = _run_openscad(result_scad, output_stl, timeout=600)
         if err:
             openscad_errors.append(err)
     except TimeoutError as e:
@@ -212,15 +229,22 @@ minkowski(){
         score = intersectionVolume / referenceVolume
 
         if "volumeValidateDelta" in testGlobals:
-            score += testGlobals["volumeValidateDelta"](
+            scoreDelta = testGlobals["volumeValidateDelta"](
                 result, resultVolume, referenceVolume, 
                 intersectionVolume, differenceVolume
             )
 
+            if scoreDelta != 0:
+                scoreExplantion += f"Score was weighted from raw volume similarity, +: {scoreDelta:.2f}\n"
+                score += scoreDelta
+
         score -= (differenceVolume / referenceVolume) * 0.5
 
         if "postProcessScore" in testGlobals:
+            oldScore = score
             score = testGlobals["postProcessScore"](score)
+            if oldScore != score:
+                scoreExplantion += f"Score was renormalised: {oldScore:.2f} -> {score:.2f}\n"
 
         score = max(0, score)
 

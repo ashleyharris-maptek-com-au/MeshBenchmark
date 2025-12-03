@@ -61,14 +61,14 @@ structure = {
 }
 
 referenceScad = """
-$fn=30;
+
 
 module reference()
 {
     difference()
     {
-        sphere(PARAM_B * 10);
-        sphere(PARAM_A * 10);
+        sphere(PARAM_B * 10, $fn=16);
+        sphere(PARAM_A * 10, $fn=16);
         translate([0,0,-500]) cube([1000,1000,1000], center=true);
     }
 }
@@ -95,6 +95,10 @@ def prepareSubpassReferenceScad(index):
     raise StopIteration
 
 def resultToScad(result):
+
+  if len(result["bricks"]) == 0:
+    return ""
+
   scad = "union() {"
   for brick in result["bricks"]:
     scad += "translate([" + str(brick["Centroid"][0]) + "," + \
@@ -103,6 +107,7 @@ def resultToScad(result):
 
   return "module result(){ " + scad + "}}\n\n"
 
+"""
 def volumeValidateDelta(result, resultVolume, referenceVolume, intersectionVolume, differenceVolume):
     brickCount = len(result["bricks"])
     expectedBrickCount = referenceVolume / 9.6 / 16 / 32
@@ -117,7 +122,7 @@ def volumeValidateDelta(result, resultVolume, referenceVolume, intersectionVolum
         " bricks, but the union of the bricks created a volume of " + str(resultVolume) + " mm^3," +\
              " the expected volume is " + str(expectedBrickCount * 9.6 * 16 * 32))
     return -0.5
-
+"""
 
 def postProcessScore(score):
   # Packing efficincy of rectangle prism in sphere is about 75%. I couldn't find an exact figure

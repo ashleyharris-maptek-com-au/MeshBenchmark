@@ -30,7 +30,8 @@ Track layout must follow these rules:
 
 You do not need to consider support positions at this stage of the planning.
 
-Assume frictionless vacuum.
+Assume frictionless vacuum for all track segments except loops. 
+A full loop results in a halving of speed.
 
 Return the track as a list of points, where each point is a list of [x, y, z] coordinates.
 
@@ -38,7 +39,7 @@ Return the track as a list of points, where each point is a list of [x, y, z] co
 
 PARAM_A = [10, 15, 20, 50, 100, 300]
 PARAM_B = [5, 9, 19, 48, 95, 250]
-PARAM_C = [10, 100, 200, 500, 1000, 3000]
+PARAM_C = [12, 100, 200, 500, 1000, 3000]
 PARAM_D = [5, 8, 12, 15, 20, 25]
 PARAM_E = [
     "", 
@@ -72,7 +73,7 @@ structure = {
 }
 
 subpassParamSummary = [
-    "Very basic. 10m cube. 5m start altitude. 10m length. 5m/s speed min. ",
+    "Very basic. 10m cube. 5m start altitude. 12m length. 5m/s speed min. ",
     "15m cube, start at 9m, 100m length. 5m/s min speed. Must exceed 8m/s at least once.", 
     "20m cube, start at 19m, 200m length. 2G turn.", 
     "50m cube, start at 48m, 500m length. Avoid centre cylinder at ground.", 
@@ -174,7 +175,7 @@ def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
                 errors.append(f"Angle at point {i+1}: {angle_deg:.1f}° > {MAX_ANGLE_DEG}°")
     
     # Check track length
-    if total_length < minLength:
+    if total_length < minLength - 0.1:
         errors.append(f"Track length {total_length:.1f}m < required {minLength}m")
     
     # Check for track crossings (simplified: check all segment pairs for XY proximity with Z clearance)
@@ -275,6 +276,11 @@ def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
                     # A complete loop is ~360° of vertical rotation
                     if abs(cumulative_vertical_angle) >= 360:
                         loop_count += 1
+
+                        # Halve the speed. We allow the carriage to drop below 5m/s for this section.
+                        speed /= 2
+                        has_been_up_to_speed = False
+
                         cumulative_vertical_angle = cumulative_vertical_angle % 360
                 
                 prev_vertical_direction = vertical_angle

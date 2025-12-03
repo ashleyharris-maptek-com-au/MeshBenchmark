@@ -3,6 +3,8 @@ import itertools,random
 
 title = "2D convex hull, identify points on the hull."
 
+skip = True
+
 prompt = """
 You are given a set of points in 2D space. Identify all points that are on the convex hull of the set
 and return them in order.
