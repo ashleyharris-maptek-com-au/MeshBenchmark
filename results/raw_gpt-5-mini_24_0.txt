@@ -1,1 +1,0 @@
-{'reasoning': 'I computed the convex hull using the monotonic chain (Andrew) algorithm: sort points by x, build lower and upper hulls by checking cross products, then concatenate to get the hull in order around the polygon.', 'hull': [15, 7, 2, 12, 8, 0]}

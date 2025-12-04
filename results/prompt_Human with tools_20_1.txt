@@ -1,0 +1,26 @@
+
+Create a < 2048 bytes snippet of python code that exports a function 'f', taking 2 parameters (x and y),
+that when executed returns a parametric shape representing Australia's land mass, including at least Tasmania.
+
+f(x,y) > 0 represents "inside".
+f(x,y) <= 0 represents "outside".
+Use a mercartor projection to project from spherical to 2D.
+Scale the 2D shape such that it fits within a normalised 0,0 -> 1,1
+Cape York, QLD's tip is on the line y=0
+South East Cape, TAS is on the line y=1
+Cape Byron, NSW is on the line x=1
+Steep Point, WAS, is on the line X=0
+Comments are a waste of bytes, do not use them.
+Coding standards & best practices are not enforced. Go nuts.
+Will be executed in Python Version: sys.version_info(major=3, minor=12, micro=0, releaselevel='final', serial=0)
+
+Your python code can not import any modules of it's own, but it does have the following imports
+prepended, and not included in the 2048 bytes character limit. .
+
+
+import math, numpy, scipy, cmath, decimal, fractions, random, statistics, itertools
+
+
+The code you send can not have an import statement, so if you're testing python code, be sure to 
+remove the "import" statement before submission.
+

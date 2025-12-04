@@ -39,10 +39,15 @@ class CacheLayer:
         print("Started at " + str(datetime.datetime.now()))
         result = self.aiEngineHook(prompt, structure)
 
-        if not result:
+        if not result and self.aiEngineHook.__name__ != "PlaceboAIHook":
           print("Empty result or Error 500, pausing and then retrying in a few minutes...")
           time.sleep(60 + random.randint(0, 120))
           result = self.aiEngineHook(prompt, structure)
+
+          if not result:
+            print("Empty result or Error 500, pausing for a VERY LONG TIME and then retrying in a few minutes...")
+            time.sleep(600 + random.randint(0, 1200))
+            result = self.aiEngineHook(prompt, structure)
 
         print("Finished at " + str(datetime.datetime.now()))
 

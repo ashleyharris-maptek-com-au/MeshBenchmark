@@ -40,7 +40,7 @@ suffix = \
 """
 Your output must be ONLY the maze's heightmap, nothing else.
 Your output must be PARAM_A rows long, and every row must be PARAM_A characters long.
-Anything else will give a score of zero.
+The maze must be your only output - Extra text above or below the maze itself corrupt your work.
 """
 
 subpassParamSummary = [
@@ -55,12 +55,12 @@ subpassParamSummary = [
 structure = None # We just take a string here.
 
 def prepareSubpassPrompt(index):
-    if index == 0: return prompt + "Create a maze of size 5x5 that has A at level 5 and B at level 0, and at least 2 jumps." + suffix
-    if index == 1: return prompt + "Create a maze of size 10x10 that has A at level 0 and B at level 9, and at least 4 jumps." + suffix
-    if index == 2: return prompt + "Create a maze of size 15x15 that has A at level 5 and B at level 5, and at least 6 jumps." + suffix
-    if index == 3: return prompt + "Create a maze of size 20x20 that has A at level 5 and B at level 5, and at least 8 jumps." + suffix
-    if index == 4: return prompt + "Create a maze of size 25x25 that has A at level 5 and B at level 5, and at least 10 jumps." + suffix
-    if index == 5: return prompt + "Create a maze of size 30x30 that has A at level 5 and B at level 0, and at least 12 jumps." + suffix
+    if index == 0: return prompt + "Create a maze of size 5x5 that has A at level 5 and B at level 0, and at least 2 jumps." + suffix.replace("PARAM_A","5")
+    if index == 1: return prompt + "Create a maze of size 10x10 that has A at level 0 and B at level 9, and at least 4 jumps." + suffix.replace("PARAM_A","10")
+    if index == 2: return prompt + "Create a maze of size 15x15 that has A at level 5 and B at level 5, and at least 6 jumps." + suffix.replace("PARAM_A","15")
+    if index == 3: return prompt + "Create a maze of size 20x20 that has A at level 5 and B at level 5, and at least 8 jumps." + suffix.replace("PARAM_A","20")
+    if index == 4: return prompt + "Create a maze of size 25x25 that has A at level 5 and B at level 5, and at least 10 jumps." + suffix.replace("PARAM_A","25")
+    if index == 5: return prompt + "Create a maze of size 30x30 that has A at level 5 and B at level 0, and at least 12 jumps." + suffix.replace("PARAM_A","30")
     raise StopIteration
 
 def resultToNiceReport(result, subPass, aiEngineName):

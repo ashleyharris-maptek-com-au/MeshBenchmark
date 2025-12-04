@@ -17,13 +17,13 @@ Two units of movement to the right looks like this (noting indent):
   ###
   #
 
-Three units of movement to the right and a 90 degree rotation looks like this (noting indent):
+Three units of movement to the right and a 90 degree clockwise rotation looks like this (noting indent):
 
   ##
    #
    #
 
-2 units of movement to the right, and a 180 degree rotation looks like this (noting indent):
+2 units of movement to the right, and a 180 degree clockwise rotation looks like this (noting indent):
 
   #
 ###

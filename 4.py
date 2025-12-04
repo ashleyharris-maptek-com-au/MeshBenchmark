@@ -27,6 +27,8 @@ Rotation is defined around the 0,0,0 point (Which is NOT THE CENTRE), and is per
 We create a scene with mulitple tetrahedra, each with a different transform. Return the transforms of such a scene
 such that a shadow projected vertically (onto the Z=0 plane) fully covers PARAM, centered at the origin.
 
+Use as many tetrahedra as you need, scoring is based on shadow coverage, not the number of tetrahedra used.
+
 Score will be deducted for any shadow outside of the square, for reduntant tetrahedra, or non-normalised quaternions.
 """
 
@@ -80,7 +82,16 @@ structure = {
 }
 
 subpassParamSummary = [
-    "Cover a square of side length 4. \n\n(Note that the shadow has been linearly extruded to a height of 1 to simplify volume comparison)",
+    """
+    Cover a square of side length 4.<br><br>
+    
+    (Note that the shadow has been linearly extruded to a height of 1 
+    to simplify volume comparison)<br><br>
+
+    (Note that a perfect score is possible - the tetrahedrons can't overlap
+    in 2D, but they can in 3D, so a right angle can be created by two tetrahedra
+    seperated on the Z axis, one rotated 90 degrees.)
+    """,
     "Cover a circle of diameter 4",
     "Cover a square of side length 6, with a hole in the centre of side length 2"
 ]
@@ -151,3 +162,7 @@ def resultToScad(result):
             str(transform["y"]) + "," + str(transform["z"]) + "]) rotate(" + \
             str(quaternionToPitchRollYawInDegrees(transform["q0"], transform["q1"], transform["q2"], transform["q3"])) + ") tetrahedron();\n"
     return scad + "}}}}}\n\n"
+
+def postProcessScore(score, subPassIndex):
+    if subPassIndex == 1: return score / 0.9 # Circle is impossible to cover.
+    return score 

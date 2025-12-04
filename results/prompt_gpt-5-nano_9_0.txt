@@ -1,0 +1,19 @@
+
+You have a 4*4 grid of unit squares, with cell coordinates (x, y) where 1 <= x <= 4, 1 <= y <= 4.
+
+
+
+Draw a single closed path that:
+- Moves from cell to cell using only side-adjacent moves.
+- Visits every cell exactly once.
+- Returns to its starting cell (so the path is a loop).
+- The last cell in your list must be side-adjacent to the first.
+
+Answer format:
+Give an ordered list of the 16 cell coordinates for the loop, starting anywhere, for example:
+
+1,1
+1,2
+1,3
+...
+2,1

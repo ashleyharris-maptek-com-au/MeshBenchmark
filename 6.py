@@ -8,7 +8,7 @@ prompt = """
 Position PARAM_A voxels in a cubic grid of PARAM_B voxels per side, such that the orthographic projection to all 3 planes is 
 solid (no holes in the projection), and there are no trivial symmetries (rotations or reflections that leave the shape unchanged).
 
-
+0,0,0 is the bottom left grid cell and indices increase up and to the right.
 """
 
 structure = {

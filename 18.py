@@ -60,7 +60,7 @@ def prepareSubpassReferenceScad(index):
     level += 1
     stones = level * level
     if stones < stoneCount:
-        scad += f"translate([0,0,-{level * 0.5}])  cube([{level},{level}, 0.5], center=true);\n"
+        scad += f"translate([0,0,-{level * 0.5}])  cube([{level * 0.5},{level * 0.5}, 0.5], center=true);\n"
         stoneCount -= stones
     else: break
 

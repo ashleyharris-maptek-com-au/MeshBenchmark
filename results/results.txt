@@ -1,3 +1,2 @@
-Human w/chatgpt: 0.342
-gpt-5-mini: 0.1921693015639555
-gpt-5-nano: 0.15497502981367153
+ChatGPT: 5
+Human with tools: 2.352942296773216

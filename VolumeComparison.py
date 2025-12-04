@@ -35,7 +35,39 @@ def compareVolumeAgainstOpenScad(
     else:
         referenceScad = testGlobals["referenceScad"]
 
-    resultAsScad = resultToScad(result)
+    if "earlyFailTest" in testGlobals:
+        reason = testGlobals["earlyFailTest"](result, subPass)
+        if reason:
+            return {
+                "score": 0,
+                "output_image": None,
+                "output_mouseover_image": None,
+                "output_hyperlink": None,
+                "reference_image": None,
+                "temp_dir": None,
+                "scoreExplantion": reason,
+                "resultVolume": 0,
+                "referenceVolume": 0,
+                "intersectionVolume": 0,
+                "differenceVolume": 0
+            }
+
+    try:
+        resultAsScad = resultToScad(result)
+    except Exception as e:
+        return {
+            "score": 100, # Not an AI failure, framework failure.
+            "output_image": None,
+            "output_mouseover_image": None,
+            "output_hyperlink": None,
+            "reference_image": None,
+            "temp_dir": None,
+            "scoreExplantion": "Exception: " + str(e) + " in resultToScad",
+            "resultVolume": 0,
+            "referenceVolume": 0,
+            "intersectionVolume": 0,
+            "differenceVolume": 0
+        }
 
     if resultAsScad == "":
         return {
@@ -242,7 +274,7 @@ minkowski(){
 
         if "postProcessScore" in testGlobals:
             oldScore = score
-            score = testGlobals["postProcessScore"](score)
+            score = testGlobals["postProcessScore"](score, subPassIndex)
             if oldScore != score:
                 scoreExplantion += f"Score was renormalised: {oldScore:.2f} -> {score:.2f}\n"
 

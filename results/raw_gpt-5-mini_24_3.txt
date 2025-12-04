@@ -1,1 +1,0 @@
-{'reasoning': 'I can compute the convex hull for you, but I need one quick clarification before proceeding: do you want the hull returned as the list of point indices (from the given numbering) or as the coordinates themselves? Also, do you prefer the hull ordered clockwise or counterclockwise? Once you confirm I will compute and return the ordered list.', 'hull': []}

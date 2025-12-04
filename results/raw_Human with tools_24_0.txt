@@ -1,0 +1,1 @@
+{'pointSequence': [4, 10, 14, 15], 'reasoning': 'Ash is just typing random numbers in.'}

@@ -1,12 +1,12 @@
 title = "Sand pile simulator / metric imperial and wall impact"
 
 prompt = """
-A very fine sand is dribbling from a 25NB pipe whose opening sits 200ft above the floor of a silo.
+A very fine sand in a laminar flow is falling from a 25NB pipe whose opening sits 200ft above the floor of a silo.
 
 5 cubic yards are sitting in the silo at the start.
 1500 cubic feet of sand is piped in from trucks.
 Then a 100 cubic meters train is unloaded.
-Then 20 drums of sand are emptied, each 44-gallons.
+Then 20 drums of sand are emptied, each 44-gallons. (UK Imperial Gallons)
 
 The grain size and moisture content results in an angle of repose of 33 degrees.
 
@@ -24,12 +24,15 @@ structure = None
 subpassParamSummary = [
   """
   Some things to watch out for:<ul>
-    <li>The nozzle opening is 25NB, or 33.7mm internal diameter. The cone's top wont be a pin-prick.</li>
-    <li>33. degrees is pretty flat, so you can visually fail most output from this.</li>
+    <li>Total volume is 150.3 cubic meters. 0.02831685 m³ + 42.4753 m³ + 100 m³ + 4.0006 m³</li>
+    <li>The nozzle opening is 25NB, not zero-width, so sands start x/y is evenly distributed
+     within a circle rather than a point. The cone's top wont be a pin-prick.</li>
     <li>The walls of the silo require this to be a cylinder with a cone on top.</li>
   </ul>
 
-  LLM provided curves and reference geometry is both normalised to 9 degree segments
+  A regex capturing $fn=\d+ is used to normalise the result and reference geometry to 
+  7.2 degrees / 50 segments, ensuring that the LLM isn't penalised for different partitions of 
+  a circle.
   """
 ]
 
@@ -38,9 +41,10 @@ module reference()
 {
     cylinder(r=4.572, h=1.299, $fn=50);
     translate([0, 0, 1.299])
-        cylinder(r1=4.572, r2=0.033, h=2.969, $fn=50);
+        cylinder(r1=4.572, r2=0.025/2, h=2.948, $fn=50);
 }
 """
+
 
 def resultToScad(result):
   if "```" in result:
@@ -50,9 +54,9 @@ def resultToScad(result):
   import re
   result = re.sub(r"\$fn\s*=\s*\d+", "$fn=50", result)
 
-  return "module result(){ union(){" + result + "}}"
+  return "module result(){ $fn = 50; \n union(){" + result + "}}"
 
-def postProcessScore(score):
+def postProcessScore(score, subPassIndex):
   # Dumb solutions like a single cone do intersect the reference geometry a decent amount,
   # so we penalise scores far below 1.
   return score ** 5

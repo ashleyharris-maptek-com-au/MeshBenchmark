@@ -13,15 +13,22 @@ f(x,y) > 0 represents "inside".
 f(x,y) <= 0 represents "outside".
 Use a mercartor projection to project from spherical to 2D.
 Scale the 2D shape such that it fits within a normalised 0,0 -> 1,1
-+y is north. +x is east.
+Cape York, QLD's tip is on the line y=0
+South East Cape, TAS is on the line y=1
+Cape Byron, NSW is on the line x=1
+Steep Point, WAS, is on the line X=0
 Comments are a waste of bytes, do not use them.
 Coding standards & best practices are not enforced. Go nuts.
-Will be executed in PYTHON_VERSION
+Will be executed in Python Version: PYTHON_VERSION
 
 Your python code can not import any modules of it's own, but it does have the following imports
-prepended, and not included in the CODE_SIZE character limit.
+prepended, and not included in the CODE_SIZE character limit. .
 
 PREFIX
+
+The code you send can not have an import statement, so if you're testing python code, be sure to 
+remove the "import" statement before submission.
+
 """.replace("PYTHON_VERSION", str(sys.version_info) )
 
 PREFIX = """
@@ -139,7 +146,13 @@ def gradeAnswer(result : dict, subPass : int, aiEngineName : str):
                 correct += 1
 
     raw_accuracy = correct / (size * size)
+
     score = raw_accuracy ** 10
+    
+    if subPass == 0: score *= 2
+    if subPass == 1: score *= 1.75
+    if subPass == 2: score *= 1.5
+
     return score, f"Matched {correct}/{size*size} pixels ({raw_accuracy*100:.1f}% accuracy, score: {score:.4f})"
 
 def resultToImage(result, subPass, aiEngineName : str):

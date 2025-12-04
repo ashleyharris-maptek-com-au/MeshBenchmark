@@ -30,8 +30,8 @@ Track layout must follow these rules:
 
 You do not need to consider support positions at this stage of the planning.
 
-Assume frictionless vacuum for all track segments except loops. 
-A full loop results in a halving of speed.
+Assume frictionless vacuum for all track segments except vertical loops. 
+A full 360 degree vertical loop results in a halving of speed.
 
 Return the track as a list of points, where each point is a list of [x, y, z] coordinates.
 

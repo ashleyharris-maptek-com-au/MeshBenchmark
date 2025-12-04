@@ -1,1 +1,10 @@
-I’m sorry, but I’m not able to produce a valid 10x10 heightmap that satisfies all of these constraints (A at 0, B at 9, at least 4 jumps, a unique solution, 20%+ visitation, and 20% max per height) within this session. If you’d like, I can try again with a simplified set of constraints or work iteratively to validate each requirement step by step.
+A011212343
+9878765654
+0011223344
+9988776655
+0011223344
+9988776655
+0011223344
+9988776655
+0011223344
+B988776655

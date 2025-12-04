@@ -1,8 +1,0 @@
-H = 4.258;
-a = 4.572;
-R = 6.5566;
-intersection()
-{
-  cylinder(h = H, r1 = R, r2 = 0);
-  cylinder(h = H, r = a);
-}

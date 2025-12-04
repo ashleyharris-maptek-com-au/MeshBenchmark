@@ -1,0 +1,19 @@
+
+Generate a 64 * 64 ASCII art maze.
+
+The maze must use the following characters:
+# - Wall
+. - Correct solution path
+A - Start
+B - End
+  - Untaken path (space)
+
+The maze must be solvable, there must be only one solution, the annotated path must not have any loops or branches, and shortest path
+from A to B must cover at least 10% of the maze area. The path threw the maze can only be 1 cell wide, and solvable with
+only horizontal or vertical moves.
+
+The maze must be 'watertight', that is have walls touching the border of the grid all around, A and B must be within the maze.
+
+Return the maze as a string, with newlines between rows. 
+Every row and column of your output must be 64 characters long, and your output must be 64 rows long.
+Outputting anything else than the maze will obviously result in a score of 0. 

@@ -1,0 +1,11 @@
+
+You have a building at the origin, axis aligned, 7 meters wide and deep, and 10 meters tall.
+
+A sniper is located at (100,100,20) and is looking at the building.
+
+Position a crowd of 200 people (represented by a 0.5*0.5*2m axis aligned bounding box resting on the z=0 plane) 
+in such a way that:
+- the sniper can not see any of them due to the building blocking their line of sight.
+- the people must be positioned entirely on the ground (z=0).
+- the people must not overlap with the building or each other.
+- nobody is more than 30 meters away from the building's center.

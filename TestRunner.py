@@ -72,7 +72,9 @@ def runTest(index: int, aiEngineHook : callable, aiEngineName : str) -> Dict[str
                 print("Failed to get result for subpass " + str(idx) + " - " + str(e))
                 results[idx] = ""
                 chainOfThought = ""
+
             open("results/raw_" + aiEngineName + "_" + str(index) + "_" + str(idx) + ".txt", "w",encoding="utf-8").write(str(results[idx]))
+            open("results/prompt_" + aiEngineName + "_" + str(index) + "_" + str(idx) + ".txt", "w",encoding="utf-8").write(str(prompts[idx]))
             open("results/cot_" + aiEngineName + "_" + str(index) + "_" + str(idx) + ".txt", "w",encoding="utf-8").write(str(chainOfThought))
     
     # In placebo mode, make sure we test all the grading functions even if the questions are currently
@@ -128,12 +130,24 @@ def runTest(index: int, aiEngineHook : callable, aiEngineName : str) -> Dict[str
         elif "gradeAnswer" in g:
             # Some tests require a custom grading function.
 
-            score, explanation = g["gradeAnswer"](result, subPass, aiEngineName)
+            try:
+                score, explanation = g["gradeAnswer"](result, subPass, aiEngineName)
+            except Exception as e:
+                print("Failed to grade subpass " + str(subPass) + " - " + str(e))
+                score = 100 # This should get attention!
+                explanation = "Failed to grade subpass " + str(subPass) + " - " + str(e) + \
+                    "This is a framework error, not an AI error."
+
+
             subpass_data["score"] = score
             subpass_data["scoreExplantion"] = explanation
 
             if "resultToNiceReport" in g:
-                subpass_data["output_nice"] = g["resultToNiceReport"](result, subPass, aiEngineName)
+                try:
+                    subpass_data["output_nice"] = g["resultToNiceReport"](result, subPass, aiEngineName)
+                except Exception as e:
+                    print("Failed to generate nice report for subpass " + str(subPass) + " - " + str(e))
+                    subpass_data["output_nice"] = "Failed to generate nice report for subpass " + str(subPass) + " - " + str(e)
             else:
                 subpass_data["output_text"] = result
         
@@ -169,10 +183,10 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
 
     hackRunSingleTest = None
 
-    if hackRunSingleTest is None and os.path.exists("results/" + aiEngineName + ".html"):
+    #if hackRunSingleTest is None and os.path.exists("results/" + aiEngineName + ".html"):
         # Don't run if it's less than 7 days old, unless we're in single test mode.
-        if os.path.getmtime("results/" + aiEngineName + ".html") > time.time() - 7 * 24 * 60 * 60:
-            return
+    #    if os.path.getmtime("results/" + aiEngineName + ".html") > time.time() - 7 * 24 * 60 * 60:
+    #        return
 
     # Create a results file for the html results of this engines test run
     results_file = open("results/" + aiEngineName + ".html", "w", buffering=1, encoding="utf-8")
@@ -207,6 +221,7 @@ def runAllTests(aiEngineHook : callable, aiEngineName : str):
         --score-good: #4CAF50;
         --score-bad: #ff6b6b;
     }
+    a { color: #55f}
 }
 body { background-color: var(--bg-color); color: var(--text-color); }
 table { border-collapse: collapse; width: 100%; margin: 20px 0; }
@@ -340,13 +355,14 @@ h2 { color: var(--text-secondary); margin-top: 30px; }
             else:
                 results_file.write("Same as typical prompt")
 
+            results_file.write("<a href=\"prompt_" + aiEngineName + "_" + str(testIndex-1) + "_" + str(subpass['subpass']) + ".txt\">View exact prompt</a><br>")
             results_file.write("<a href=\"raw_" + aiEngineName + "_" + str(testIndex-1) + "_" + str(subpass['subpass']) + ".txt\">View raw AI output</a><br>")
             results_file.write("<a href=\"cot_" + aiEngineName + "_" + str(testIndex-1) + "_" + str(subpass['subpass']) + ".txt\">View chain of thought</a><br>")
 
             results_file.write("</td>\n")
             
             if "reasoning" in subpass:
-                results_file.write(f"<td colspan=2><strong>AI Reasoning: </strong>{html.escape(subpass['reasoning'])}</td>")
+                results_file.write(f"<td colspan=2><div style='overflow-y: auto;max-height: 200px;'><strong>AI Reasoning: </strong>{html.escape(subpass['reasoning'])}</div></td>")
             else:
                 results_file.write("<td colspan=2></td>")
 
@@ -466,7 +482,7 @@ h2 { color: var(--text-secondary); margin-top: 30px; }
     scores[aiEngineName] = overall_total_score / overall_max_score
 
     with open("results/results.txt", "w", encoding="utf-8") as f:
-        for key, value in scores.items():
+        for key, value in sorted(scores.items(), key=lambda item: float(item[1]), reverse=True):
             f.write(f"{key}: {value}\n")
 
     # Generate a summary page of the results, suitable for use as a github landing page,
@@ -701,14 +717,21 @@ h2 { color: var(--text-secondary); margin-top: 30px; }
 
 
 if __name__ == "__main__":
-  if False:
+  if True:
+    # "Placebo" is the author (Ashley Harris) trying to get a reference score by
+    # screwing around with his intuition, ChatGPT.com, python, openscad and 
+    # Google for a bit.
+
     import AiEnginePlacebo
 
     cacheLayer = CacheLayer(AiEnginePlacebo.configAndSettingsHash   ,
                             AiEnginePlacebo.PlaceboAIHook)
     
-    runAllTests(cacheLayer.AIHook, "Placebo")
+    runAllTests(cacheLayer.AIHook, "Human with tools")
   
+    #import sys
+    #sys.exit(0)
+
   if os.environ.get("OPENAI_API_KEY") is not None:
     import AiEngineOpenAiChatGPT
 
@@ -756,6 +779,94 @@ if __name__ == "__main__":
     print("No OpenAI API key found - skipping openai tests")
 
 
+  if os.environ.get("GEMINI_API_KEY") is not None:
+    import AiEngineGoogleGemini
+
+    geminiModels = [
+        "gemini-2.5-flash",
+        "gemini-3-pro"
+    ]
+
+    for model in geminiModels:
+        AiEngineGoogleGemini.Configure(model, False, False)
+
+        cacheLayer = CacheLayer(AiEngineGoogleGemini.configAndSettingsHash   ,
+                                AiEngineGoogleGemini.GeminiAIHook)
+        
+        runAllTests(cacheLayer.AIHook, model)
+
+        # Reasoning
+
+        #AiEngineGemini.Configure(model, 5, False)
+
+        #cacheLayer = CacheLayer(AiEngineGemini.configAndSettingsHash   ,
+        #                        AiEngineGemini.GeminiAIHook)
+        #
+        #runAllTests(cacheLayer.AIHook, model + "-Reasoning")
+
+        AiEngineGoogleGemini.Configure(model, 10, False)
+
+        cacheLayer = CacheLayer(AiEngineGoogleGemini.configAndSettingsHash   ,
+                                AiEngineGoogleGemini.GeminiAIHook)
+        
+        runAllTests(cacheLayer.AIHook, model + "-HighReasoning")
+
+        # Reasoning + Tools
+
+        AiEngineGoogleGemini.Configure(model, 10, True)
+
+        cacheLayer = CacheLayer(AiEngineGoogleGemini.configAndSettingsHash   ,
+                                AiEngineGoogleGemini.GeminiAIHook)
+        
+        runAllTests(cacheLayer.AIHook, model + "-Reasoning-Tools")
+  else:
+    print("No Gemini API key found - skipping gemini tests")
+
+
+  if os.environ.get("XAI_API_KEY") is not None:
+    import AiEngineXAIGrok
+
+    xaiModels = [
+        "grok-4-1-fast-non-reasoning",
+        "grok-4-1-fast-reasoning",
+        "grok-4-0709"
+    ]
+
+    for model in xaiModels:
+        AiEngineXAIGrok.Configure(model, False, False)
+
+        cacheLayer = CacheLayer(AiEngineXAIGrok.configAndSettingsHash   ,
+                                AiEngineXAIGrok.XAIGrokAIHook)
+        
+        runAllTests(cacheLayer.AIHook, model)
+
+        if "non-reasoning" not in model:
+            # Reasoning
+
+            #AiEngineXAIGrok.Configure(model, 5, False)
+
+            #cacheLayer = CacheLayer(AiEngineXAIGrok.configAndSettingsHash   ,
+            #                        AiEngineXAIGrok.XAIGrokAIHook)
+            #
+            #runAllTests(cacheLayer.AIHook, model + "-Reasoning")
+
+            AiEngineXAIGrok.Configure(model, 10, False)
+
+            cacheLayer = CacheLayer(AiEngineXAIGrok.configAndSettingsHash   ,
+                                    AiEngineXAIGrok.XAIGrokAIHook)
+            
+            runAllTests(cacheLayer.AIHook, model + "-HighReasoning")
+
+            # Reasoning + Tools
+
+            AiEngineXAIGrok.Configure(model, 10, True)
+
+            cacheLayer = CacheLayer(AiEngineXAIGrok.configAndSettingsHash   ,
+                                    AiEngineXAIGrok.XAIGrokAIHook)
+            
+            runAllTests(cacheLayer.AIHook, model + "-Reasoning-Tools")
+  else:
+    print("No XAI API key found - skipping xai tests")
 
   if os.environ.get("ANTHROPIC_API_KEY") is not None:
     import AiEngineAnthropicClaude
@@ -796,3 +907,5 @@ if __name__ == "__main__":
                                 AiEngineAnthropicClaude.ClaudeAIHook)
         
         runAllTests(cacheLayer.AIHook, model + "-Reasoning-Tools")
+  else:
+    print("No Anthropic API key found - skipping anthropic tests")

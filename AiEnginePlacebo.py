@@ -1,7 +1,7 @@
 from textwrap import dedent
 import hashlib
 
-configAndSettingsHash = hashlib.sha256("Placebo").hexdigest()
+configAndSettingsHash = hashlib.sha256(b"Placebo").hexdigest()
 
 def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
     h = hashlib.sha256(prompt.strip().encode()).hexdigest()
@@ -620,7 +620,8 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
             }, "Placebo thinking... hmmm..."
 
     if h == "a4b11c00377b6658bc85341c17bf29173a8db227048f47dc664be0000bc90de3":
-        return """
+        return {
+            "painting" : dedent("""
               ##
              ####
              "#''
@@ -653,7 +654,8 @@ def PlaceboAIHook(prompt: str, structure: dict | None) -> dict | str:
        ""'''
         "''
          '
-        """.rstrip().lstrip("\n"), "Placebo thinking... hmmm..."
+        """.rstrip().lstrip("\n"))
+        }, "Placebo thinking... hmmm..."
         
     if h == "b6b9e8e242e9a29cba115d4421bb5baf5d3be9371e7bac10ef162ea3f7476b8e":
         return {
@@ -836,3 +838,32 @@ def h(x,y,P):
  return c
 def f(x,y):return 1 if h(x,y,PA)or h(x,y,PT)else-1
 """, "Placebo thinking... hmmm... Ash opens ChatGPT website and copy/pasted this... hmmm..."
+
+
+    if h == "9de73558fd26633642b603790929dd6a15c468bf2170e03ea02f48da160b00a5":
+        # Question 24
+        return {
+            "pointSequence" : [4, 10, 14, 15],
+            "reasoning" : "Ash is just typing random numbers in."
+        }, "They looked nice."
+
+    if h == "a94fc81dfc2c2952ae38febdb9a0d2f14848e43b66ff40b15faf567606b3ab89":
+        # Question 25
+        return {
+            "reasoning" : "Ash is just guessing",
+            "triangles" : [[0,1,2],[3,4,5], [6,7,8], [9,10,11],[12,13,14],[15,0,1]]
+        }, "Placebo thinking... hmmm..."
+
+    if h == "c55ce2dea0508481f4643a0461798fe7b0e89b220473f7b9953da8cc02fd2f3f":
+        # Question 26
+        return {
+            "reasoning" : "Ash is not even trying here. Sorry it's late and I have a meeting in the morning.",
+            "nodes" : ["000000", "111111"]
+        }, "Placebo thinking... hmmm..."
+
+    if h == "":
+        # Question 27
+        moves = []
+        for i in range(100):
+            moves.append({"cellX" : random.randint(1, 29), "cellY" : random.randint(1, 5), "direction" : random.choice(["up", "down", "left", "right"])})
+        return { "moves" : moves }, "Placebo thinking... hmmm..."

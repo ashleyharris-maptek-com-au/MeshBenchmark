@@ -717,9 +717,20 @@ def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
     # Check to see if we rendevous with any station higher than 2000km
     for r in rendezvous:
         heightAboveEarth = round(math.sqrt(r["position"][0]**2 + r["position"][1]**2 + r["position"][2]**2) - 6371)
-        if heightAboveEarth > 2000:
+        if heightAboveEarth > 10000:
             return 0, "Spacecraft is planning a rendezvous at an altitude of " + \
                 str(heightAboveEarth) + "km above mean sea level, which is well above LEO orbit and higher than any of these stations get."
+
+    # Before we start the complex simulation, try to estimate the delta-v used
+    roughDeltaV = 0
+    for b in burns:
+        roughDeltaV += math.sqrt(b["acceleration"][0]**2 + b["acceleration"][1]**2 + b["acceleration"][2]**2)
+
+    if roughDeltaV > 15000:
+        return 0, "Spacecraft is planning to use more than 15km/s of delta-v from LEO, which is enough to escape the solar system."
+
+    if roughDeltaV > 5000:
+        return 0, "Spacecraft is planning to use more than 5km/s of delta-v from LEO, which is is more than a Mars mission."
 
     deltaVUsed = 0
     STEP_SIZE = 10  # seconds per simulation step

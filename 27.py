@@ -13,29 +13,39 @@ C represents Cubic Zirconia
 D represents Diamond
 E represents Emerald
 
-Your job is to swap jewels in the grid, when 3 jewels are in a line, horizontally, vertically, 
+Your job is to swap jewels in the grid, when 3 or more jewels are in a line, either horizontally or vertically, 
 they are removed from the grid, go into your pocket, and the jewels above them fall down, leaving empty
-space at the top of the game board. Falling jewels may match with neighbours, leading to future profits.
+space at the top of the game board. Falling jewels may match with neighbours before your next move, 
+leading to future profits but complicating your prepared moves.
 
 0,0 is the bottom left grid cell and indices increase up and to the right.
 
-The goal is to remove as many jewels as possible and get the highest payout.
+The goal is to remove as many jewels as possible and get the highest payout. You can not swap any jewel
+with an empty cell. All jewels are equally valuable.
 
-You may make up to 1000 moves.
+You may make up to 1000 moves (there is no cost-per-move), but they must all be made in advance. You need to 
+predict how the gems interact, match, fall, and use that to extract maximum profit.
 
 """
 
 def makeGrid(size : list[int]):
-  while True:
+    random.seed(123)
     grid = []
-    for i in range(size[0]):
+    for i in range(size[1]):
         row = []
-        for j in range(size[1]):
+        for j in range(size[0]):
             row.append(random.choice("ABCDE"))
         grid.append(row)
 
-    if processGrid(grid)[0] == 0:
-      return grid
+    while True:
+      if processGrid(grid)[0] == 0:
+        return grid
+    
+      for i in range(size[1]):
+        while " " in grid[i]:
+          x = grid[i].index(" ")
+          grid[i][x] = random.choice("ABCDE")
+      
 
 def processGrid(grid : list[list[str]]) -> tuple[int, list[list[str]]]:
     # Look for any vertical or horizontal lines of 3 or more jewels
@@ -114,7 +124,7 @@ structure = {
         }}
     },
     "additionalProperties" : False,
-    "required" : [ "grid", "removed" ]
+    "required" : [ "moves" ]
 }
 
 promptChangeSummary = "Progressively larger grids."
@@ -129,14 +139,20 @@ for size in gridSize:
     solvedGrids.append(None)
 
 def prepareSubpassPrompt(index):
-    if index < 5: return prompt.replace("GRID", grids[index])
-    raise StopIteration
+    if index == 5:
+        raise StopIteration
+    grid = ""
+    for line in reversed(grids[index]):
+        grid += "".join(line) + "\n"
+    return prompt.replace("GRID", grid)
 
 def gradeAnswer(answer, subPass, aiEngineName):
     grid = grids[subPass].copy()
     
     score = 0
     maxScore = gridSize[subPass][0] * gridSize[subPass][1] - 10
+
+    penalyIllegalMoves = 0
 
     for move in answer.get("moves", []):
         pos = (move.get("cellX"), move.get("cellY"))
@@ -162,10 +178,10 @@ def gradeAnswer(answer, subPass, aiEngineName):
         value2 = grid[pos2[1]][pos2[0]]
         if value == ' ' or value2 == ' ':
             solvedGrids[subPass] = grid.copy()
-            return 0, "Invalid move, can't swap air" + str(move)
+            return min(1, score / maxScore), "Invalid move, can't swap air" + str(move)
         if value == value2:
-            solvedGrids[subPass] = grid.copy()
-            return 0, "Invalid move, same jewels" + str(move)
+            penalyIllegalMoves += 1
+            continue
         
         grid[pos[1]][pos[0]] = value2
         grid[pos2[1]][pos2[0]] = value
@@ -174,29 +190,48 @@ def gradeAnswer(answer, subPass, aiEngineName):
         score += removed
     
     solvedGrids[subPass] = grid.copy()
-    return min(1, score / maxScore), "Made " + str(score) + " moves"
+
+    penalyIllegalMovesString = ""
+
+    if penalyIllegalMoves:
+        score -= penalyIllegalMoves
+        penalyIllegalMovesString = ". Lost " + str(penalyIllegalMoves) + " points for illegal moves"
+
+    return (
+       min(1, score / maxScore), 
+      "Made " + str(score) + " gems in " + str(len(answer.get("moves", []))) + " moves" + penalyIllegalMovesString
+    )
 
 
 def resultToNiceReport(result, subPassIndex, aiEngineName : str):
-    region_colours = {" " : [1,1,1]}
+    region_colours = {" " : [0,0,0], "A" : [127, 0, 0], "B" : [127, 0, 127], "C" : [0,127,0], "D" : [0,0,127], "E": [0,127,127]}
     
     # Use the grid from the grade answer pass, so we don't have to redo the entire game.
     grid = solvedGrids[subPassIndex]
     
-    out = "<span style='font-family: monospace;"
-    out += "font-size:10px; line-height:10px"
-    out += "'>"
+    if len(grid[0]) < 50:
+        out = "<span style='font-family: monospace;"
+        out += "font-size:30px; line-height:30px"
+        out += "'>"
+    else:
+
+        out = "<span style='font-family: monospace;"
+        out += "font-size:10px; line-height:10px"
+        out += "'>"
     
-    for y in range(10, size):
+    for y in reversed(range(0, len(grid))):
         for x in range(len(grid[y])):
             cell = grid[y][x]
             if cell not in region_colours:
                 region_colours[cell] = [10 * random.randint(0, 25), 10 * random.randint(0, 25), 10 * random.randint(0, 25)]
             out += f"<span style='background-color: rgb({region_colours[cell][0]}, {region_colours[cell][1]}, {region_colours[cell][2]});'>"
-            out += "#" if cell else "&nbsp;"
+            out += cell if cell != ' ' else "&nbsp;"
             out += "</span>"
         out += "<br>"
 
     out += "</span>"
     return out
 
+if __name__ == "__main__":
+    solvedGrids[3] = grids[3]
+    print(resultToNiceReport({}, 3,""))

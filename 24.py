@@ -3,31 +3,32 @@ import itertools,random
 
 title = "2D convex hull, identify points on the hull."
 
-skip = True
-
 prompt = """
-You are given a set of points in 2D space. Identify all points that are on the convex hull of the set
-and return them in order.
+You are given a set of points in 2D space. A rubber band is stretch around the entire scene,
+and let snap. Return a list of all the points the rubber band touches.
+
+
 """
 
 structure = {
     "type" : "object",
     "properties" : {
         "reasoning" : { "type" : "string"},
-        "hull" : { "type" : "array", "items" : { "type" : "integer"} }
+        "pointSequence" : { "type" : "array", "items" : { "type" : "integer"} }
     },
     "additionalProperties": False,
     "propertyOrdering": [
         "reasoning",
-        "hull"
+        "pointSequence"
     ],
     "required": [
         "reasoning",
-        "hull"
+        "pointSequence"
     ]
 }
 
 points = []
+random.seed(42)
 for i in range(1024):
     points.append((random.randint(0, 100), random.randint(0, 100)))
 
@@ -45,16 +46,16 @@ def prepareSubpassPrompt(index):
     return prompt + "\n\n" + pointString(pointsCount[index])
 
 def resultToScad(result):
-  scad = "module result(){difference(){union(){"
+  scad = "module result(){linear_extrude(1) difference(){union(){"
 
-  for i,j in itertools.pairwise(result["hull"]):
+  for i,j in itertools.pairwise(result["pointSequence"]):
     scad += "hull(){"
     scad += "translate([" + str(points[i][0]) + "," + str(points[i][1]) + "]) circle(1);\n"
     scad += "translate([" + str(points[j][0]) + "," + str(points[j][1]) + "]) circle(1);\n"
     scad += "};\n"
 
   scad += "};\nhull(){"
-  for i in result["hull"]:
+  for i in result["pointSequence"]:
     scad += "translate([" + str(points[i][0]) + "," + str(points[i][1]) + "]) circle(0.001);\n"
 
   scad += "};\n" + "}}\n\n"
@@ -62,7 +63,7 @@ def resultToScad(result):
   return scad
 
 def prepareSubpassReferenceScad(index):
-  scad = "module reference(){ difference() {hull(){"
+  scad = "module reference(){ linear_extrude(1) difference() {hull(){"
   for i in range(pointsCount[index]):
     scad += "translate([" + str(points[i][0]) + "," + str(points[i][1]) + "]) circle(1);\n"
 

@@ -1,13 +1,18 @@
 import random
 from scipy.spatial import Delaunay
 import numpy as np
+import VolumeComparison as vc 
 
 title = "2D Delaunay Triangulation"
 
-skip = True
-
 prompt = """
-You are given a set of points in 2D space. Triangulate the points using Delaunay Triangulation and return the triangles in order.
+You are given a set of points in 2D space. 
+
+Form a collection of triangles from these points such that:
+- No edges cross each other.
+- No points lie inside a triangle.
+- Every point contributes to a triangle.
+- Minimum angles are maximised.
 """
 
 structure = {
@@ -28,12 +33,11 @@ structure = {
 }
 
 points = []
+random.seed(100)
 for i in range(1024):
     points.append((random.randint(0, 100), random.randint(0, 100)))
 
 pointsCount = [16, 32, 64, 128, 512, 1024]
-
-referenceScad = ""
 
 def prepareSubpassPrompt(index):
     def pointString(count):
@@ -100,7 +104,11 @@ def gradeAnswer(result, subPass, aiEngineName):
     
     score = correct / total if total > 0 else 0
     
-    return score, f"Matched {correct}/{total} triangles. Extra: {extra}, Missing: {missing}"
+    return score, f"""
+    Matched {correct}/{total} triangles. <br>
+    {extra} triangles given which were not in the reference. <br>
+    {missing} triangles missing from the reference set. <br>
+    """
 
 def resultToNiceReport(result, subPassIndex, aiEngineName : str):
     triangles = result.get("triangles", [])
@@ -110,20 +118,22 @@ def resultToNiceReport(result, subPassIndex, aiEngineName : str):
         #generate a random colour for each triangle:
         r = random.random()
         g = random.random()
-        b = random.random()
+        bl = random.random()
 
-        scad_content += "color([" + str(r) + "," + str(g) + "," + str(b) + "]) hull(){\n"
+        scad_content += "color([" + str(r) + "," + str(g) + "," + str(bl) + "]) hull(){\n"
         scad_content += f"    translate([{points[a][0]},{points[a][1]}]) sphere(0.01);\n"
         scad_content += f"    translate([{points[b][0]},{points[b][1]}]) sphere(0.01);\n"
         scad_content += f"    translate([{points[c][0]},{points[c][1]}]) sphere(0.01);\n"
         scad_content += "}\n"
     
-    scad_content += f"translate([0,0,-0.01]) color([0.1,0.1,0.1]) cube([{squareSize},{squareSize},0.01]);"
-
     import os
     os.makedirs("results", exist_ok=True)
-    output_path = "results/25_Visualization_" + aiEngineName + "_" + str(squareSize) + ".png"
+    output_path = "results/25_Visualization_" + aiEngineName + "_" + str(subPassIndex) + ".png"
     vc.render_scadText_to_png(scad_content, output_path)
     print(f"Saved visualization to {output_path}")
 
     return f'<img src="{os.path.basename(output_path)}" alt="Pipe Loop Visualization" style="max-width: 100%;">'
+
+
+if __name__ == "__main__":
+    resultToNiceReport({"triangles": [[0,1,2],[3,4,5], [6,7,8], [9,10,11],[12,13,14],[15,0,1]]}, 0, "Test")

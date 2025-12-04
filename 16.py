@@ -150,6 +150,17 @@ def resultToNiceReport(result, subPass, aiEngineName : str):
     return "<img src=\"" + os.path.basename(output_path) + "\" />"
 
 
+def postProcessScore(score, subPassIndex):
+  if score < 70:
+    # It's really easy to get a decent score via dumb packing, especially
+    # "just place them all in a line" or other very naive solutions, so penalise 
+    # any that isn't at least 70% efficient.
+    return score / 2
+
+  # I don't believe subpasses 3+ are solvable with 100% efficinecy. I haven't proved it,
+  # but I'm happy to mulligan the very good results.
+  return min(1,score / 0.95)
+
 #gradeAnswer({ "boxes" : [
 #            {"XyzMin": [0,0,0], "XyzMax": [5,3,2]},
 #            {"XyzMin": [0,0,2], "XyzMax": [5,3,4]},

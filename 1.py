@@ -80,21 +80,42 @@ def resultToScad(result):
 subpassParamSummary =[ 
 """Every AI I've tested has failed to solve this problem. 
 <pre>
-Closeup of typical failed result:       Closeup of correct result:
-(note the overlap between vertical      (Note all 3 pipes touch but 
-pipes and the horizontal pipe)           don't overlap.)
+Closeup of correct result:
+(Note all 3 pipes touch but 
+ don't overlap.)
 
-|  i  |                                 |  i  |
-|  i  |                                 |  i  |
-|  X--X---------                        |  i  X---------------
-|  i??|                                 |  i  |
-|  i??|                                 |  i  |
-X--XXXX - - - -                         X-----X - - - - - - - 
-|  i??|                                 |  i  |
-|  i??|                                 |  i  |
-|  X--X---------                        |  i  X---------------
-|  i  |                                 |  i  |
-|  i  |                                 |  i  |
+   x = -2.55 (from -2.6 to -2.5)
+   | 
+|  i  |
+|  i  |
+|  i  |
+|  i  X--------------- 
+|  i  | 5 m long
+X-----X - - - - - - - 
+|  i  | -2.5 to 2.5
+|  i  X---------------
+|  i  |
+|  i  |
+|  i  |
+
+Closeup of typical failed result:       
+(note the overlap between vertical      
+pipes and the horizontal pipe)         
+
+   x = -2.5 (from -2.55 to -2.45)       
+   |                                    
+|  i  |                                 
+|  i  |                                 
+|  X--X                 
+|  i??X---------------                        
+|  i??| 5 m long                    
+X--XXXX - - - - - - -                   
+|  i??| -2.5 to 2.5                                 
+|  i??X---------------                                   
+|  X--X              
+|  i  |                                 
+|  i  |                                 
+
 </pre>
 
 """

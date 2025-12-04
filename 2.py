@@ -124,7 +124,42 @@ def volumeValidateDelta(result, resultVolume, referenceVolume, intersectionVolum
     return -0.5
 """
 
-def postProcessScore(score):
+def postProcessScore(score, subPassIndex):
   # Packing efficincy of rectangle prism in sphere is about 75%. I couldn't find an exact figure
   # but it's close enough for this test.
   return min(1,score / 0.75)
+
+def earlyFailTest(result, subpass):
+  # Get sphere radii in mm (params are in cm, *10 in scad)
+  if subpass == 0: innerR, outerR = 40, 70
+  elif subpass == 1: innerR, outerR = 80, 110
+  else: innerR, outerR = 150, 170
+
+  innerR2 = innerR * innerR
+  outerR2 = outerR * outerR
+
+  for brick in result["bricks"]:
+
+    # A brick below ground is invalid. Since it's 9.6mm tall, anything below 4.8 intersects
+    # the ground.
+    if brick["Centroid"][2] < 4.8:
+      return "A brick " + str(brick) + " below ground is invalid"
+
+    cornerPoints = [
+      [brick["Centroid"][0] - 16, brick["Centroid"][1] - 8, brick["Centroid"][2] - 4.8],
+      [brick["Centroid"][0] + 16, brick["Centroid"][1] - 8, brick["Centroid"][2] - 4.8],
+      [brick["Centroid"][0] + 16, brick["Centroid"][1] + 8, brick["Centroid"][2] - 4.8],
+      [brick["Centroid"][0] - 16, brick["Centroid"][1] + 8, brick["Centroid"][2] - 4.8],
+      [brick["Centroid"][0] - 16, brick["Centroid"][1] - 8, brick["Centroid"][2] + 4.8],
+      [brick["Centroid"][0] + 16, brick["Centroid"][1] - 8, brick["Centroid"][2] + 4.8],
+      [brick["Centroid"][0] + 16, brick["Centroid"][1] + 8, brick["Centroid"][2] + 4.8],
+      [brick["Centroid"][0] - 16, brick["Centroid"][1] + 8, brick["Centroid"][2] + 4.8]
+    ]
+
+    # A brick wholly inside the inner sphere is invalid (in the hollow part)
+    if all([p[0]*p[0] + p[1]*p[1] + p[2]*p[2] < innerR2 for p in cornerPoints]):
+      return "A brick " + str(brick) + " wholly inside the inner sphere is redundant"
+
+    # A brick wholly outside the outer sphere is invalid
+    if all([p[0]*p[0] + p[1]*p[1] + p[2]*p[2] > outerR2 for p in cornerPoints]):
+      return "A brick " + str(brick) + " wholly outside the outer sphere is a waste"

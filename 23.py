@@ -27,7 +27,8 @@ subpassParamSummary = [
     "there is a lake of at least 36 voxels in surface area.",
     "there are 3 unconnected bodies of water each at least 2x2",
     "there is a lake of at least 2 voxels at z > 5",
-    "there is an underground lake of at least 10 voxels in volume, that isn't visible from above",
+    "there is an underground lake of at least 10 voxels in volume, " +
+      "but no water voxels are visible from above.",
     "there are 3 lakes on 3 different z levels",
     "there is a lake at least 6 voxels deep",
     "there are 2 lakes, each over 200 voxels in volume"

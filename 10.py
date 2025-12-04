@@ -222,3 +222,38 @@ def resultToNiceReport(answer: dict, subPass: int, aiEngineName: str):
     html += "</div>"
     return html
 
+if __name__ == "__main__":
+    gradeAnswer({"painting":    """
+              ##
+             ####
+             "#''
+             ""''
+             ""''
+              "'
+                             ##
+                            ####
+                            "##'
+  #                         "#''
+ ###                        ""''
+"###                        ""'
+""''          
+""''         
+"intentional 
+ "mistake
+               
+
+
+
+
+                             #
+                            ###
+                           "###'
+        ##                 ""#''
+       ####                "\""''
+       ####'               "\""''   
+       "##''                ""'
+       ""'''                 "
+       ""'''
+        "''
+         '
+        """.rstrip().lstrip("\n")}, 1, "Placebo")
