@@ -1,0 +1,27 @@
+
+Here is the points and faces of a regular tetrahedron with all sides equal 1, resting on the Z=0 plane and with an edge along the X=0 plane:
+
+polyhedron(
+    points = [
+        [0, 0, 0],                               // 0
+        [1, 0, 0],                               // 1
+        [0.5, sqrt(3)/2, 0],                     // 2
+        [0.5, sqrt(3)/6, sqrt(2/3)]              // 3 (apex)
+    ],
+    faces = [
+        [0, 2, 1],   // base (oriented outward)
+        [0, 1, 3],
+        [1, 2, 3],
+        [2, 0, 3]
+    ],
+    convexity = 4
+);
+
+We define a 7-part rigid transform of (x,y,z,q0,q1,q2,q3), where q0,q1,q2,q3 is a normalised quaternion, and x, y, z are the translation.
+Rotation is defined around the 0,0,0 point (Which is NOT THE CENTRE), and is performed before translation.
+
+We create a scene with multiple tetrahedra, each with a different transform. Now we can pack them in as tightly as possible
+in order to create a 3D shape, trying to maximize packing density and recreate the target shape.
+
+Return the transform array of tetrahedra in order to create a:
+Tetrahedron of side length 10, with vertices at 0,0,0 and 10,0,0.

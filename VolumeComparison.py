@@ -274,7 +274,7 @@ minkowski(){
 
         if "postProcessScore" in testGlobals:
             oldScore = score
-            score = testGlobals["postProcessScore"](score, subPassIndex)
+            score = testGlobals["postProcessScore"](score, subPass)
             if oldScore != score:
                 scoreExplantion += f"Score was renormalised: {oldScore:.2f} -> {score:.2f}\n"
 

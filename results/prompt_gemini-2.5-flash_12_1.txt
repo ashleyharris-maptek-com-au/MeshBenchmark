@@ -1,0 +1,10 @@
+
+You have 16 1m lengths of pipe, and an square area of side length 3 to play with.
+
+Lay the pipe out to form a closed loop, using all the pipe, and returning to the starting point.
+
+You can not cross existing pipe, you can not re-use vertices, and you can not cross the boundary of the area. You do not need to 
+stick to axis aligned paths.
+
+Return the loop as a list of the pipe endpoints. Note that N pipes requires N+1 verticies to describe a path, but since the 
+first and last vertices are the same, you only need to return N points.

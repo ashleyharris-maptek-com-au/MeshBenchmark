@@ -1,0 +1,33 @@
+
+
+Here is a heightmap platform maze, in which A is located at height 5, and B is located at height 0. 
+The maze represents a 3D space where movement is constrained by height differences. 
+Characters can only move to adjacent cells if the height difference is at most 1, or jump over gaps.
+
+A555
+2B20
+3015
+4555
+
+The character can move:
+- 1 cell horizontally or vertically, so long as the height is within 1 unit.
+- Can jump 2 cells horizontally or vertically, so long as:
+  - source and destination heights are the same
+  - the height of the cell between the source and destination is lower than the source height (jump over gaps, not through walls!)
+
+In this case, the character:
+- starts at A, which is at level 5
+- walks flat for a bit, 
+- jumps over a gap of height 0 to another level 5 block.
+- walks flat for a bit
+- descends until level 2, then jumps over B to level 2,
+- and then continues down to level 0, reaching B.
+
+The maze must use only 0-9, A & B to represent height, and must only have one solution.
+A & B must appear in the grid once each.
+The path must visit at least 20% of all cells.
+No single elevation can occupy more than 20% of the grid.
+Create a maze of size 25x25 that has A at level 5 and B at level 5, and at least 10 jumps.
+Your output must be ONLY the maze's heightmap, nothing else.
+Your output must be 25 rows long, and every row must be 25 characters long.
+The maze must be your only output - Extra text above or below the maze itself corrupt your work.

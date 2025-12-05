@@ -113,8 +113,8 @@ def ClaudeAIHook(prompt: str, structure: dict | None) -> dict | str:
         # Handle structured output using tools (Claude's approach)
         if structure is not None:
   
-            # Recursively remove "PropertyOrdering", as it's required under OpenAI but banned
-            # with Anthropic.
+            # For some stupid reason, OpenAI requires "PropertyOrdering",
+            # but Anthropic rejects it completely. Grrr
             def remove_property_ordering(schema):
                 if isinstance(schema, dict):
                     if "propertyOrdering" in schema:

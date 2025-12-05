@@ -1,0 +1,23 @@
+
+A pharoh is building a pyramyd to rest on top of his tomb and protect him for the afterlife. 
+He has an army of 100,000 men who are honour bound to assist him in the project.
+
+Pyramids must face north, which is +y, and is centred over the future tomb.
+
+Pharoh has 2,500,000 cut large stones, each a 50cm side-length cube.
+Each stone needs 10 men to move.
+
+When placed on top of other stones, each stone must have all 4 base
+corners sitting in the middle of another stone. Any other arrangements will result in collapse. 
+The pyramid does not have any internal voids for this reason.
+
+The final facade will be done with wedges of marble, and the local stonemason requires precise plans to cut 
+marble such that each external large stone is covered and the resulting pyamid is smooth.
+
+Generate an OpenSCAD plan showing the tallest pyramid the pharoh can build with his budget
+of stone. This plan must be precise with its volume accurate to the milimeter including every step
+yet optimised enough to be viewable on the stonemason's CAD software.
+
+Use Metric SI units in all working and in the final OpenSCAD file.
+
+Do not output anything else than the OpenSCAD file, as that will cause compilation errors.

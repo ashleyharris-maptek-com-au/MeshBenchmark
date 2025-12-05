@@ -1,0 +1,24 @@
+
+
+You can output polyhedrons in a json format. This is a simple cube, every face has 4 vertices, and there are 6 faces:
+
+{
+"polyhedron":
+  {
+    "vertex":[{"xyz":[-1.0,-1.0,-1.0]},{"xyz":[1.0,-1.0,-1.0]},{"xyz":[1.0,1.0,-1.0]},{"xyz":[-1.0,1.0,-1.0]},{"xyz":[-1.0,-1.0,1.0]},{"xyz":[1.0,-1.0,1.0]},{"xyz":[1.0,1.0,1.0]},{"xyz":[-1.0,1.0,1.0]}],
+    "faces":[{"vertex":[3,2,1,0]},{"vertex":[4,5,6,7]},{"vertex":[0,1,5,4]},{"vertex":[7,6,2,3]},{"vertex":[3,0,4,7]},{"vertex":[1,2,6,5]}}]
+  }
+}
+
+Now you've learnt the format, use it to solve the following problem:
+
+You are given a solid rectangular prism of size 10cm * 20cm * 30cm, translated such that it's centre of mass is at 10cm, 5cm, 5cm.
+
+You are also given a solid cube with single side dimension 15cm, translated such that it's centre of mass is at -10cm, -5cm, -5cm.
+
+Return a polyhedron that is the union of the two solid objects. 
+- Ensure faces have normals encoded in a consistent direction.
+- Ensure no geometry occurs inside the polyhedron, and no faces cross through it.
+- Note that some faces may have more than 4 vertices.
+- Your output should have no degenerate faces or redundant vertices. 
+- The task is a failure if the output is not watertight.

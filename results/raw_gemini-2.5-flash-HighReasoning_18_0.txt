@@ -1,0 +1,68 @@
+```openscad
+// OpenSCAD plan for the Pharaoh's Pyramid
+
+// Define the size of each stone in meters.
+stone_size = 0.5; // Each stone is a 50cm side-length cube.
+
+// Calculate the maximum number of layers (height, H) based on the stone budget.
+// The total number of stones for a stepped pyramid with H layers,
+// where the top layer is a single stone, is given by the formula:
+// Total_stones = H * (4*H^2 - 1) / 3
+// We have a budget of 20,000 stones.
+// We need to find the largest integer H such that H * (4*H^2 - 1) / 3 <= 20000.
+
+// By calculation:
+// For H = 24: Total stones = 24 * (4 * 24^2 - 1) / 3 = 24 * (4 * 576 - 1) / 3
+//                          = 8 * (2304 - 1) = 8 * 2303 = 18424 stones.
+// For H = 25: Total stones = 25 * (4 * 25^2 - 1) / 3 = 25 * (4 * 625 - 1) / 3
+//                          = 25 * (2500 - 1) / 3 = 25 * 2499 / 3 = 25 * 833 = 20825 stones.
+
+// Therefore, the maximum possible height is 24 layers.
+num_layers = 24;
+
+// Calculate the number of stones along one side of the base layer (N).
+// For a pyramid with H layers, the base width N is 2*H - 1.
+// (Example: H=1 -> N=1; H=2 -> N=3; H=3 -> N=5)
+base_stones_N = 2 * num_layers - 1; // N = 2 * 24 - 1 = 47
+
+// The pyramid is centered at (0,0,0) in the X,Y plane, with +Z being up.
+// Each layer `k` (0-indexed, where 0 is the base layer) is placed
+// directly above the previous layer, with its stones aligned such that
+// an upper stone's corners sit on the centers of four lower stones.
+// This results in each successive layer being 2 stones shorter in X and Y
+// and remaining centered over the pyramid's base.
+
+union() {
+    // Loop through each layer of the pyramid, from base (k=0) to top (k=num_layers-1).
+    for (layer_k = 0; layer_k < num_layers; layer_k = layer_k + 1) {
+        // Determine the number of stones in a row/column for the current layer.
+        // The base layer has 'base_stones_N' stones. Each subsequent layer
+        // is 2 stones narrower than the layer below it.
+        // Example: k=0 -> current_N = 47 (base)
+        //          k=1 -> current_N = 45
+        //          k=23 -> current_N = 1 (top stone)
+        current_N = base_stones_N - (2 * layer_k);
+        
+        // Calculate the Z-coordinate (height) for the current layer's base.
+        layer_z = layer_k * stone_size;
+        
+        // Loop through the X and Y grid positions for stones within the current layer.
+        for (i = 0; i < current_N; i = i + 1) {
+            for (j = 0; j < current_N; j = j + 1) {
+                // Calculate the X and Y coordinates for the center of each stone.
+                // The `(current_N - 1) / 2` term ensures the layer is centered
+                // around the origin (0,0) of the X,Y plane.
+                x_pos = (i - (current_N - 1) / 2) * stone_size;
+                y_pos = (j - (current_N - 1) / 2) * stone_size;
+                
+                // Place a single stone (cube) at the calculated position.
+                // `center = true` makes the cube's origin its geometric center,
+                // so the `translate` vector points to the stone's center.
+                translate([x_pos, y_pos, layer_z]) {
+                    cube(stone_size, center = true);
+                }
+            }
+        }
+    }
+}
+```

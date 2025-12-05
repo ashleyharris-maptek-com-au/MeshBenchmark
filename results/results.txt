@@ -1,2 +1,8 @@
 ChatGPT: 5
-Human with tools: 2.352942296773216
+gemini-2.5-flash-HighReasoning: 2.512619229998677
+Human with tools: 0.8218575611962928
+gemini-2.5-flash: 0.15969711596659789
+gemini-2.5-flash-Reasoning-Tools: 0.0
+gemini-3-pro: 0.0
+gemini-3-pro-HighReasoning: 0.0
+gemini-3-pro-Reasoning-Tools: 0.0

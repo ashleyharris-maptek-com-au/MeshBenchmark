@@ -1,0 +1,19 @@
+
+You are given a 3D voxel world, of dimensions 32 * 32 * 8 voxels,
+currently filled with dirt uniformly flat and solid at the layers z = [0,1,2]
+
+Rainfall occurs at the top centre of the world, and follows the following rules:
+- If air is below water, the water falls (z = z - 1)
+- If water has ground or water below it, it "flood fills" out looking for any air voxels 
+  at the z level below it, and moves to the nearest one.
+- If water touches the sides or bottom of the world, it falls off and is lost forever.
+- If water can't find a reachable air voxel to walk to, it remains there as a pool of water.
+
+Rainfall currently all runs off the edge of the map, meaning earthworks are required to achieve
+your goals. After your earthworks complete, there will be 1000s of voxels worth of rainfall
+before your world is graded.
+
+Add dirt or air voxels to the world in order to accomplish your task:
+
+Ensure that; after the rains end,
+there is a lake of at least 2 voxels at z > 5

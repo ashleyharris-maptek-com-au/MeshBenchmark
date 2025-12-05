@@ -1,0 +1,49 @@
+```openscad
+// Define stone dimensions in millimeters
+stone_size = 500; // 50 cm = 500 mm
+
+// Calculate the maximum base dimension (N) for the pyramid
+// The total number of stones for a pyramid with a base of N x N stones is
+// the sum of squares from 1 to N: N * (N + 1) * (2 * N + 1) / 6.
+// Pharaoh has 20,000 stones.
+// If N = 38, total stones = 38 * (38 + 1) * (2 * 38 + 1) / 6 = 38 * 39 * 77 / 6 = 19019 stones.
+// If N = 39, total stones = 39 * (39 + 1) * (2 * 39 + 1) / 6 = 39 * 40 * 79 / 6 = 20540 stones (too many).
+// Therefore, the largest possible base dimension (number of stones along one side of the base) is 38.
+base_N = 38;
+
+// Calculate the total width of the base layer for centering the pyramid
+pyramid_base_width = base_N * stone_size;
+
+// Translate the entire pyramid to be centered over (0,0) on the XY plane.
+// The base of the pyramid will sit at Z=0.
+translate([-pyramid_base_width / 2, -pyramid_base_width / 2, 0]) {
+    // Loop through each layer of the pyramid, starting from the base (k=0)
+    // up to the single stone at the apex (k = base_N - 1).
+    for (k = 0; k < base_N; k = k + 1) {
+        // Calculate the number of stones along one side for the current layer.
+        // Each higher layer is one stone smaller in dimension.
+        layer_N = base_N - k;
+
+        // Determine the XY offset for the current layer based on the stacking rule:
+        // "each stone must have all 4 base corners sitting in the middle of another stone."
+        // This implies that every other layer (odd-indexed layers: 1, 3, ...) is
+        // shifted by half a stone's length in both X and Y relative to the even-indexed layers.
+        offset_xy = (k % 2) * stone_size / 2;
+
+        // Loop through the grid of stones for the current layer
+        for (i = 0; i < layer_N; i = i + 1) {
+            for (j = 0; j < layer_N; j = j + 1) {
+                // Position each stone in the current layer
+                translate([
+                    i * stone_size + offset_xy, // X-coordinate
+                    j * stone_size + offset_xy, // Y-coordinate
+                    k * stone_size              // Z-coordinate (height of the layer)
+                ]) {
+                    // Create a cubic stone
+                    cube(stone_size);
+                }
+            }
+        }
+    }
+}
+```

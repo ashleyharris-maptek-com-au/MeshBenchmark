@@ -81,8 +81,28 @@ def GeminiAIHook(prompt : str, structure : dict | None) -> dict | str:
         
         # Add structured output if schema provided
         if structure is not None:
+
+            # For some studpid reason, OpenAI REQUIRE that you specify AdditionalProperties=False
+            # in the schema, whereas Gemini seems to fail if it's even mentioned.... grr.
+            # Remove "AdditionalProperties" recursively
+            def remove_additional_properties(schema):
+                if isinstance(schema, dict):
+                    # Remove AdditionalProperties key
+                    schema.pop("additionalProperties", None)
+                    # Recursively process all values
+                    for key, value in schema.items():
+                        if isinstance(value, dict):
+                            remove_additional_properties(value)
+                        elif isinstance(value, list) and value and isinstance(value[0], dict):
+                            for item in value:
+                                if isinstance(item, dict):
+                                    remove_additional_properties(item)
+                return schema
+            
+            cleaned_structure = remove_additional_properties(structure.copy())
+
             config_params['response_mime_type'] = 'application/json'
-            config_params['response_schema'] = structure
+            config_params['response_schema'] = cleaned_structure
         
         # Add thinking/reasoning configuration if REASONING is set
         # Map 0-10 scale to Gemini's thinking_budget (0-24576)

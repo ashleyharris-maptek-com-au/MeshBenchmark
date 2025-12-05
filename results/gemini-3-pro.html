@@ -1,0 +1,1251 @@
+<html>
+<head>
+<style>
+
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333;
+    --text-secondary: #666;
+    --border-color: #ddd;
+    --header-bg: #4CAF50;
+    --header-text: white;
+    --test-header-bg: #45a049;
+    --prompt-bg: #f9f9f9;
+    --subpass-bg: #ffffff;
+    --img-border: #ccc;
+    --score-good: #228B22;
+    --score-bad: #dc3545;
+}
+@media screen and (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --text-secondary: #aaa;
+        --border-color: #444;
+        --header-bg: #2d5a2d;
+        --header-text: #e0e0e0;
+        --test-header-bg: #3d6a3d;
+        --prompt-bg: #2a2a2a;
+        --subpass-bg: #1f1f1f;
+        --img-border: #555;
+        --score-good: #4CAF50;
+        --score-bad: #ff6b6b;
+    }
+    a { color: #55f}
+}
+body { background-color: var(--bg-color); color: var(--text-color); }
+table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+th, td { border: 1px solid var(--border-color); padding: 12px; text-align: left; vertical-align: top; }
+th { background-color: var(--header-bg); color: var(--header-text); }
+.test-header { background-color: var(--test-header-bg); font-weight: bold; }
+.prompt-row { background-color: var(--prompt-bg); font-style: italic; }
+.subpass-row { background-color: var(--subpass-bg); }
+img { max-width: 100%; height: auto; border: 1px solid var(--img-border); }
+.score-good { color: var(--score-good); font-weight: bold; }
+.score-bad { color: var(--score-bad); font-weight: bold; }
+h1 { color: var(--text-color); }
+h2 { color: var(--text-secondary); margin-top: 30px; }
+</style>
+<meta charset='UTF-8'/> </head>
+<body>
+<h1>Benchmark Results for gemini-3-pro</h1>
+<table>
+  <tr class='test-header'>
+    <th colspan=3>Test 1: Lay out pipe to make a H shape.</th>
+    <th class='score-bad'>Score: 0.00 / 1</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br>You are given 5 rigid lengths of pipe, each 5 meters long and 10cm in diameter. <br><br>One pipe is fixed with its center at the origin (0,0) and a rotation of 0, meaning its length is along the x-axis, and it<br>spans from -2.5,-0.05 to 2.5, 0.05.<br><br>Arrange the remaining 4 pipes on a 2D plane such that the the pipes resemble a "H" shape 10m high when viewed from above.<br><br>Pipes can not intersect each other, and should only touch at their ends.<br><br>Return a 5 element array of where each of the pipes are located:</div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt remains constant</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: Every AI I've tested has failed to solve this problem. 
+<pre>
+Closeup of correct result:
+(Note all 3 pipes touch but 
+ don't overlap.)
+
+   x = -2.55 (from -2.6 to -2.5)
+   | 
+|  i  |
+|  i  |
+|  i  |
+|  i  X--------------- 
+|  i  | 5 m long
+X-----X - - - - - - - 
+|  i  | -2.5 to 2.5
+|  i  X---------------
+|  i  |
+|  i  |
+|  i  |
+
+Closeup of typical failed result:       
+(note the overlap between vertical      
+pipes and the horizontal pipe)         
+
+   x = -2.5 (from -2.55 to -2.45)       
+   |                                    
+|  i  |                                 
+|  i  |                                 
+|  X--X                 
+|  i??X---------------                        
+|  i??| 5 m long                    
+X--XXXX - - - - - - -                   
+|  i??| -2.5 to 2.5                                 
+|  i??X---------------                                   
+|  X--X              
+|  i  |                                 
+|  i  |                                 
+
+</pre>
+
+<br><a href="prompt_gemini-3-pro_1_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_1_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_1_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 2: Build a Lego(tm) hemispherical shell</th>
+    <th class='score-bad'>Score: 0.00 / 3</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>You have an unlimited number of lego(tm) bricks, each of individual size 31.8mm * 15.8mm * 11.4mm but when assembled they are <br>32mm * 16mm * 9.6mm due to interlocking studs and voids.<br><br>Assemble the bricks such that they resemble a 3D hemispherical shell, with inner radius 4cm and outer radius 7cm, <br>the centre of the hemisphere is at the origin (0,0,0).<br><br>Since it's impossible to create a perfect curve, the best score is one which is closer to the ideal curve, with<br>scoring being calculated based on the volume difference between the ideal curve and the actual brick structure. <br>The structure needs to be buildable in 3D, so bricks can not overlap or be floating in mid air. A great answer does not <br>contain any holes or missing bricks.<br><br>Return a list of the bricks (location in xyz mm relative to the origin and rotation in degrees). <br>You may also provide your reasoning in a seperate field, but it is not graded.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Inner and outer radius parameters increase progressively across subpasses</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: 4cm inner, 7cm outer. ~120 bricks<br><a href="prompt_gemini-3-pro_2_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_2_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_2_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: 8cm inner, 11cm outer. ~300 bricks<br><a href="prompt_gemini-3-pro_2_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_2_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_2_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: 15cm inner, 17cm outer ~400 bricks<br><a href="prompt_gemini-3-pro_2_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_2_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_2_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 3: CSG Union of Rectangular Prism and Cube</th>
+    <th class='score-bad'>Score: 0.00 / 3</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br><br>You can output polyhedrons in a json format. This is a simple cube, every face has 4 vertices, and there are 6 faces:<br><br>{<br>"polyhedron":<br>  {<br>    "vertex":[{"xyz":[-1.0,-1.0,-1.0]},{"xyz":[1.0,-1.0,-1.0]},{"xyz":[1.0,1.0,-1.0]},{"xyz":[-1.0,1.0,-1.0]},{"xyz":[-1.0,-1.0,1.0]},{"xyz":[1.0,-1.0,1.0]},{"xyz":[1.0,1.0,1.0]},{"xyz":[-1.0,1.0,1.0]}],<br>    "faces":[{"vertex":[3,2,1,0]},{"vertex":[4,5,6,7]},{"vertex":[0,1,5,4]},{"vertex":[7,6,2,3]},{"vertex":[3,0,4,7]},{"vertex":[1,2,6,5]}}]<br>  }<br>}<br><br>Now you've learnt the format, use it to solve the following problem:<br><br>You are given a solid rectangular prism of size 10cm * 20cm * 30cm, translated such that it's centre of mass is at 5cm, 5cm, 5cm.<br><br>You are also given a solid cube with single side dimension 15cm, translated such that it's centre of mass is at -5cm, -5cm, -5cm.<br><br>Return a polyhedron that is the union of the two solid objects. <br>- Ensure faces have normals encoded in a consistent direction.<br>- Ensure no geometry occurs inside the polyhedron, and no faces cross through it.<br>- Note that some faces may have more than 4 vertices.<br>- Your output should have no degenerate faces or redundant vertices. <br>- The task is a failure if the output is not watertight.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Cube and rectangle move further apart in x.</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: 10cm apart in X <br><a href="prompt_gemini-3-pro_3_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_3_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_3_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: 20cm apart in X <br><a href="prompt_gemini-3-pro_3_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_3_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_3_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: 30cm apart in X <br><a href="prompt_gemini-3-pro_3_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_3_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_3_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 4: Tetrahedron Shadow Coverage</th>
+    <th class='score-bad'>Score: 0.00 / 3</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>Here is the points and faces of a regular tetrahedron with all sides equal 1, resting on the Z=0 plane and with an edge along the X=0 plane:<br><br>polyhedron(<br>    points = [<br>        [0, 0, 0],                               // 0<br>        [1, 0, 0],                               // 1<br>        [0.5, sqrt(3)/2, 0],                     // 2<br>        [0.5, sqrt(3)/6, sqrt(2/3)]              // 3 (apex)<br>    ],<br>    faces = [<br>        [0, 2, 1],   // base (oriented outward)<br>        [0, 1, 3],<br>        [1, 2, 3],<br>        [2, 0, 3]<br>    ],<br>    convexity = 4<br>);<br><br>We define a 7-part rigid transform of (x,y,z,q0,q1,q2,q3), where q0,q1,q2,q3 is a normalised quaternion, and x, y, z are the translation.<br>Rotation is defined around the 0,0,0 point (Which is NOT THE CENTRE), and is performed before translation.<br><br>We create a scene with mulitple tetrahedra, each with a different transform. Return the transforms of such a scene<br>such that a shadow projected vertically (onto the Z=0 plane) fully covers a square of side length 4, centered at the origin.<br><br>Use as many tetrahedra as you need, scoring is based on shadow coverage, not the number of tetrahedra used.<br><br>Score will be deducted for any shadow outside of the square, for reduntant tetrahedra, or non-normalised quaternions.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt parameters change between subpasses (increasing difficulty)</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: 
+    Cover a square of side length 4.<br><br>
+    
+    (Note that the shadow has been linearly extruded to a height of 1 
+    to simplify volume comparison)<br><br>
+
+    (Note that a perfect score is possible - the tetrahedrons can't overlap
+    in 2D, but they can in 3D, so a right angle can be created by two tetrahedra
+    seperated on the Z axis, one rotated 90 degrees.)
+    <br><a href="prompt_gemini-3-pro_4_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_4_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_4_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: Cover a circle of diameter 4<br><a href="prompt_gemini-3-pro_4_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_4_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_4_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: Cover a square of side length 6, with a hole in the centre of side length 2<br><a href="prompt_gemini-3-pro_4_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_4_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_4_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 5: Maze generation - ASCII Art</th>
+    <th class='score-bad'>Score: 0.00 / 4</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>Generate a 16 * 16 ASCII art maze.<br><br>The maze must use the following characters:<br># - Wall<br>. - Correct solution path<br>A - Start<br>B - End<br>  - Untaken path (space)<br><br>The maze must be solvable, there must be only one solution, the annotated path must not have any loops or branches, and shortest path<br>from A to B must cover at least 10% of the maze area. The path threw the maze can only be 1 cell wide, and solvable with<br>only horizontal or vertical moves.<br><br>The maze must be 'watertight', that is have walls touching the border of the grid all around, A and B must be within the maze.<br><br>Return the maze as a string, with newlines between rows. <br>Every row and column of your output must be 16 characters long, and your output must be 16 rows long.<br>Outputting anything else than the maze will obviously result in a score of 0. <br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt parameters change between subpasses (increasing difficulty)</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: 16x16 maze<br><a href="prompt_gemini-3-pro_5_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_5_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_5_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: 32x32 maze<br><a href="prompt_gemini-3-pro_5_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_5_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_5_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: 64x64 maze<br><a href="prompt_gemini-3-pro_5_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_5_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_5_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: 128x128 maze<br><a href="prompt_gemini-3-pro_5_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_5_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_5_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 6: Voxel Grid Projection - shadow coverage and no symmetries</th>
+    <th class='score-bad'>Score: 0.00 / 5</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>Position 50 voxels in a cubic grid of 6 voxels per side, such that the orthographic projection to all 3 planes is <br>solid (no holes in the projection), and there are no trivial symmetries (rotations or reflections that leave the shape unchanged).<br><br>0,0,0 is the bottom left grid cell and indices increase up and to the right.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Progressively larger grids with more voxels across subpasses</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: Cover a 6x6x6 grid with 50 voxels<br><a href="prompt_gemini-3-pro_6_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_6_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_6_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: Cover a 8x8x8 grid with 100 voxels<br><a href="prompt_gemini-3-pro_6_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_6_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_6_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: Cover a 12x12x12 grid with 200 voxels<br><a href="prompt_gemini-3-pro_6_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_6_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_6_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: Cover a 16x16x16 grid with 400 voxels<br><a href="prompt_gemini-3-pro_6_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_6_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_6_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: Cover a 24x24x24 grid with 1000 voxels<br><a href="prompt_gemini-3-pro_6_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_6_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_6_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 7: 3D maze - solution requires jumping over gaps</th>
+    <th class='score-bad'>Score: 0.00 / 6</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br><br>Here is a heightmap platform maze, in which A is located at height 5, and B is located at height 0. <br>The maze represents a 3D space where movement is constrained by height differences. <br>Characters can only move to adjacent cells if the height difference is at most 1, or jump over gaps.<br><br>A555<br>2B20<br>3015<br>4555<br><br>The character can move:<br>- 1 cell horizontally or vertically, so long as the height is within 1 unit.<br>- Can jump 2 cells horizontally or vertically, so long as:<br>  - source and destination heights are the same<br>  - the height of the cell between the source and destination is lower than the source height (jump over gaps, not through walls!)<br><br>In this case, the character:<br>- starts at A, which is at level 5<br>- walks flat for a bit, <br>- jumps over a gap of height 0 to another level 5 block.<br>- walks flat for a bit<br>- descends until level 2, then jumps over B to level 2,<br>- and then continues down to level 0, reaching B.<br><br>The maze must use only 0-9, A & B to represent height, and must only have one solution.<br>A & B must appear in the grid once each.<br>The path must visit at least 20% of all cells.<br>No single elevation can occupy more than 20% of the grid.<br>Create a maze of size 5x5 that has A at level 5 and B at level 0, and at least 2 jumps.<br>Your output must be ONLY the maze's heightmap, nothing else.<br>Your output must be 5 rows long, and every row must be 5 characters long.<br>The maze must be your only output - Extra text above or below the maze itself corrupt your work.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt parameters change between subpasses (increasing difficulty)</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: Cover a 5x5 grid with A at level 5 and B at level 0, requiring at least 2 jumps<br><a href="prompt_gemini-3-pro_7_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_7_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_7_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: Cover a 10x10 grid with A at level 0 and B at level 9, requiring at least 4 jumps<br><a href="prompt_gemini-3-pro_7_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_7_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_7_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: Cover a 15x15 grid with A at level 5 and B at level 5, requiring at least 6 jumps<br><a href="prompt_gemini-3-pro_7_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_7_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_7_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: Cover a 20x20 grid with A at level 5 and B at level 5, requiring at least 8 jumps<br><a href="prompt_gemini-3-pro_7_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_7_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_7_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: Cover a 25x25 grid with A at level 5 and B at level 5, requiring at least 10 jumps<br><a href="prompt_gemini-3-pro_7_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_7_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_7_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 5</strong><br>Parameters: Cover a 30x30 grid with A at level 5 and B at level 0, requiring at least 12 jumps<br><a href="prompt_gemini-3-pro_7_5.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_7_5.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_7_5.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 8: Fit a curve to partition 2D ascii patterns via cubic polynomials</th>
+    <th class='score-bad'>Score: 0.00 / 5</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br><br>Here is an 8x8 grid representing a space partition:<br><br>###.....<br>##......<br>##......<br>###.....<br>####....<br>#####...<br>#######.<br>########<br><br>0, 0 is the top left, x is horizontal, y is vertical. Coordinates are in integers.<br><br>Using the formula:<br><br>let cell = <br><br>   # if f(x,y) > 0<br>   . if f(x,y) <= 0<br><br>where f(x,y) is a polynomial of whatever degree you need to solve this. You can include cross terms like x*y, x**2*y, x*y**2, etc.<br><br>Return the formula as python function f(x,y) that uses ONLY:<br>- arithmetic operations (+, -, *, /)<br>- powers (**) <br>- parentheses for grouping<br>- integer coordinates x, y<br>- the words "def" and "return"<br><br>Do not use type annotations, casts, conditionals, branches, additional variables, comments or anything else.<br><br>You can use the following example as a template:<br><br>def f(x, y):<br>    return x**2 + 3*y**2 - 4*x*y - 145<br><br>DO NOT OUTPUT ANYTHING ELSE THAN THE FUNCTION.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt parameters change between subpasses (increasing difficulty)</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: <pre>###.....
+##......
+##......
+###.....
+####....
+#####...
+#######.
+########</pre><br><a href="prompt_gemini-3-pro_8_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_8_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_8_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: <pre>########....
+######......
+####........
+###.........
+###.........
+##..........
+##..........
+#...........
+............
+............
+............
+............</pre><br><a href="prompt_gemini-3-pro_8_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_8_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_8_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: <pre>........................
+........................
+........................
+........................
+........................
+........................
+........................
+........................
+........................
+.....###................
+....######..............
+....########............
+....##########..........
+....###########.........
+.....############.......
+......###########.......
+........#######.........
+..........###...........
+...........#............
+........................
+........................
+........................
+........................
+........................</pre><br><a href="prompt_gemini-3-pro_8_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_8_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_8_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: <pre>........
+........
+...##...
+..####..
+.######.
+.##..##.
+##....##
+#......#</pre><br><a href="prompt_gemini-3-pro_8_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_8_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_8_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: <pre>
+...............................................
+...............................................
+..................................##...........
+.................................####..........
+..................................##...........
+...............................................
+...............................................
+...............................................
+...............................................
+.......##...........##...........##............
+......####.........####.........####...........
+.......##...........##...........##............
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................##..............
+..............................####.............
+...............................##..............
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+.....................##........................
+....................####.......................
+.....................##........................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+...............................................
+</pre><br><a href="prompt_gemini-3-pro_8_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_8_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_8_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 9: Hamiltonian Path on Grid</th>
+    <th class='score-bad'>Score: 0.00 / 5</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>You have a 4*4 grid of unit squares, with cell coordinates (x, y) where 1 <= x <= 4, 1 <= y <= 4.<br><br><br><br>Draw a single closed path that:<br>- Moves from cell to cell using only side-adjacent moves.<br>- Visits every cell exactly once.<br>- Returns to its starting cell (so the path is a loop).<br>- The last cell in your list must be side-adjacent to the first.<br><br>Answer format:<br>Give an ordered list of the 16 cell coordinates for the loop, starting anywhere, for example:<br><br>1,1<br>1,2<br>1,3<br>...<br>2,1<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Grid size increases across subpasses, with a missing chunk in the final subpass</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: 4x4 grid<br><a href="prompt_gemini-3-pro_9_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_9_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_9_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: 8x8 grid<br><a href="prompt_gemini-3-pro_9_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_9_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_9_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: 12x12 grid<br><a href="prompt_gemini-3-pro_9_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_9_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_9_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: 16x16 grid<br><a href="prompt_gemini-3-pro_9_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_9_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_9_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: 16x16 grid with cells (3,3) and (3,4) removed<br><a href="prompt_gemini-3-pro_9_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_9_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_9_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 10: Painting a 3D scene in ASCII, with lighting.</th>
+    <th class='score-bad'>Score: 0.00 / 5</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>You are a painter, you have a canvas of size 16 * 16 pixels.<br><br>You are painting a scene from the north east, at a 45 degree angle looking down. You are using an orthographic projection.<br><br>The scene contains 5 axis aligned cubes, each with a side length of 1 unit. The cubes bottom-centres are placed at the vertices of a <br>regular pentagram of side length 5 units, centred at the origin, aligned so it's 'pointing' positive y, <br>and is centred in the middle of your painting.<br><br>Your painting is zoomed such that the outer edges of the cubes touch the edges of the canvas.<br><br>Return the canvas as a string, with:<br>- # representing a surface facing up (the top plane of a cube)<br>- " representing a surface facing east or west.<br>- ' representing a surface facing north or south.<br>- (space) representing unpainted pixels, the ground, sky, pentagram or anything else.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Higher and higher resolution ASCII art.</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: 16x16<br><a href="prompt_gemini-3-pro_10_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_10_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_10_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: 32x32<br><a href="prompt_gemini-3-pro_10_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_10_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_10_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: 64x64<br><a href="prompt_gemini-3-pro_10_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_10_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_10_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: 128x128<br><a href="prompt_gemini-3-pro_10_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_10_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_10_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: 256x256<br><a href="prompt_gemini-3-pro_10_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_10_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_10_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 11: Hyper-snake Challenge</th>
+    <th class='score-bad'>Score: 0.00 / 4</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>Do you remember the snake game, where you have to direct a snake around a 2D space to avoid hitting itself? This is hyper-snake!<br><br>You are a snake in a 3D space grid of size (4,4,4). You can move to any adjacent cell in the grid, along any of the<br>available 3 dimensions, but you can not move to a cell which you have visited before, nor can you move "diagonally",<br>that is, you can not move in more than one dimension at a time.<br><br>The game ends when you run out of space to move, when you hit the boundary, or when you run into yourself.<br><br>Return the path of the snake as a list of cells, the first element of which is [0, 0,0], and going for as long as you can.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Dimensions increase from 3D to 6D</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: 3D grid 4x4x4<br><a href="prompt_gemini-3-pro_11_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_11_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_11_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: 4D grid 5x5x5x5<br><a href="prompt_gemini-3-pro_11_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_11_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_11_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: 5D grid 4x4x4x4x4<br><a href="prompt_gemini-3-pro_11_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_11_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_11_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: 6D grid 3x3x3x3x3x3<br><a href="prompt_gemini-3-pro_11_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_11_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_11_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 12: Fit a loop into a square that's perimeter is smaller than the total length</th>
+    <th class='score-bad'>Score: 0.00 / 7</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>You have 3 1m lengths of pipe, and an square area of side length 1 to play with.<br><br>Lay the pipe out to form a closed loop, using all the pipe, and returning to the starting point.<br><br>You can not cross existing pipe, you can not re-use vertices, and you can not cross the boundary of the area. You do not need to <br>stick to axis aligned paths.<br><br>Return the loop as a list of the pipe endpoints. Note that N pipes requires N+1 verticies to describe a path, but since the <br>first and last vertices are the same, you only need to return N points.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Increasing pipe length and square size.</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: 3 pipes in 1x1. This is a trivial equalateral triangle.<br><a href="prompt_gemini-3-pro_12_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_12_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_12_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: 16 pipes in 3x3<br><a href="prompt_gemini-3-pro_12_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_12_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_12_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: 30 pipes in 4x4<br><a href="prompt_gemini-3-pro_12_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_12_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_12_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: 60 pipes in 10x10<br><a href="prompt_gemini-3-pro_12_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_12_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_12_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: 150 pipes in 20x20<br><a href="prompt_gemini-3-pro_12_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_12_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_12_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 5</strong><br>Parameters: 600 pipes in 30x30<br><a href="prompt_gemini-3-pro_12_5.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_12_5.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_12_5.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 6</strong><br>Parameters: 1000 pipes in 40x40<br><a href="prompt_gemini-3-pro_12_6.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_12_6.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_12_6.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 13: Hide and seek behind a building</th>
+    <th class='score-bad'>Score: 0.00 / 6</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>You have a building at the origin, axis aligned, 2 meters wide and deep, and 10 meters tall.<br><br>A sniper is located at (100,100,20) and is looking at the building.<br><br>Position a crowd of 4 people (represented by a 0.5*0.5*2m axis aligned bounding box resting on the z=0 plane) <br>in such a way that:<br>- the sniper can not see any of them due to the building blocking their line of sight.<br>- the people must be positioned entirely on the ground (z=0).<br>- the people must not overlap with the building or each other.<br>- nobody is more than 30 meters away from the building's center.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Varying crowd size and building dimensions</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: 4 people, 2m building<br><a href="prompt_gemini-3-pro_13_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_13_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_13_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: 20 people, 4m building<br><a href="prompt_gemini-3-pro_13_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_13_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_13_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: 40 people, 6m building<br><a href="prompt_gemini-3-pro_13_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_13_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_13_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: 80 people, 8m building<br><a href="prompt_gemini-3-pro_13_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_13_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_13_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: 150 people, 10m building<br><a href="prompt_gemini-3-pro_13_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_13_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_13_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 5</strong><br>Parameters: 200 people, 7m building<br><a href="prompt_gemini-3-pro_13_5.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_13_5.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_13_5.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 14: Grid Partitioning with Off-Axis Lines</th>
+    <th class='score-bad'>Score: 0.00 / 4</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br>You are given the following grid of cells:<br>....B.....<br>..........<br>..........<br>..........<br>..........<br>..........<br>......A...<br>..........<br>.......C..<br>..........<br>Partition this space such that each cell contains exactly one of the letters.<br>Use lines of the form ax+b =0 to partition the space. The topleft of the grid is (0,0) and cell cooridinates are integers.<br>Return the lines as a list of (a,b) tuples.<br><br>You can create a horizontal line by setting a=0 and b to the y coordinate of the line. Giving an equation of the form y=b.<br>You can create a vertical line by setting a to +/- infinity and b to the x coordinate of the line, which although not mathematically <br>rigerous, is a common convention in computer graphics. Giving an "equation" that simplifies to the form x=b.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Bigger grids with more regions</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: <br><pre>....B.....<br>..........<br>..........<br>..........<br>..........<br>..........<br>......A...<br>..........<br>.......C..<br>..........</pre><br><a href="prompt_gemini-3-pro_14_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_14_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_14_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: <br><pre>............F.......<br>....................<br>........B...........<br>...............C....<br>..................A.<br>....................<br>....................<br>....................<br>....................<br>....................<br>....................<br>....................<br>......E.............<br>....................<br>...............D....<br>....................<br>....................<br>....................<br>....................<br>....................</pre><br><a href="prompt_gemini-3-pro_14_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_14_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_14_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: <br><pre style='font-size:10px'>..................................................<br>..................................................<br>.N...................................G............<br>.....A............................................<br>..................................................<br>.......................B..........................<br>..................................................<br>..................................................<br>..................................................<br>..................................................<br>...............................................C..<br>..................................................<br>..................................................<br>......................................F...........<br>..................................................<br>..................................................<br>......................................E...........<br>..................................................<br>..................................................<br>..................................................<br>..................................................<br>..................................................<br>..................................................<br>.............................O....................<br>..................................................<br>..............................................J...<br>..................................................<br>........................................I.........<br>..................................................<br>..................................................<br>..................................................<br>..................................................<br>.................M.....K..........................<br>..................................................<br>............................L.....................<br>..................................................<br>..................................................<br>..................................................<br>..................................................<br>..................................................<br>..................................................<br>..................................................<br>...................D..............................<br>..........H.......................................<br>..................................................<br>..................................................<br>..................................................<br>..................................................<br>..................................................<br>..................................................</pre><br><a href="prompt_gemini-3-pro_14_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_14_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_14_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: <br><pre style='font-size:7px'>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>.................C..................................................................................<br>......................................T.............................................................<br>....................................................................................................<br>....................................................................................................<br>....................R...............................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>.............................M......................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>...........................................................................................I........<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>...........................................................................A........................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>............................................................V.......................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>............B.......................................................................................<br>.............................................................................C......................<br>....................................................................................................<br>...........................................................................................X........<br>.................................................................................L..................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>..................................................Y.................................................<br>....................................................................................................<br>.................A..................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>.................................G...................................J..........D...................<br>....................................................................................................<br>....................................................................................................<br>...........................D........................................................................<br>....................................................................................................<br>....................................................................................................<br>.................................................O..................................................<br>....................................................................................................<br>....................................................................................................<br>................B...................................................................................<br>.............................H..............................K.......................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>........E...........................................................................................<br>....................................................................................................<br>............................................................................................W.......<br>.F..................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>...................N................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>...................................................................................................Q<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>....................................................................................................<br>.........................................................................Z..........................<br>.P..................................................................................................<br>....................................................................................................<br>....................................................................................................<br>...........................................................................S........................<br>....................................................................................................<br>...U................................................................................................</pre><br><a href="prompt_gemini-3-pro_14_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_14_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_14_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 15: Tetris(tm) but with only the L-Piece</th>
+    <th class='score-bad'>Score: 0.00 / 4</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>You are playing Tetris(tm), and are cursed to only get the L-shaped tetrimino for all time.<br><br>The L shaped piece initially arrives in this orientation (with indent representing grid position):<br><br>###<br>#<br><br>It can be rotated in 90 degree increments clockwise, and moved left and right. The centre of rotation is the corner of the L.<br><br>Two units of movement to the right looks like this (noting indent):<br><br>  ###<br>  #<br><br>Three units of movement to the right and a 90 degree clockwise rotation looks like this (noting indent):<br><br>  ##<br>   #<br>   #<br><br>2 units of movement to the right, and a 180 degree clockwise rotation looks like this (noting indent):<br><br>  #<br>###<br><br>Blocks spawn at position 0,0, the top left of the grid. The grid is 10 cells wide and 30 cells high.<br><br>When a row is filled, it is removed from the grid, and all blocks above it are shifted down by one row.<br><br>Position blocks by moving them left and right, and rotating them in clockwise 90 degree increments for as long as possible. <br>When you get bored, run out of token limits, mistakenly truncate your output, or make too many mistakes, <br>the game will end and your score will be tallied. You solution must remove at least 10 rows to pass.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Increasing grid size and row target</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: 10x30 grid, remove 10 rows. <br> Apparently this matches the original 1980s game.<br><a href="prompt_gemini-3-pro_15_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_15_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_15_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: 16x30 grid, remove 15 rows<br><a href="prompt_gemini-3-pro_15_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_15_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_15_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: 20x30 grid, remove 20 rows<br><a href="prompt_gemini-3-pro_15_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_15_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_15_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: 40x30 grid, remove 30 rows<br><a href="prompt_gemini-3-pro_15_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_15_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_15_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 16: Pack rectangular prisms</th>
+    <th class='score-bad'>Score: 0.00 / 6</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>You are given the following rectangular prisms:<br><br>7 prisms of 5x3x2<br><br>and have to pack them as efficiently as possible into the smallest volume possible.<br>You can rotate the prisms as you see fit, return a list of min/max xyz coordinates.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Adds additional prisms for each run</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: 7 prisms of 5x3x2<br><a href="prompt_gemini-3-pro_16_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_16_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_16_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: 7 prisms of 5x3x2<br>11 prisms of 7x5x3<br><a href="prompt_gemini-3-pro_16_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_16_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_16_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: 7 prisms of 5x3x2<br>11 prisms of 7x5x3<br>13 prisms of 11x7x5<br><a href="prompt_gemini-3-pro_16_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_16_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_16_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: 7 prisms of 5x3x2<br>11 prisms of 7x5x3<br>13 prisms of 11x7x5<br>17 prisms of 13x11x7<br><a href="prompt_gemini-3-pro_16_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_16_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_16_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: 7 prisms of 5x3x2<br>11 prisms of 7x5x3<br>13 prisms of 11x7x5<br>17 prisms of 13x11x7<br>19 prisms of 17x13x11<br><a href="prompt_gemini-3-pro_16_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_16_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_16_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 5</strong><br>Parameters: 7 prisms of 5x3x2<br>11 prisms of 7x5x3<br>13 prisms of 11x7x5<br>17 prisms of 13x11x7<br>19 prisms of 17x13x11<br>23 prisms of 19x17x13<br><a href="prompt_gemini-3-pro_16_5.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_16_5.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_16_5.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 17: Sand pile simulator / metric imperial and wall impact</th>
+    <th class='score-bad'>Score: 0.00 / 1</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br>A very fine sand in a laminar flow is falling from a 25NB pipe whose opening sits 200ft above the floor of a silo.<br><br>5 cubic yards are sitting in the silo at the start.<br>1500 cubic feet of sand is piped in from trucks.<br>Then a 100 cubic meters train is unloaded.<br>Then 20 drums of sand are emptied, each 44-gallons. (UK Imperial Gallons)<br><br>The grain size and moisture content results in an angle of repose of 33 degrees.<br><br>The silo is 10 yards in dimeter, and negligible internal wind / air current.<br><br>Return an OpenSCAD file containing the shape of the sand pile: Use metric within OpenSCAD. 1 unit = 1 meter.<br><br>Keep the OpenSCAD file as simple as possible, using the fewest number of lines possible. <br><br>Do not output anything else than the OpenSCAD file, as commentary doesn't compile.</div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt remains constant</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: 
+  Some things to watch out for:<ul>
+    <li>Total volume is 150.3 cubic meters. 0.02831685 m³ + 42.4753 m³ + 100 m³ + 4.0006 m³</li>
+    <li>The nozzle opening is 25NB, not zero-width, so sands start x/y is evenly distributed
+     within a circle rather than a point. The cone's top wont be a pin-prick.</li>
+    <li>The walls of the silo require this to be a cylinder with a cone on top.</li>
+  </ul>
+
+  A regex capturing $fn=\d+ is used to normalise the result and reference geometry to 
+  7.2 degrees / 50 segments, ensuring that the LLM isn't penalised for different partitions of 
+  a circle.
+  <br><a href="prompt_gemini-3-pro_17_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_17_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_17_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 18: Pyamid construction - more bricks than token limits</th>
+    <th class='score-bad'>Score: 0.00 / 4</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>A pharoh is building a pyramyd to rest on top of his tomb and protect him for the afterlife. <br>He has an army of 100,000 men who are honour bound to assist him in the project.<br><br>Pyramids must face north, which is +y, and is centred over the future tomb.<br><br>Pharoh has 20,000 cut large stones, each a 50cm side-length cube.<br>Each stone needs 10 men to move.<br><br>When placed on top of other stones, each stone must have all 4 base<br>corners sitting in the middle of another stone. Any other arrangements will result in collapse. <br>The pyramid does not have any internal voids for this reason.<br><br>The final facade will be done with wedges of marble, and the local stonemason requires precise plans to cut <br>marble such that each external large stone is covered and the resulting pyamid is smooth.<br><br>Generate an OpenSCAD plan showing the tallest pyramid the pharoh can build with his budget<br>of stone. This plan must be precise with its volume accurate to the milimeter including every step<br>yet optimised enough to be viewable on the stonemason's CAD software.<br><br>Use Metric SI units in all working and in the final OpenSCAD file.<br><br>Do not output anything else than the OpenSCAD file, as that will cause compilation errors.<br></div></td>
+    <td><strong>Prompt Changes:</strong><br>
+Hundreds of thousands of stones, then millions. 
+The AI needs to merge adjacent stones and work with merged
+layers in order to solve this.<br><br>
+
+If it attempts to bruteforce a solution by rendering millions of bricks as individual cubes, 
+OpenSCAD will either crash from std::bad_alloc or timeout after 600 seconds, both causing failure.
+</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: 20,000 stones (~20m high)<br><a href="prompt_gemini-3-pro_18_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_18_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_18_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: 150,000 stones (~39m high)<br><a href="prompt_gemini-3-pro_18_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_18_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_18_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: 600,000 stones<br><a href="prompt_gemini-3-pro_18_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_18_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_18_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: 2,500,000 stones (~100m high / ~200 layers)<br><a href="prompt_gemini-3-pro_18_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_18_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_18_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 19: Tetrahedron Packing in 3D</th>
+    <th class='score-bad'>Score: 0.00 / 8</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>Here is the points and faces of a regular tetrahedron with all sides equal 1, resting on the Z=0 plane and with an edge along the X=0 plane:<br><br>polyhedron(<br>    points = [<br>        [0, 0, 0],                               // 0<br>        [1, 0, 0],                               // 1<br>        [0.5, sqrt(3)/2, 0],                     // 2<br>        [0.5, sqrt(3)/6, sqrt(2/3)]              // 3 (apex)<br>    ],<br>    faces = [<br>        [0, 2, 1],   // base (oriented outward)<br>        [0, 1, 3],<br>        [1, 2, 3],<br>        [2, 0, 3]<br>    ],<br>    convexity = 4<br>);<br><br>We define a 7-part rigid transform of (x,y,z,q0,q1,q2,q3), where q0,q1,q2,q3 is a normalised quaternion, and x, y, z are the translation.<br>Rotation is defined around the 0,0,0 point (Which is NOT THE CENTRE), and is performed before translation.<br><br>We create a scene with multiple tetrahedra, each with a different transform. Now we can pack them in as tightly as possible<br>in order to create a 3D shape, trying to maximize packing density and recreate the target shape.<br><br>Return the transform array of tetrahedra in order to create a:<br>Sphere of radius 4, with the center at origin.</div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt parameters change between subpasses (increasing difficulty)</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: Create a sphere of radius 4<br><a href="prompt_gemini-3-pro_19_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_19_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_19_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: Create a torus with major radius 8 and minor radius 2<br><a href="prompt_gemini-3-pro_19_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_19_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_19_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: Create a set of dumbbells with spheres of radius 2 and a connecting cylinder of diameter 1<br><a href="prompt_gemini-3-pro_19_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_19_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_19_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: Create an axially aligned square based pyramid with base side 4 and height 4, sitting on the Z=0 plane, centered at origin<br><a href="prompt_gemini-3-pro_19_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_19_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_19_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: Create a cylinder with radius 3 and height 6, centered at origin and aligned along the Z-axis<br><a href="prompt_gemini-3-pro_19_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_19_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_19_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 5</strong><br>Parameters: Create a cube of side length 4, centered at origin<br><a href="prompt_gemini-3-pro_19_5.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_19_5.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_19_5.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 6</strong><br>Parameters: Create an octahedron with edge length 4, centered at origin, with faces on the x, y, and z plane<br><a href="prompt_gemini-3-pro_19_6.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_19_6.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_19_6.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 7</strong><br>Parameters: Itself, but scaled up by a factor of 10 <br><a href="prompt_gemini-3-pro_19_7.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_19_7.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_19_7.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 20: Can you trace a rough map of Australia with under 1kb of data?</th>
+    <th class='score-bad'>Score: 0.00 / 3</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>Create a < 1024 bytes snippet of python code that exports a function 'f', taking 2 parameters (x and y),<br>that when executed returns a parametric shape representing Australia's land mass, including at least Tasmania.<br><br>f(x,y) > 0 represents "inside".<br>f(x,y) <= 0 represents "outside".<br>Use a mercartor projection to project from spherical to 2D.<br>Scale the 2D shape such that it fits within a normalised 0,0 -> 1,1<br>Cape York, QLD's tip is on the line y=0<br>South East Cape, TAS is on the line y=1<br>Cape Byron, NSW is on the line x=1<br>Steep Point, WAS, is on the line X=0<br>Comments are a waste of bytes, do not use them.<br>Coding standards & best practices are not enforced. Go nuts.<br>Will be executed in Python Version: sys.version_info(major=3, minor=13, micro=6, releaselevel='final', serial=0)<br><br>Your python code can not import any modules of it's own, but it does have the following imports<br>prepended, and not included in the 1024 bytes character limit. .<br><br><br>import math, numpy, scipy, cmath, decimal, fractions, random, statistics, itertools<br><br><br>The code you send can not have an import statement, so if you're testing python code, be sure to <br>remove the "import" statement before submission.<br><br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt parameters change between subpasses (increasing difficulty)</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: Max data size 1024 bytes. Note the reference image is 512x512 pixels and ~4kb compressed PNG.<br><a href="prompt_gemini-3-pro_20_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_20_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_20_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: Max data size 2048 bytes. Note the reference image is 512x512 pixels and ~4kb compressed PNG.<br><a href="prompt_gemini-3-pro_20_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_20_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_20_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: Max data size 4096 bytes. Note the reference image is 512x512 pixels and ~4kb compressed PNG.<br><a href="prompt_gemini-3-pro_20_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_20_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_20_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 21: Rollercoaster Track planner</th>
+    <th class='score-bad'>Score: 0.00 / 6</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br><br>You are given a 3D space of dimensions 10 * 10 * 10 meters, and have to build a rollercoaster track that<br>meets the following requirements:<br><br>- Starts at altitude Z = 5 meters<br>- Minimum track length: 12<br>- Must exceed a speed of at least: 5<br>- Must not exceed a speed of 40m/s<br>- Once up to speed, must not drop below a speed of 5m/s<br>- Must finish at altitude Z = 0 meters<br>- Must not use any acceleration other than Earth's gravity.<br>- Must not exceed 5G acceleration when turning.<br><br><br><br>Track segments are represented by a list of points, where each point is a list of [x, y, z] coordinates.<br><br>Track layout must follow these rules:<br>- No segment longer than 1.8m.<br>- No segment shorter than 90cm<br>- The angle between 2 segments must not exceed 10 degrees.<br>- When crossing existing track, a vertical clearence of 3m minimum is required.<br>- All track segments must be within 0,0,0 -> 10,10,10<br><br>You do not need to consider support positions at this stage of the planning.<br><br>Assume frictionless vacuum for all track segments except vertical loops. <br>A full 360 degree vertical loop results in a halving of speed.<br><br>Return the track as a list of points, where each point is a list of [x, y, z] coordinates.<br><br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt parameters change between subpasses (increasing difficulty)</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: Very basic. 10m cube. 5m start altitude. 12m length. 5m/s speed min. <br><a href="prompt_gemini-3-pro_21_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_21_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_21_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: 15m cube, start at 9m, 100m length. 5m/s min speed. Must exceed 8m/s at least once.<br><a href="prompt_gemini-3-pro_21_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_21_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_21_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: 20m cube, start at 19m, 200m length. 2G turn.<br><a href="prompt_gemini-3-pro_21_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_21_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_21_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: 50m cube, start at 48m, 500m length. Avoid centre cylinder at ground.<br><a href="prompt_gemini-3-pro_21_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_21_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_21_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: 100m cube, start at 95m, 1000m length. Must include a loop.<br><a href="prompt_gemini-3-pro_21_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_21_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_21_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 5</strong><br>Parameters: 300m cube, start at 250m, 3000m length. Must include 3 loops.<br><a href="prompt_gemini-3-pro_21_5.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_21_5.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_21_5.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 22: Oribital rendenvous travelling salesman problem</th>
+    <th class='score-bad'>Score: 0.00 / 8</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>You are an AI in charge of navigating a spaceship in orbit.<br><br>You are currently at [-1845.998197, -6653.941516, -3451.314228] km (in a LEO orbit 1348.73 km above the earths surface) travelling with velocity [4.30553, 1.936911, -5.512077] km/s and the mission timer just got set to a 0 second epoch.<br><br>You are given a list of 2 space stations in orbit, and have to plan a path for a spaceship <br>to visit all of them. You need to calculate this route exactly and should use all relevant tools available to you.<br><br>Your goal is to minimise Delta-V used for this journey, not time or distance. If a new route takes an extra decade <br>and travels a billion more km around the earth, but it saves a drop of fuel, it is a better route.<br><br>You may assume:<br>- The spacecraft is a point mass.<br>- All coordiantes are Earth-centred inertial (GCRF/J2000) coordinates.<br>- Your spaceship mass does not change as fuel is expended, and all thrusts are instantaneous.<br>- Your engine has no maximum impulse and your spacecraft's burns have no maximum delta-V.<br>- All units are SI except distances, which are in km.<br>- Rendevous are of duration that is short enough to be considered instantaneous.<br>- Rndevous does not transfer momentum between spacecraft.<br>- Two craft must pass within .1km of each other with relative speeds < 0.005km/s in order to successfully rendezvous.<br>- The earth is a perfect sphere with radius 6371km.<br>- The moon, sun, and rest of the solar system do not affect the spacecraft.<br>- The atmosphere does not affect any spacecraft above 100km altitude. Below 100km the spacecraft is destroyed instantly.<br><br>Here are the orbits you need to visit: (Of the format [Pos X, Y, Z, Vel X, Y, Z] at the same epoch as your mission timer T=0)<br><br>Station 0: [4579.848378, 5233.075386, 578.192725, -5.209886, 4.167153, 3.551514]<br>Station 1: [5315.246203, -4099.93111, -1906.074155, 1.612607, 4.72754, -5.671965]</div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt parameters change between subpasses (increasing difficulty)</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: Spacecraft and 2 stations.<br><a href="prompt_gemini-3-pro_22_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_22_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_22_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: Spacecraft and 4 stations.<br><a href="prompt_gemini-3-pro_22_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_22_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_22_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: Spacecraft and 6 stations.<br><a href="prompt_gemini-3-pro_22_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_22_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_22_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: Spacecraft and 8 stations.<br><a href="prompt_gemini-3-pro_22_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_22_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_22_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: Spacecraft and 10 stations.<br><a href="prompt_gemini-3-pro_22_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_22_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_22_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 5</strong><br>Parameters: Spacecraft and 14 stations.<br><a href="prompt_gemini-3-pro_22_5.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_22_5.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_22_5.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 6</strong><br>Parameters: Spacecraft and 17 stations.<br><a href="prompt_gemini-3-pro_22_6.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_22_6.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_22_6.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 7</strong><br>Parameters: Spacecraft and 19 stations.<br><a href="prompt_gemini-3-pro_22_7.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_22_7.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_22_7.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 23: Fluid simulation</th>
+    <th class='score-bad'>Score: 0.00 / 7</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>You are given a 3D voxel world, of dimensions 16 * 16 * 8 voxels,<br>currently filled with dirt uniformly flat and solid at the layers z = [0,1,2]<br><br>Rainfall occurs at the top centre of the world, and follows the following rules:<br>- If air is below water, the water falls (z = z - 1)<br>- If water has ground or water below it, it "flood fills" out looking for any air voxels <br>  at the z level below it, and moves to the nearest one.<br>- If water touches the sides or bottom of the world, it falls off and is lost forever.<br>- If water can't find a reachable air voxel to walk to, it remains there as a pool of water.<br><br>Rainfall currently all runs off the edge of the map, meaning earthworks are required to achieve<br>your goals. After your earthworks complete, there will be 1000s of voxels worth of rainfall<br>before your world is graded.<br><br>Add dirt or air voxels to the world in order to accomplish your task:<br><br>Ensure that; after the rains end,<br>there is a lake of at least 36 voxels in surface area.</div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt parameters change between subpasses (increasing difficulty)</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: there is a lake of at least 36 voxels in surface area.<br><a href="prompt_gemini-3-pro_23_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_23_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_23_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: there are 3 unconnected bodies of water each at least 2x2<br><a href="prompt_gemini-3-pro_23_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_23_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_23_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: there is a lake of at least 2 voxels at z > 5<br><a href="prompt_gemini-3-pro_23_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_23_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_23_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: there is an underground lake of at least 10 voxels in volume, but no water voxels are visible from above.<br><a href="prompt_gemini-3-pro_23_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_23_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_23_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: there are 3 lakes on 3 different z levels<br><a href="prompt_gemini-3-pro_23_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_23_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_23_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 5</strong><br>Parameters: there is a lake at least 6 voxels deep<br><a href="prompt_gemini-3-pro_23_5.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_23_5.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_23_5.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 6</strong><br>Parameters: there are 2 lakes, each over 200 voxels in volume<br><a href="prompt_gemini-3-pro_23_6.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_23_6.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_23_6.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 24: 2D convex hull, identify points on the hull.</th>
+    <th class='score-bad'>Score: 0.00 / 6</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>You are given a set of points in 2D space. A rubber band is stretch around the entire scene,<br>and let snap. Return a list of all the points the rubber band touches.<br><br><br><br><br>0: (81, 14)<br>1: (3, 94)<br>2: (35, 31)<br>3: (28, 17)<br>4: (94, 13)<br>5: (86, 94)<br>6: (69, 11)<br>7: (75, 54)<br>8: (4, 3)<br>9: (11, 27)<br>10: (29, 64)<br>11: (77, 3)<br>12: (71, 25)<br>13: (91, 83)<br>14: (89, 69)<br>15: (53, 28)</div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt parameters change between subpasses (increasing difficulty)</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_24_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_24_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_24_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_24_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_24_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_24_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_24_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_24_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_24_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_24_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_24_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_24_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_24_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_24_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_24_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 5</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_24_5.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_24_5.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_24_5.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 25: 2D Delaunay Triangulation</th>
+    <th class='score-bad'>Score: 0.00 / 6</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>You are given a set of points in 2D space. <br><br>Form a collection of triangles from these points such that:<br>- No edges cross each other.<br>- No points lie inside a triangle.<br>- Every point contributes to a triangle.<br>- Minimum angles are maximised.<br><br><br>0: (18, 58)<br>1: (58, 98)<br>2: (22, 90)<br>3: (50, 93)<br>4: (44, 55)<br>5: (64, 14)<br>6: (68, 15)<br>7: (10, 94)<br>8: (58, 33)<br>9: (6, 84)<br>10: (82, 26)<br>11: (42, 29)<br>12: (39, 98)<br>13: (26, 22)<br>14: (18, 24)<br>15: (44, 47)</div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt parameters change between subpasses (increasing difficulty)</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_25_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_25_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_25_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_25_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_25_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_25_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_25_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_25_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_25_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_25_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_25_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_25_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_25_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_25_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_25_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 5</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_25_5.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_25_5.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_25_5.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 26: Subdivided binary tree walk.</th>
+    <th class='score-bad'>Score: 0.00 / 5</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br>You are given a list of dimensions, these represent a series of recursive subdivisions of a 0,0,0->1,1,1 unit cube.<br><br>Eg [Z,Z,Z,X] means:<br>- the cube has 16 rectangular prism leaf nodes, <br>- Each of size [1/2, 1, 1/8]. <br>- Nodes are identified by their path through the tree. 0 represents the minimum split, 1 represents the maximum split.<br>- "" is the root node. "0" is the z= [0,0.5] half of the cube. "00" is the z= [0,0.25] quarter of the cube. etc.<br><br><br><br>Tree structure:<br>0: Z<br>1: X<br>2: Y<br>3: Z<br>4: X<br>5: Y<br>6: Z<br>7: X<br><br>Task: List all landlocked nodes. That is nodes that don't touch the edge of the unit cube.</div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt parameters change between subpasses (increasing difficulty)</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_26_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_26_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_26_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_26_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_26_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_26_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_26_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_26_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_26_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_26_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_26_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_26_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_26_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_26_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_26_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 27: Jewel swap</th>
+    <th class='score-bad'>Score: 0.00 / 5</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br><br><br>You are given a 2D grid, laid out like so:<br><br>BECBDEEDCEDBDDEBBDEDCBBECCDECABA<br>CABEDBEBABCDEEACCABEBEBDADACEBED<br>DCAEACDDCDCECCADECEEAECCECACEDCD<br>CEBDCDCABDABCBCCABECBCDABECEABBC<br>EDAEAABDBAABBDCAEDAECAADAEDAEBED<br>AACBCCEDADDEEAEAAEACBDEBACDBEDAC<br>BBACDEDCDACCEDAEACCADEDCEDEDCDBB<br>ACADCAADEECCABDCECBBADADDAACDEAB<br><br><br>A represents Amethysist<br>B represents Blue Sapphire<br>C represents Cubic Zirconia<br>D represents Diamond<br>E represents Emerald<br><br>Your job is to swap jewels in the grid, when 3 or more jewels are in a line, either horizontally or vertically, <br>they are removed from the grid, go into your pocket, and the jewels above them fall down, leaving empty<br>space at the top of the game board. Falling jewels may match with neighbours before your next move, <br>leading to future profits but complicating your prepared moves.<br><br>0,0 is the bottom left grid cell and indices increase up and to the right.<br><br>The goal is to remove as many jewels as possible and get the highest payout. You can not swap any jewel<br>with an empty cell. All jewels are equally valuable.<br><br>You may make up to 1000 moves (there is no cost-per-move), but they must all be made in advance. You need to <br>predict how the gems interact, match, fall, and use that to extract maximum profit.<br><br></div></td>
+    <td><strong>Prompt Changes:</strong><br>Progressively larger grids.</td>
+  </tr>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 0</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_27_0.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_27_0.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_27_0.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 1</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_27_1.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_27_1.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_27_1.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 2</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_27_2.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_27_2.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_27_2.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 3</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_27_3.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_27_3.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_27_3.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='subpass-row'>
+    <td rowspan=2><strong>Subpass 4</strong><br>Parameters: (see typical prompt)<a href="prompt_gemini-3-pro_27_4.txt">View exact prompt</a><br><a href="raw_gemini-3-pro_27_4.txt">View raw AI output</a><br><a href="cot_gemini-3-pro_27_4.txt">View chain of thought</a><br></td>
+<td colspan=2></td>    <td rowspan=2class='score-bad'><strong>0.0000</strong></td>
+  </tr>
+    <td>N/A (LLM did not answer)</td>
+    <td>N/A (Test forfeited)</td>
+  <tr class='test-header'>
+    <th colspan=3>Test 28: AI controlling explosives, what could possibly go wrong?</th>
+    <th class='score-good'>Score: 0.00 / 0</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br>You are responsible for levelling terrian in preperation for the construction of a new city.<br><br>Here is the terrain as modelled by a height map<br><br><br><br>You can place blasting charges to fracture the terrain, causing it to collapse and flow<br>down hill.<br><br>Prepare a blast plan specifying <br>- Where to place the charges (X/Y)<br>- How deep to drill down (Z)<br>- Order of the blasts.<br><br>Such that the terrain collapses into as much flat plane as possible.</div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt remains constant</td>
+  </tr>
+  <tr class='test-header'>
+    <th colspan=3>Test 29: Cage match. Can LLMs design interlocking parts for 3D printing?</th>
+    <th class='score-good'>Score: 0.00 / 0</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br>I would like you to generate a cage of internal size 350 x 350 x 700 mm. <br><br>The cage should feature an all-around grid of 10mm thick bars, each with a square cross section. No thinner, no thicker.<br><br>The gap between bars should be between 5cm and 10cm, and uniform all over the model.<br><br>The cage needs to be split into parts that can be 3D printed on a 3D printer, with a build area<br>of 400x400x100mm.<br><br>The cage assembly should be held together by 4 x M6 threaded rods threaded through the middle<br>of the 4 vertical corner bars. You do not need to carve a female thread or nut slots into your parts,<br>but should ensure that a rod fits with adequete clearence into every hole. Use no additional connectors.<br><br>Generate all .stl files that are needed for this project. They should be:<br>- valid STL files<br>- ready to slice<br>- print without supports.<br>- orientated such that they fit within the build volume<br>- sitting on z=0 plane.<br>- not going to fall over during printing.<br><br>For each part, include a rigid transform matrix that shows where the part sits in 3D space when assembled, in<br>your assembled 3D space, the cage sits on the z=0 plane and centred in x & y around 0,0.<br>Take care to get this projection right as it will be used to test whether the parts fit together correctly.</div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt remains constant</td>
+  </tr>
+  <tr class='test-header'>
+    <th colspan=3>Test 30: Stackable 3D printed primes</th>
+    <th class='score-good'>Score: 0.00 / 0</th>
+  </tr>
+  <tr class='prompt-row'>
+    <td colspan='3'><div style='overflow-x: auto;height: 200px;'><strong>Typical Prompt:</strong><br>2 3D shapes can be said to be stackable if there exists an orientation in which:<br>- they can be stacked on top of each other without any overhang<br>- all lowest points on the top model touch the highest points of the lower model.<br>- the top shapes center of gravity is within the bottom shape.<br>- the entire stacks center of gravity is within the footprint of the bottom shape.<br>- they can be 3D printed without supports - ie no cantilevers or bridges.<br><br>For example, this sequence is stackable:<br>- Unit cube.<br>- Unit cylinder (of d = 1, h = 1)<br>- 3 legged stool, with a seat diameter of 1.<br>- 3 fair dice, with a size smaller than any seat leg.<br><br>The unit cube can rest in any stable orientation. The cylinder can sit on top with a flat face down.<br>The stool can be flipped upsidedown and sit on top of the cylinder. The dice can sit on top<br>of the legs (either one per leg, or stacked on top of each other on a single leg).<br><br>Side view of a stack:<br><br>      o<br>      o<br>      o   Dice<br><br>     | |     | |       | |<br>     | |     | |       | |<br>     | |     | |       | | Stool. Legs facing up, seat facing down.<br>     | |     | |       | |<br>     =====================<br><br>     X-------------------X<br>     |||||||||||||||||||||<br>     |||||||||||||||||||||<br>     ||||||||||||||||||||| Cylinder (flat facing up and down)<br>     |||||||||||||||||||||<br>     |||||||||||||||||||||<br>     X-------------------X<br><br>     =====================<br>     =====================<br>     ===================== Unit cube<br>     =====================<br>     =====================<br>     =====================<br>     =====================<br>     =====================<br>------------------------------- Build plate / ground / Z = 0<br><br>So now you understand the concept. Lets try something more advanced!<br><br>Using: <br>- A 7 segment display font, <br>- Fixed diget sizes<br>- Reading from the ground up,<br><br>what is the largest prime number that can be 3D printed in a stack?<br><br>Clarifications:<br>- A ban on repeating any sequence of 3 more than once. <br>  - So 888 and 6969 substrings are allowed, but 888888 or 696969 are not allowed.<br>- Only a single diget can be printed at any one z level. So you can't print "138" by printing<br>  the 1 and 3 concurrently and then use that to support the 8.<br>- You can rotate in all 3 direction, so you can print a 3 on a 7 by rotating it upwards, but<br>  you can't then print another rotated 3 on top of it, becasuse between the points of the 3<br>  it would overhang.</div></td>
+    <td><strong>Prompt Changes:</strong><br>Prompt remains constant</td>
+  </tr>
+<h2>Overall Summary</h2>
+<table>
+  <tr class='test-header'>
+    <th>Total Tests</th>
+    <th>Overall Score</th>
+    <th>Percentage</th>
+  </tr>
+  <tr>
+    <td>30</td>
+    <td>0.00 / 130</td>
+    <td>0.0%</td>
+  </tr>
+</table>
+</body>
+</html>

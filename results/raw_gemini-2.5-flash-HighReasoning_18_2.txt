@@ -1,0 +1,125 @@
+```openscad
+// Pharaoh's Pyramid Plan - OpenSCAD
+
+// =============================================================================
+// PARAMETERS AND CONSTANTS
+// =============================================================================
+
+// Stone dimensions
+STONE_SIDE = 0.5; // 50 cm = 0.5 meters (side length of a cubic stone)
+
+// Pyramid calculation based on 600,000 stones budget and structural rules:
+// Each higher layer's stones are placed such that their four base corners
+// sit in the middle of four adjacent stones in the layer below.
+// This construction method implies that each successive layer (moving upwards)
+// will have one less stone along each side dimension than the layer beneath it.
+// For example, if the base is L x L stones, the next layer will be (L-1) x (L-1),
+// and so on, until the top layer which is a single 1x1 stone.
+//
+// Let L_1 be the number of stones along one side of the base layer.
+// The total number of layers will then be L_1.
+// The total number of stones (T) is the sum of squares from 1 to L_1:
+// T = 1^2 + 2^2 + ... + (L_1)^2 = L_1 * (L_1 + 1) * (2*L_1 + 1) / 6
+//
+// We have a budget of 600,000 stones.
+// We need to find the largest L_1 such that T <= 600,000.
+//
+// If L_1 = 121:
+// T = 121 * (121 + 1) * (2*121 + 1) / 6
+// T = 121 * 122 * 243 / 6
+// T = 599,001 stones. This fits within the budget.
+//
+// If L_1 = 122:
+// T = 122 * (122 + 1) * (2*122 + 1) / 6
+// T = 122 * 123 * 245 / 6
+// T = 612,485 stones. This exceeds the budget.
+//
+// Therefore, the tallest pyramid possible has a base layer side length of 121 stones,
+// and consists of 121 layers in total.
+
+BASE_LAYERS = 121; // Number of layers from the base (bottom) to the top (L_1 from calculation)
+
+// Total width of the base layer in meters, used for centering the pyramid.
+TOTAL_BASE_WIDTH = BASE_LAYERS * STONE_SIDE;
+
+// =============================================================================
+// MODULES
+// =============================================================================
+
+/*
+ * Module: stone_layer_2d_profile
+ * Generates a 2D union of squares that represents the footprint of a single layer of stones.
+ * This 2D shape will then be extruded to create the 3D layer.
+ * Using this approach is generally more efficient for OpenSCAD rendering than creating
+ * individual 3D cubes for every single stone, especially for large numbers of stones,
+ * while still precisely representing each stone's position within the layer.
+ *
+ * Parameters:
+ *   num_stones_side: The number of individual stones along one side of this square layer.
+ *   stone_side: The side length of an individual cubic stone in meters.
+ */
+module stone_layer_2d_profile(num_stones_side, stone_side) {
+    union() {
+        for (i = [0 : num_stones_side - 1]) {
+            for (j = [0 : num_stones_side - 1]) {
+                // Place each individual stone's base square within the layer's local coordinate system.
+                // The (0,0) stone of the layer starts at (0,0).
+                translate([i * stone_side, j * stone_side, 0]) {
+                    square(stone_side);
+                }
+            }
+        }
+    }
+}
+
+/*
+ * Module: pyramid_structure
+ * Generates the full 3D stepped pyramid structure.
+ * Each layer is constructed by extruding a 2D profile created by `stone_layer_2d_profile`.
+ * This method accurately represents every individual stone and "every step" of the pyramid,
+ * ensuring precision while being optimized for OpenSCAD rendering.
+ *
+ * Centering: The entire pyramid is centered horizontally on the X-Y plane at (0,0,Z).
+ * Orientation: The pyramid's +Y axis aligns with North, as specified.
+ */
+module pyramid_structure() {
+    // Loop through each layer, starting from the base (k=0) up to the top (k=BASE_LAYERS-1).
+    // `k` represents the current layer's index, where `k=0` is the bottom-most layer.
+    for (k = [0 : BASE_LAYERS - 1]) {
+        // Calculate the number of stones along one side of the current layer.
+        // The base layer (k=0) has BASE_LAYERS stones on a side.
+        // Each subsequent layer (k=1, k=2, ...) has one less stone on a side.
+        num_stones_side = BASE_LAYERS - k;
+        
+        // Calculate the horizontal offset for this layer.
+        // This offset is crucial for two reasons:
+        // 1. To ensure the pyramid is centered on the X-Y origin (0,0).
+        //    The base layer's (k=0) bottom-left corner needs to be shifted by -(TOTAL_BASE_WIDTH / 2)
+        //    in both X and Y from the origin.
+        // 2. To implement the structural rule "each stone must have all 4 base corners
+        //    sitting in the middle of another stone". This means each higher layer's footprint
+        //    is shifted inwards by half a stone's side length (STONE_SIDE / 2)
+        //    in both X and Y relative to the layer below it.
+        // The total inward shift for layer `k` (relative to the base layer's minimum corner) is `k * STONE_SIDE / 2`.
+        layer_offset_xy = (k * STONE_SIDE / 2) - (TOTAL_BASE_WIDTH / 2);
+        
+        // Translate the entire layer to its correct 3D position.
+        // x and y are for horizontal centering and inward shifting.
+        // z is for stacking layers one on top of another.
+        translate([layer_offset_xy, layer_offset_xy, k * STONE_SIDE]) {
+            // Extrude the 2D layer profile into a 3D solid layer of stones.
+            // `height` is the height of a single stone.
+            // `center=false` means the extrusion starts from the Z-coordinate specified by `translate`.
+            // `convexity` is set to improve rendering performance for complex shapes in OpenSCAD's preview.
+            linear_extrude(height = STONE_SIDE, center = false, convexity = 10) {
+                stone_layer_2d_profile(num_stones_side, STONE_SIDE);
+            }
+        }
+    }
+}
+
+// =============================================================================
+// RENDER THE PYRAMID
+// =============================================================================
+pyramid_structure();
+```

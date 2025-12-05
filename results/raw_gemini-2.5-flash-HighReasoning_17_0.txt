@@ -1,0 +1,8 @@
+r_silo = 4.572;
+h_cylinder = 1.299099;
+h_cone = 2.96980;
+$fn = 64;
+
+cylinder(h = h_cylinder, r = r_silo);
+translate([0, 0, h_cylinder])
+    cylinder(h = h_cone, r1 = r_silo, r2 = 0);

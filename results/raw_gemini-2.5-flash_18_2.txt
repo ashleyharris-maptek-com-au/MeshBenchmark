@@ -1,0 +1,75 @@
+```openscad
+// Pharaoh's Pyramid Plan
+// Generated based on stone budget and stacking rules.
+
+// --- PARAMETERS ---
+STONE_SIZE = 500; // Side length of each cubic stone in millimeters (50cm)
+
+// Calculate the maximum number of layers (N) for a step pyramid.
+// The total number of stones in a pyramid with N layers is given by the sum of squares:
+// Sum(k^2 for k=1 to N) = N * (N + 1) * (2*N + 1) / 6.
+// Given a budget of 600,000 stones:
+// For N=121: 121 * (121 + 1) * (2*121 + 1) / 6 = 121 * 122 * 243 / 6 = 598,341 stones (within budget)
+// For N=122: 122 * (122 + 1) * (2*122 + 1) / 6 = 122 * 123 * 245 / 6 = 613,105 stones (exceeds budget)
+// Therefore, the maximum number of layers (N) is 121.
+NUM_LAYERS = 121; 
+
+// Total width/length of the pyramid's base layer
+TOTAL_BASE_WIDTH = NUM_LAYERS * STONE_SIZE; // 121 * 500mm = 60500mm (60.5 meters)
+
+// Total height of the pyramid
+TOTAL_PYRAMID_HEIGHT = NUM_LAYERS * STONE_SIZE; // 121 * 500mm = 60500mm (60.5 meters)
+
+// --- MODULES ---
+
+// Module for a single cubic stone
+// Using center=false means the origin (0,0,0) of the cube is its bottom-left-front corner.
+module stone() {
+    cube(STONE_SIZE, center=false);
+}
+
+// Module to build the entire pyramid structure
+// The pyramid is constructed layer by layer, starting from the base.
+module pyramid() {
+    // Translate the entire pyramid so its base is centered at (0,0,0) on the XY plane.
+    // This ensures the pyramid is centered over the future tomb.
+    translate([-TOTAL_BASE_WIDTH / 2, -TOTAL_BASE_WIDTH / 2, 0]) {
+        // Loop through each layer, where 'k' is the layer index (0 for base, NUM_LAYERS-1 for top).
+        for (k = [0 : NUM_LAYERS - 1]) {
+            // Calculate the number of stones along one side of the current layer.
+            // Each layer is one stone smaller in width/length than the layer below it.
+            num_stones_in_current_layer = NUM_LAYERS - k;
+            
+            // Calculate the horizontal (X and Y) offset for the current layer.
+            // According to the rule "each stone must have all 4 base corners sitting in the middle of another stone",
+            // each successive layer is shifted inwards by STONE_SIZE/2 on both X and Y axes
+            // relative to the layer directly below it.
+            x_layer_offset = k * STONE_SIZE / 2;
+            y_layer_offset = k * STONE_SIZE / 2;
+            
+            // Calculate the vertical (Z) position for the current layer.
+            // Each layer is placed directly on top of the previous, increasing height by STONE_SIZE.
+            z_layer_height = k * STONE_SIZE;
+            
+            // Loop to place individual stones within the current layer (k).
+            // 'i' and 'j' represent the stone's position within the current layer's grid.
+            for (i = [0 : num_stones_in_current_layer - 1]) {
+                for (j = [0 : num_stones_in_current_layer - 1]) {
+                    // Translate each stone to its precise location.
+                    // The offsets define the bottom-left corner of the current layer's footprint,
+                    // and 'i' and 'j' position the specific stone within that layer.
+                    translate([x_layer_offset + i * STONE_SIZE,
+                               y_layer_offset + j * STONE_SIZE,
+                               z_layer_height]) {
+                        stone(); // Place a single stone cube.
+                    }
+                }
+            }
+        }
+    }
+}
+
+// --- MAIN EXECUTION ---
+// Build the pyramid.
+pyramid();
+```

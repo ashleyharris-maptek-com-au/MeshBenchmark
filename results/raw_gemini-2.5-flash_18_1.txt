@@ -1,0 +1,48 @@
+```openscad
+stone_size = 500; // 50cm side-length cube (in mm)
+num_layers = 76;  // Max layers based on 150,000 available stones (149,466 stones used)
+
+// Calculate the initial X and Y offset for the bottom-left-most stone of the base layer (l=0).
+// This ensures that the entire base layer (which has a total extent of num_layers * stone_size)
+// is perfectly centered on the (0,0) point in the X-Y plane.
+// For 'N' stones, the centers range from `-(N - 1) / 2 * stone_size` to `(N - 1) / 2 * stone_size`.
+initial_center_offset_xy = -(num_layers - 1) * stone_size / 2;
+
+// Iterate through each layer of the pyramid, from the bottom (l=0) to the very top (l=num_layers-1).
+for (l = 0; l < num_layers; l++) {
+    // Determine the number of stones along one edge for the current layer.
+    // Each successive layer is one stone smaller in X and Y dimensions than the layer below it.
+    stones_in_current_layer_edge = num_layers - l;
+
+    // Calculate the Z-coordinate for the *center* of all stones in this specific layer.
+    // The base of the pyramid is at Z=0. Since `cube(center=true)` is used, we add half a stone's
+    // height to `l * stone_size` to get the center of the cube.
+    layer_z_center = l * stone_size + stone_size / 2;
+
+    // The core stacking rule "each stone must have all 4 base corners sitting in the middle of another stone"
+    // dictates that each successive layer must be horizontally offset by half a stone's length
+    // (stone_size / 2) in both the X and Y directions, relative to the grid of the layer immediately below it.
+    // This cumulative offset for layer 'l' is `l * stone_size / 2`.
+    layer_stacking_shift_xy = l * stone_size / 2;
+
+    // Nested loops to iterate through the X and Y positions for placing individual stones within the current layer.
+    for (x_idx = 0; x_idx < stones_in_current_layer_edge; x_idx++) {
+        for (y_idx = 0; y_idx < stones_in_current_layer_edge; y_idx++) {
+            // Calculate the precise X and Y coordinates for the center of the current stone.
+            // This calculation incorporates:
+            // 1. `initial_center_offset_xy`: To center the entire pyramid base.
+            // 2. `x_idx * stone_size` / `y_idx * stone_size`: To position the stone within its layer's grid.
+            // 3. `layer_stacking_shift_xy`: The cumulative shift required by the stacking rule.
+            current_x_center = initial_center_offset_xy + x_idx * stone_size + layer_stacking_shift_xy;
+            current_y_center = initial_center_offset_xy + y_idx * stone_size + layer_stacking_shift_xy;
+
+            // Translate (move) the drawing origin to the calculated center of the stone,
+            // then place a cube there. `center=true` makes the cube's center coincide
+            // with the translated origin.
+            translate([current_x_center, current_y_center, layer_z_center]) {
+                cube(stone_size, center=true);
+            }
+        }
+    }
+}
+```

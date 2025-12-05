@@ -1,0 +1,32 @@
+
+You are an AI in charge of navigating a spaceship in orbit.
+
+You are currently at [-1845.998197, -6653.941516, -3451.314228] km (in a LEO orbit 1348.73 km above the earths surface) travelling with velocity [4.30553, 1.936911, -5.512077] km/s and the mission timer just got set to a 0 second epoch.
+
+You are given a list of 6 space stations in orbit, and have to plan a path for a spaceship 
+to visit all of them. You need to calculate this route exactly and should use all relevant tools available to you.
+
+Your goal is to minimise Delta-V used for this journey, not time or distance. If a new route takes an extra decade 
+and travels a billion more km around the earth, but it saves a drop of fuel, it is a better route.
+
+You may assume:
+- The spacecraft is a point mass.
+- All coordiantes are Earth-centred inertial (GCRF/J2000) coordinates.
+- Your spaceship mass does not change as fuel is expended, and all thrusts are instantaneous.
+- Your engine has no maximum impulse and your spacecraft's burns have no maximum delta-V.
+- All units are SI except distances, which are in km.
+- Rendevous are of duration that is short enough to be considered instantaneous.
+- Rndevous does not transfer momentum between spacecraft.
+- Two craft must pass within .1km of each other with relative speeds < 0.005km/s in order to successfully rendezvous.
+- The earth is a perfect sphere with radius 6371km.
+- The moon, sun, and rest of the solar system do not affect the spacecraft.
+- The atmosphere does not affect any spacecraft above 100km altitude. Below 100km the spacecraft is destroyed instantly.
+
+Here are the orbits you need to visit: (Of the format [Pos X, Y, Z, Vel X, Y, Z] at the same epoch as your mission timer T=0)
+
+Station 0: [4579.848378, 5233.075386, 578.192725, -5.209886, 4.167153, 3.551514]
+Station 1: [5315.246203, -4099.93111, -1906.074155, 1.612607, 4.72754, -5.671965]
+Station 2: [7078.137, 0.0, 0.0, 0.0, -1.122156, 7.419911]
+Station 3: [-3589.0685, 6216.448994, 0.0, -6.453475, -3.725916, 0.0]
+Station 4: [-5021.137307, -2809.845016, 4456.930482, 1.463799, -6.765963, -2.616458]
+Station 5: [-3789.0685, 0.0, -6562.859155, -0.0, -7.252499, -0.0]

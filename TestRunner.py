@@ -362,7 +362,7 @@ h2 { color: var(--text-secondary); margin-top: 30px; }
             results_file.write("</td>\n")
             
             if "reasoning" in subpass:
-                results_file.write(f"<td colspan=2><div style='overflow-y: auto;max-height: 200px;'><strong>AI Reasoning: </strong>{html.escape(subpass['reasoning'])}</div></td>")
+                results_file.write(f"<td colspan=2><div style='overflow-y: auto;max-height: 100px;'><strong>AI Reasoning: </strong>{html.escape(subpass['reasoning'])}</div></td>")
             else:
                 results_file.write("<td colspan=2></td>")
 
@@ -717,7 +717,7 @@ h2 { color: var(--text-secondary); margin-top: 30px; }
 
 
 if __name__ == "__main__":
-  if True:
+  if not os.path.exists("results/Human with tools.html"):
     # "Placebo" is the author (Ashley Harris) trying to get a reference score by
     # screwing around with his intuition, ChatGPT.com, python, openscad and 
     # Google for a bit.
@@ -729,8 +729,8 @@ if __name__ == "__main__":
     
     runAllTests(cacheLayer.AIHook, "Human with tools")
   
-    #import sys
-    #sys.exit(0)
+  else:
+    print("'Human with tools' results already exist, skipping...")
 
   if os.environ.get("OPENAI_API_KEY") is not None:
     import AiEngineOpenAiChatGPT

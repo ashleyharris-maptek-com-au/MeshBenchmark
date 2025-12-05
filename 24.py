@@ -54,6 +54,12 @@ def resultToScad(result):
     scad += "translate([" + str(points[j][0]) + "," + str(points[j][1]) + "]) circle(1);\n"
     scad += "};\n"
 
+  if len(result["pointSequence"]) > 1:
+    scad += "hull(){"
+    scad += "translate([" + str(points[-1][0]) + "," + str(points[-1][1]) + "]) circle(1);\n"
+    scad += "translate([" + str(points[0][0]) + "," + str(points[0][1]) + "]) circle(1);\n"
+    scad += "};\n"
+
   scad += "};\nhull(){"
   for i in result["pointSequence"]:
     scad += "translate([" + str(points[i][0]) + "," + str(points[i][1]) + "]) circle(0.001);\n"

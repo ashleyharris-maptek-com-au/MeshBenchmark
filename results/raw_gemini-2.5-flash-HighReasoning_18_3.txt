@@ -1,0 +1,65 @@
+```openscad
+// Pyramid Parameters
+stone_size = 0.5; // Each stone is 50cm (0.5 meters) side-length cube.
+
+// Calculate the maximum number of layers (N_L)
+// The number of stones in layer 'k' (starting k=0 for the top layer) is (k+1)^2.
+// Total stones = sum((k+1)^2 for k from 0 to N_L-1)
+// This is equivalent to sum(j^2 for j from 1 to N_L)
+// Sum of squares formula: N_L * (N_L + 1) * (2 * N_L + 1) / 6
+// We have a budget of 2,500,000 stones.
+// N_L * (N_L + 1) * (2 * N_L + 1) / 6 <= 2,500,000
+// N_L * (N_L + 1) * (2 * N_L + 1) <= 15,000,000
+
+// Let's test values for N_L:
+// N_L = 195: 195 * 196 * 391 / 6 = 2,481,430 stones. (Within budget)
+// N_L = 196: 196 * 197 * 393 / 6 = 2,530,286 stones. (Exceeds budget)
+// Therefore, the maximum number of layers is 195.
+max_layers = 195;
+
+// Total height of the pyramid
+pyramid_height = max_layers * stone_size; // 195 * 0.5m = 97.5m
+
+// Module to draw a single stone cube at a given center (x, y, z)
+module pyramid_stone(x, y, z) {
+    translate([x, y, z]) {
+        cube(stone_size, center=true);
+    }
+}
+
+// Generate the pyramid layer by layer
+// k is the layer index, from 0 (topmost layer) to max_layers - 1 (base layer).
+for (k = 0; k < max_layers; k = k + 1) {
+    // Calculate the z-coordinate for the center of stones in this layer.
+    // The base of the entire pyramid (bottom of layer max_layers-1) is at z=0.
+    // The top of the entire pyramid (top of layer 0) is at z=pyramid_height.
+    // So, for layer 'k' (from the top), its bottom is at: (max_layers - 1 - k) * stone_size
+    // The center of the stone is at: (bottom of layer) + stone_size / 2
+    current_z_center = (max_layers - 1 - k) * stone_size + (stone_size / 2);
+
+    // Each layer 'k' (from k=0 at top) has (k+1) x (k+1) stones.
+    // The stones are placed such that their base corners sit in the middle of stones below.
+    // This forms a square grid for each layer, with an alternating offset.
+    //
+    // For layer k (side length k+1 stones):
+    // k=0 (1x1): Center at (0, 0)
+    // k=1 (2x2): Centers at (+/- 0.25, +/- 0.25)
+    // k=2 (3x3): Centers at (0, 0), (+/- 0.5, 0), (0, +/- 0.5), (+/- 0.5, +/- 0.5)
+    //
+    // This pattern can be generalized:
+    // The x and y coordinates of the stone centers are determined by iterating through indices
+    // and adjusting by `k/2.0` to center the entire layer over the origin.
+    // `(i_idx - k / 2.0) * stone_size` gives the center coordinate.
+    // For example, for k=0: i_idx=0 -> (0 - 0/2.0)*0.5 = 0.0
+    // For k=1: i_idx=0,1 -> (0 - 1/2.0)*0.5 = -0.25; (1 - 1/2.0)*0.5 = 0.25
+    // For k=2: i_idx=0,1,2 -> (0 - 2/2.0)*0.5 = -0.5; (1 - 2/2.0)*0.5 = 0.0; (2 - 2/2.0)*0.5 = 0.5
+    
+    for (i_idx = 0; i_idx <= k; i_idx = i_idx + 1) {
+        for (j_idx = 0; j_idx <= k; j_idx = j_idx + 1) {
+            x_coord = (i_idx - k / 2.0) * stone_size;
+            y_coord = (j_idx - k / 2.0) * stone_size;
+            pyramid_stone(x_coord, y_coord, current_z_center);
+        }
+    }
+}
+```

@@ -1,0 +1,33 @@
+
+You are playing Tetris(tm), and are cursed to only get the L-shaped tetrimino for all time.
+
+The L shaped piece initially arrives in this orientation (with indent representing grid position):
+
+###
+#
+
+It can be rotated in 90 degree increments clockwise, and moved left and right. The centre of rotation is the corner of the L.
+
+Two units of movement to the right looks like this (noting indent):
+
+  ###
+  #
+
+Three units of movement to the right and a 90 degree clockwise rotation looks like this (noting indent):
+
+  ##
+   #
+   #
+
+2 units of movement to the right, and a 180 degree clockwise rotation looks like this (noting indent):
+
+  #
+###
+
+Blocks spawn at position 0,0, the top left of the grid. The grid is 10 cells wide and 30 cells high.
+
+When a row is filled, it is removed from the grid, and all blocks above it are shifted down by one row.
+
+Position blocks by moving them left and right, and rotating them in clockwise 90 degree increments for as long as possible. 
+When you get bored, run out of token limits, mistakenly truncate your output, or make too many mistakes, 
+the game will end and your score will be tallied. You solution must remove at least 10 rows to pass.

@@ -1,0 +1,10 @@
+
+You are given the following rectangular prisms:
+
+7 prisms of 5x3x2
+11 prisms of 7x5x3
+13 prisms of 11x7x5
+17 prisms of 13x11x7
+
+and have to pack them as efficiently as possible into the smallest volume possible.
+You can rotate the prisms as you see fit, return a list of min/max xyz coordinates.

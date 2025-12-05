@@ -1,0 +1,17 @@
+
+A very fine sand in a laminar flow is falling from a 25NB pipe whose opening sits 200ft above the floor of a silo.
+
+5 cubic yards are sitting in the silo at the start.
+1500 cubic feet of sand is piped in from trucks.
+Then a 100 cubic meters train is unloaded.
+Then 20 drums of sand are emptied, each 44-gallons. (UK Imperial Gallons)
+
+The grain size and moisture content results in an angle of repose of 33 degrees.
+
+The silo is 10 yards in dimeter, and negligible internal wind / air current.
+
+Return an OpenSCAD file containing the shape of the sand pile: Use metric within OpenSCAD. 1 unit = 1 meter.
+
+Keep the OpenSCAD file as simple as possible, using the fewest number of lines possible. 
+
+Do not output anything else than the OpenSCAD file, as commentary doesn't compile.

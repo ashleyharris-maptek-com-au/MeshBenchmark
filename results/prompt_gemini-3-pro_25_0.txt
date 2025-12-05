@@ -1,0 +1,26 @@
+
+You are given a set of points in 2D space. 
+
+Form a collection of triangles from these points such that:
+- No edges cross each other.
+- No points lie inside a triangle.
+- Every point contributes to a triangle.
+- Minimum angles are maximised.
+
+
+0: (18, 58)
+1: (58, 98)
+2: (22, 90)
+3: (50, 93)
+4: (44, 55)
+5: (64, 14)
+6: (68, 15)
+7: (10, 94)
+8: (58, 33)
+9: (6, 84)
+10: (82, 26)
+11: (42, 29)
+12: (39, 98)
+13: (26, 22)
+14: (18, 24)
+15: (44, 47)

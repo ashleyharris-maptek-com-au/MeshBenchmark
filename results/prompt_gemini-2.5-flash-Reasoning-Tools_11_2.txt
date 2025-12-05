@@ -1,0 +1,10 @@
+
+Do you remember the snake game, where you have to direct a snake around a 2D space to avoid hitting itself? This is hyper-snake!
+
+You are a snake in a 5D space grid of size (4,4,4,4,4). You can move to any adjacent cell in the grid, along any of the
+available 5 dimensions, but you can not move to a cell which you have visited before, nor can you move "diagonally",
+that is, you can not move in more than one dimension at a time.
+
+The game ends when you run out of space to move, when you hit the boundary, or when you run into yourself.
+
+Return the path of the snake as a list of cells, the first element of which is [0, 0,0,0,0], and going for as long as you can.

@@ -1,0 +1,59 @@
+```openscad
+// OpenSCAD plan for the Pharaoh's Pyramid
+
+// Define constants in metric SI units (meters)
+stone_side_length = 0.5; // Each stone is a 50cm side-length cube (0.5 meters)
+
+// Maximum number of stones available from the budget
+total_stones_budget = 2500000;
+
+// Calculate the maximum base layer size (N) for the pyramid.
+// A pyramid with 'N' stones along its base edge will have 'N' layers.
+// The total number of stones is the sum of squares: 1^2 + 2^2 + ... + N^2.
+// The formula for this sum is N * (N + 1) * (2 * N + 1) / 6.
+// We need to find the largest integer N such that this sum is less than or equal to total_stones_budget.
+
+// Pre-calculation based on total_stones_budget = 2,500,000:
+// For N = 195, total stones = 195 * 196 * 391 / 6 = 2,490,070 stones. (Fits budget)
+// For N = 196, total stones = 196 * 197 * 393 / 6 = 2,519,266 stones. (Exceeds budget)
+N_base_stones = 195; // Maximum number of stones along one edge of the base layer
+
+// Calculate the overall dimensions of the pyramid
+pyramid_base_width = N_base_stones * stone_side_length; // Width of the base layer
+pyramid_height = N_base_stones * stone_side_length;     // Total height (N layers, each 'stone_side_length' tall)
+
+// The pyramid must be centered over the future tomb (0,0) and rest on the ground (Z=0).
+// Each subsequent layer is offset by half a stone length (stone_side_length / 2)
+// in both X and Y directions from the layer below it, according to the rule:
+// "each stone must have all 4 base corners sitting in the middle of another stone."
+// This results in a 45-degree angle of ascent for the pyramid's sides.
+
+// Loop through each layer of the pyramid, starting from the base (k=0) up to the top (k=N_base_stones-1)
+for (k = [0 : N_base_stones - 1]) {
+    // Determine the number of stones along one edge for the current layer
+    current_layer_N = N_base_stones - k;
+
+    // Calculate the Z-position for the bottom face of stones in the current layer
+    layer_z_pos = k * stone_side_length;
+
+    // Calculate the starting X and Y coordinates for the bottom-left corner of the current layer.
+    // The entire pyramid is centered, so the base layer's effective origin is at (-pyramid_base_width/2, -pyramid_base_width/2).
+    // Each layer 'k' is inset by 'k' steps, where each step is stone_side_length / 2.
+    layer_x_start = -pyramid_base_width / 2 + k * (stone_side_length / 2);
+    layer_y_start = -pyramid_base_width / 2 + k * (stone_side_length / 2);
+
+    // Loop through the grid of stones within the current layer
+    for (i = [0 : current_layer_N - 1]) { // Iterate along the X-axis for stones in this layer
+        for (j = [0 : current_layer_N - 1]) { // Iterate along the Y-axis for stones in this layer
+            // Calculate the X and Y positions for the bottom-left-front corner of the current stone
+            stone_x_pos = layer_x_start + i * stone_side_length;
+            stone_y_pos = layer_y_start + j * stone_side_length;
+            
+            // Place the cube representing the stone
+            translate([stone_x_pos, stone_y_pos, layer_z_pos]) {
+                cube(stone_side_length);
+            }
+        }
+    }
+}
+```

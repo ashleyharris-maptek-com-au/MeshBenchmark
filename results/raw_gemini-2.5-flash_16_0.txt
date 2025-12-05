@@ -1,0 +1,1 @@
+{'boxes': [{'XyzMin': [0, 0, 0], 'XyzMax': [5, 3, 2]}, {'XyzMin': [0, 3, 0], 'XyzMax': [5, 6, 2]}, {'XyzMin': [0, 0, 2], 'XyzMax': [5, 2, 5]}, {'XyzMin': [0, 2, 2], 'XyzMax': [5, 4, 5]}, {'XyzMin': [0, 4, 2], 'XyzMax': [5, 6, 5]}, {'XyzMin': [0, 0, 5], 'XyzMax': [5, 3, 7]}, {'XyzMin': [0, 3, 5], 'XyzMax': [5, 6, 7]}]}
