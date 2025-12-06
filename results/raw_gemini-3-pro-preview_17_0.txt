@@ -1,0 +1,24 @@
+```openscad
+$fn = 100;
+
+// Dimensions and Conversions
+radius = (10 * 0.9144) / 2; // 10 yards diameter to meters radius
+vol_yds = 5 * pow(0.9144, 3);
+vol_fts = 1500 * pow(0.3048, 3);
+vol_mtr = 100;
+vol_gal = 20 * 44 * 0.00454609; // 20 drums, 44 UK gal/drum to m^3
+total_vol = vol_yds + vol_fts + vol_mtr + vol_gal;
+
+// Geometry Calculations based on Repose Angle 33 deg
+cone_h = radius * tan(33);
+cone_vol = (1/3) * PI * pow(radius, 2) * cone_h;
+
+// Since total_vol > cone_vol, the pile has a cylindrical base
+cyl_h = (total_vol - cone_vol) / (PI * pow(radius, 2));
+
+// Render
+union() {
+    color("sandybrown") cylinder(r=radius, h=cyl_h);
+    color("sandybrown") translate([0, 0, cyl_h]) cylinder(r1=radius, r2=0, h=cone_h);
+}
+```

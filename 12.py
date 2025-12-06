@@ -23,7 +23,8 @@ subpassParamSummary = [
     "60 pipes in 10x10", 
     "150 pipes in 20x20", 
     "600 pipes in 30x30",
-    "1000 pipes in 40x40"   
+    "1000 pipes in 40x40",
+    "1200 pipes in 20x20"
 ]
 
 promptChangeSummary = "Increasing pipe length and square size."
@@ -72,12 +73,13 @@ def prepareSubpassPrompt(index):
     if index == 4: return prompt.replace("PARAM_A", "150").replace("PARAM_B", "20")
     if index == 5: return prompt.replace("PARAM_A", "600").replace("PARAM_B", "30")
     if index == 6: return prompt.replace("PARAM_A", "1000").replace("PARAM_B", "40")
+    if index == 7: return prompt.replace("PARAM_A", "1200").replace("PARAM_B", "20")
     raise StopIteration
 
 def gradeAnswer(answer: dict, subPassIndex: int, aiEngineName: str):
     # Get parameters for this subpass
-    pipe_counts = [3, 16, 30, 60, 150, 600, 1000]
-    boundary_sizes = [2, 3, 4, 10, 20, 30, 40]
+    pipe_counts = [3, 16, 30, 60, 150, 600, 1000, 1200]
+    boundary_sizes = [2, 3, 4, 10, 20, 30, 40, 20]
     
     if subPassIndex < 0 or subPassIndex >= len(pipe_counts):
         return 0, "Invalid subPassIndex"

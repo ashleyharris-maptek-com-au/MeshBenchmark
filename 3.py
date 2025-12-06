@@ -108,18 +108,21 @@ promptChangeSummary = "Cube and rectangle move further apart in x."
 subpassParamSummary = [
   "10cm apart in X ", 
   "20cm apart in X ",
-  "30cm apart in X "]
+  "30cm apart in X ",
+  "5cm apart in X "]
 
 def prepareSubpassPrompt(index):
     if index == 0: return prompt.replace("PARAM", "5")
     if index == 1: return prompt.replace("PARAM", "10")
     if index == 2: return prompt.replace("PARAM", "15")
+    if index == 3: return prompt.replace("PARAM", "2.5")
     raise StopIteration
 
 def prepareSubpassReferenceScad(index):
     if index == 0: return referenceScad.replace("PARAM", "5")
     if index == 1: return referenceScad.replace("PARAM", "10")
     if index == 2: return referenceScad.replace("PARAM", "15")
+    if index == 3: return referenceScad.replace("PARAM", "2.5")
     raise StopIteration
 
 def resultToScad(result):

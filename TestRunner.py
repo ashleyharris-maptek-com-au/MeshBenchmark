@@ -783,8 +783,8 @@ if __name__ == "__main__":
     import AiEngineGoogleGemini
 
     geminiModels = [
-        "gemini-2.5-flash",
-        "gemini-3-pro"
+       # "gemini-2.5-flash",
+        "gemini-3-pro-preview"
     ]
 
     for model in geminiModels:

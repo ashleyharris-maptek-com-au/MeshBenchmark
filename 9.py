@@ -58,7 +58,7 @@ structure = {
   ]
 }
 
-subpassParamSummary = ["4x4 grid", "8x8 grid", "12x12 grid", "16x16 grid", "16x16 grid with cells (3,3) and (3,4) removed"]
+subpassParamSummary = ["4x4 grid", "8x8 grid", "12x12 grid", "16x16 grid", "16x16 grid with cells (3,3) and (3,4) removed", "16x16 grid with no odd numbered cells"]
 promptChangeSummary = "Grid size increases across subpasses, with a missing chunk in the final subpass"
 
 
@@ -69,12 +69,13 @@ def prepareSubpassPrompt(index):
     if index == 3: return prompt.replace("SIZE", "16").replace("SQUARED", "256").replace("TWIST", "")
     if index == 4: return prompt.replace("SIZE", "16").replace("SQUARED", "254").replace("TWIST", 
         "Cells 3,3 and 3,4 have been removed from the grid and must be skipped.")
-
+    if index == 5: return prompt.replace("SIZE", "16").replace("SQUARED", "256").replace("TWIST", 
+        "No cells with both coordinates being odd can be visited.")
     raise StopIteration
 
 
 def gradeAnswer(answer : dict, subPass : int, aiEngineName : str):
-    expected_steps = [16, 64, 144, 256, 254]
+    expected_steps = [16, 64, 144, 256, 254, 256 - 64]
     if subPass < len(expected_steps) and len(answer["steps"]) != expected_steps[subPass]:
         return 0, f"Expected {expected_steps[subPass]} steps, got {len(answer['steps'])}"
 
@@ -93,6 +94,9 @@ def gradeAnswer(answer : dict, subPass : int, aiEngineName : str):
         
         if subPass == 4 and (step["xy"][0] == 3 and step["xy"][1] == 3 or step["xy"][0] == 3 and step["xy"][1] == 4):
             return 0, "You forgot to skip cell 3,3 or 3,4!"
+
+        if subPass == 5 and (step["xy"][0] % 2 == 1 and step["xy"][1] % 2 == 1):
+            return 0, f"You visited an odd numbered cell {step['xy']}!"
 
         # check that the step is side-adjacent to the previous step
         xDiff = abs(step["xy"][0] - location[0])

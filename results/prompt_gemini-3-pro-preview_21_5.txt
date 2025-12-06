@@ -1,0 +1,32 @@
+
+
+You are given a 3D space of dimensions 300 * 300 * 300 meters, and have to build a rollercoaster track that
+meets the following requirements:
+
+- Starts at altitude Z = 250 meters
+- Minimum track length: 3000
+- Must exceed a speed of at least: 25
+- Must not exceed a speed of 40m/s
+- Once up to speed, must not drop below a speed of 5m/s
+- Must finish at altitude Z = 0 meters
+- Must not use any acceleration other than Earth's gravity.
+- Must not exceed 5G acceleration when turning.
+
+Must include at least 3 loops
+
+Track segments are represented by a list of points, where each point is a list of [x, y, z] coordinates.
+
+Track layout must follow these rules:
+- No segment longer than 1.8m.
+- No segment shorter than 90cm
+- The angle between 2 segments must not exceed 10 degrees.
+- When crossing existing track, a vertical clearence of 3m minimum is required.
+- All track segments must be within 0,0,0 -> 300,300,300
+
+You do not need to consider support positions at this stage of the planning.
+
+Assume frictionless vacuum for all track segments except vertical loops. 
+A full 360 degree vertical loop results in a halving of speed.
+
+Return the track as a list of points, where each point is a list of [x, y, z] coordinates.
+

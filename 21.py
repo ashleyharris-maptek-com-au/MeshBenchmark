@@ -340,8 +340,16 @@ hull() {{
     vc.render_scadText_to_png(scadOutput, output_path)
     print(f"Saved visualization to {output_path}")
 
+    scadFile = "results/21_Visualization_" + aiEngineName + "_" + str(len(answer["trackPoints"])) + ".scad"
+
+    import zipfile
+    with zipfile.ZipFile(output_path.replace(".png", ".zip"), 'w') as zipf:
+        zipf.write(scadFile, os.path.basename(scadFile))
+
+    os.unlink(scadFile)
+
     return f"""
-<a href="{os.path.basename(output_path).replace(".png", "temp.scad")}" download>
+<a href="{os.path.basename(output_path).replace(".png", "zip")}" download>
 <img src="{os.path.basename(output_path)}" alt="Rollercoaster Visualization" style="max-width: 100%;">
 </a>
 """

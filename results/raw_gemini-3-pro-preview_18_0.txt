@@ -1,0 +1,108 @@
+```openscad
+// OpenSCAD Plan for Pharaoh's Pyramid
+// Units: Metric SI (Meters)
+//
+// Calculation of Maximum Height:
+// Total Men: 100,000
+// Cost to move one stone: 10 men
+// Total Stones Moveable: 100,000 / 10 = 10,000 stones
+// Available Stones in inventory: 20,000 (Limiting factor is Manpower: 10,000)
+//
+// Stacking Logic:
+// Layer 1 (Top): 1x1 = 1 stone
+// Layer 2: 2x2 = 4 stones
+// ...
+// Layer N: N*N stones
+// Total Stones = Sum(i^2) for i=1 to N = N(N+1)(2N+1)/6
+//
+// For N=30: 30(31)(61)/6 = 9,455 stones (Feasible, < 10,000)
+// For N=31: 31(32)(63)/6 = 10,416 stones (Impossible, > 10,000)
+//
+// Result: 30 Layers.
+// Stone Size: 0.5m cube.
+//
+// Facade Geometry:
+// To ensure the pyramid is smooth and covers all external stones without voids,
+// the outer surface is defined by a plane touching the top-outer edge of every step.
+// Slope calculation:
+// Run per step = 0.5 * Stone_Size = 0.25m
+// Rise per step = Stone_Size = 0.5m
+// Slope = 2.
+//
+// Base Width Calculation:
+// Bottom Core Layer (30): 30 * 0.5m = 15.0m wide.
+// To maintain slope 2 covering the top-outer edge of the bottom layer,
+// the casing must extend 0.5*Stone_Size = 0.25m out on each side.
+// Total Base Width = 15.0m + 0.5m = 15.5m.
+// Total Height = Base_Width_Half * Slope = 7.75m * 2 = 15.5m.
+
+$fn = 4; // Low poly count for pyramid generation
+
+stone_size = 0.5; // meters
+num_layers = 30; // Calculated max layers
+
+// Total dimensions for the smooth outer shell
+base_width_core = num_layers * stone_size;
+base_width_outer = (num_layers + 1) * stone_size; // 15.5m
+total_height = base_width_outer; // Slope of 2 implies height = width for center-to-edge run of width/2
+
+module core_stones() {
+    // Generates the stepped pyramid core
+    // Optimized: Renders each layer as a single slab rather than individual cubes
+    for (layer = [1 : num_layers]) {
+        // layer 1 is top, layer 30 is bottom
+        
+        stones_in_width = layer;
+        layer_width = stones_in_width * stone_size;
+        
+        // Z position: Bottom layer (30) is at Z=0. Top (1) is at Z=14.5
+        z_pos = (num_layers - layer) * stone_size;
+        
+        translate([0, 0, z_pos])
+            translate([0, 0, stone_size/2]) // Center cube in Z for scaling
+            cube([layer_width, layer_width, stone_size], center=true);
+    }
+}
+
+module smooth_pyramid_shape() {
+    // The mathematical pyramid shape that defines the marble facade
+    // Width 15.5m, Height 15.5m
+    
+    // Cylinder with fn=4 is a square, but rotated 45 degrees relative to axes
+    // We rotate it back 45 degrees to align with the cubic stones
+    
+    // Diagonal of the base square
+    diagonal = base_width_outer * sqrt(2);
+    
+    rotate([0, 0, 45])
+        cylinder(h = total_height, d1 = diagonal, d2 = 0, $fn=4);
+}
+
+module marble_facade() {
+    // The marble is the volume of the smooth pyramid minus the stone core
+    difference() {
+        color("White", 1.0) 
+            smooth_pyramid_shape();
+        
+        // Ensure precise subtraction
+        core_stones();
+    }
+}
+
+// --- Assembly ---
+
+// 1. The Limestone Core (Gray)
+color([0.6, 0.6, 0.6]) // Stone Gray
+    core_stones();
+
+// 2. The Marble Facade (White, slightly transparent to show the core in preview)
+// Note: For precise volume calculations, transparency does not affect geometry.
+color([1, 1, 1, 0.7]) // Marble White
+    marble_facade();
+
+// Technical Note for Stonemason:
+// The facade volume represents the exact marble required to fill the steps
+// to a perfect slope of 2:1 (63.43 degrees).
+// Total Height: 15.5m
+// Base Width: 15.5m
+```

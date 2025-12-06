@@ -1,0 +1,107 @@
+```openscad
+// Pharaoh's Pyramid Plan
+// Units: Meters (SI)
+//
+// Calculation for Maximum Height:
+// Stone Dimensions: 0.5m x 0.5m x 0.5m (Cube)
+// Stability Rule: Each stone rests on 4 corners centered on stones below.
+// This necessitates a layer progression of n^2 stones (1x1, 2x2, 3x3...).
+//
+// Total Stones Available: 600,000
+// Sum of squares formula: S_n = n(n+1)(2n+1)/6
+// We need max n where S_n <= 600,000.
+//
+// Check n=121: 121(122)(243)/6 = 597,901 stones. (Feasible)
+// Check n=122: 122(123)(245)/6 = 612,745 stones. (Over budget)
+//
+// Result: Maximum Layers = 121.
+// Leftover stones: 600,000 - 597,901 = 2,099.
+//
+// Labor Constraint Check:
+// 100,000 men / 10 men per stone = 10,000 simultaneous stones.
+// Since construction is sequential, labor force is sufficient for any layer size
+// up to 100x100 (10,000 stones). Since the base is 121x121, the bottom layers 
+// take multiple "shifts" to place, but this is a throughput constraint, 
+// not a geometric one limiting the final height.
+
+// --- Parameters ---
+stone_side = 0.500; // 50cm in meters
+num_layers = 121;   // Calculated max height
+
+// --- Derived Dimensions ---
+// To achieve a smooth facade that covers every external stone corner:
+// The slope is 2:1 (Run 0.5 blocks for Rise 1 block).
+// The smooth pyramid must pass through the top-outer edge of the top block (width 1)
+// and the top-outer edge of the bottom block (width 121).
+// Geometric calculation yields a base width of (N+1) stones.
+facade_base_width = (num_layers + 1) * stone_side;
+facade_height = (num_layers + 1) * stone_side;
+
+// --- Rendering Settings ---
+$fn = 4; // Square pyramid resolution
+
+// --- Main Assembly ---
+union() {
+    // 1. The Structural Core (The 600,000 Stones)
+    // Rendered in Sandstone color
+    color("Burlywood") 
+        SteppedCore();
+
+    // 2. The Marble Facade (The Wedges)
+    // Rendered in White Marble with transparency to show the plan
+    // Calculated as the boolean difference between the ideal smooth pyramid and the stepped core.
+    color("White", 0.6) 
+        difference() {
+            SmoothPyramidShape();
+            SteppedCore();
+        }
+}
+
+// --- Modules ---
+
+module SteppedCore() {
+    // Generates the stack of 121 layers
+    // Optimization: Instead of 600k cubes, we generate 121 slabs.
+    // Visually and volumetrically identical for the "no void" requirement.
+    
+    for (i = [1 : num_layers]) {
+        // i = 1 is the top layer
+        // i = 121 is the bottom layer
+        
+        current_layer_width = i * stone_side;
+        
+        // Z Position:
+        // Bottom layer (121) sits on ground (z=0)
+        // Layer i sits on top of layer i+1.
+        // Height of bottom of layer i = (num_layers - i) * stone_side
+        z_pos = (num_layers - i) * stone_side;
+        
+        translate([0, 0, z_pos]) {
+            // Center the slab on X/Y origin
+            translate([-current_layer_width/2, -current_layer_width/2, 0])
+                cube([current_layer_width, current_layer_width, stone_side]);
+        }
+    }
+}
+
+module SmoothPyramidShape() {
+    // The ideal smooth geometry encasing the steps.
+    // Faces North (+y) implies sides align with axes.
+    // cylinder($fn=4) creates a diamond shape relative to axes.
+    // rotate(45) aligns the flat faces with X/Y axes.
+    
+    // Radius calculation:
+    // For a square of side W, the distance from center to corner (radius)
+    // is (W / 2) * sqrt(2) = W / sqrt(2).
+    base_radius = facade_base_width / sqrt(2);
+    
+    rotate([0, 0, 45])
+        cylinder(r1 = base_radius, r2 = 0, h = facade_height);
+}
+
+// --- Dimensions Output (Console Echo for Stonemason) ---
+echo(str("Total Height: ", num_layers * stone_side, "m"));
+echo(str("Base Width (Core): ", num_layers * stone_side, "m"));
+echo(str("Base Width (With Facade): ", facade_base_width, "m"));
+echo(str("Stones Used: ", 597901));
+```

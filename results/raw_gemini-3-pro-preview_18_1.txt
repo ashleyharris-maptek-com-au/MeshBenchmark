@@ -1,0 +1,111 @@
+// OpenSCAD Plan for Pharaoh's Pyramid
+// Units: Metric SI (Meters)
+// 1 Unit = 1 Meter
+
+/* 
+    --- ENGINEERING CALCULATION ---
+    
+    1. RESOURCE CONSTRAINTS:
+       - Total Men: 100,000
+       - Cost per Stone: 10 men
+       - Max Movable Stones = 100,000 / 10 = 10,000 stones.
+       - Available Inventory: 150,000 stones.
+       - LIMITING FACTOR: Manpower (10,000 stones max).
+
+    2. GEOMETRY & STRUCTURAL INTEGRITY:
+       - Stone Size: 0.5m x 0.5m x 0.5m.
+       - Rule: Each stone rests on 4 corners of stones below.
+       - This dictates a Square Pyramidal Number sequence (1, 4, 9, 16...).
+       - Layer n (from top) contains n^2 stones.
+       
+    3. MAX HEIGHT CALCULATION:
+       - Total Stones S = Sum(n^2) for n=1 to H.
+       - Formula: S = H(H+1)(2H+1)/6
+       - We need Max H where S <= 10,000.
+       - Try H=30: (30 * 31 * 61) / 6 = 9,455 stones.
+       - Try H=31: (31 * 32 * 63) / 6 = 10,416 stones (Exceeds Budget).
+       - MAX LAYERS = 30.
+       - Total Height = 30 * 0.5m = 15.0m.
+       - Base Width (Core) = 30 stones * 0.5m = 15.0m.
+
+    4. MARBLE FACADE DESIGN:
+       - Requirement: Smooth pyramid covering all external stones.
+       - To circumscribe the stepped core perfectly (touching the outer-top corners of every step):
+       - Slope Calculation:
+         - Top Stone (Layer 1): Width 0.5m, Top at Z=15.0m. (Corner at x=0.25).
+         - Bottom Stone (Layer 30): Width 15.0m, Top at Z=0.5m. (Corner at x=7.5).
+         - To create a continuous smooth slope covering these points, we extend the line connecting them.
+         - Slope = dz/dx = (15.0 - 0.5) / (7.5 - 0.25) = 14.5 / 7.25 = 2.
+       - Apex Height (Z_apex):
+         - Z = 15.0m at x = 0.25m.
+         - Z_apex = 15.0 + (Slope * 0.25) = 15.0 + 0.5 = 15.5m.
+       - Base Width (at Z=0):
+         - Z = 0.5m at x = 7.5m.
+         - X_base_edge = 7.5 + (0.5 / Slope) = 7.5 + 0.25 = 7.75m.
+         - Total Base Width = 7.75 * 2 = 15.5m.
+       - This results in a smooth pyramid base 15.5m wide and 15.5m high.
+*/
+
+// --- PARAMETERS ---
+
+stone_size = 0.500; // Meters
+num_layers = 30;    // Calculated max height
+base_core_width = num_layers * stone_size;
+facade_height = 15.5; 
+facade_base_width = 15.5;
+
+// Optimization: Instead of drawing 9,455 individual cubes, we draw 30 slabs.
+// This is geometrically identical for the exterior and vastly faster to render.
+// The Stonemason can inspect layers by using Difference or Transparency.
+
+module core_stones() {
+    color([0.85, 0.75, 0.55]) // Sandstone color
+    for (i = [1 : num_layers]) {
+        // i is layer number from TOP (1 is single stone, 30 is base)
+        layer_width = i * stone_size;
+        // Z position: 
+        // Layer 30 (base) is at z=0..0.5
+        // Layer 1 (top) is at z=14.5..15.0
+        // Formula for bottom of layer i: (num_layers - i) * stone_size
+        translate([0, 0, (num_layers - i) * stone_size + (stone_size/2)])
+        cube([layer_width, layer_width, stone_size], center=true);
+    }
+}
+
+module smooth_shell() {
+    // A 4-sided pyramid.
+    // Cylinder r is radius to corner. For a square of width W, r = W / sqrt(2).
+    radius = facade_base_width / sqrt(2);
+    
+    rotate([0, 0, 45]) // Align flat faces to X/Y axes (North is +Y)
+    cylinder(r1 = radius, r2 = 0, h = facade_height, $fn = 4);
+}
+
+module marble_facade() {
+    color([0.95, 0.95, 1.0, 0.4]) // White Marble, semi-transparent for planning view
+    difference() {
+        smooth_shell();
+        core_stones();
+    }
+}
+
+// --- ASSEMBLY ---
+
+// 1. Draw the internal limestone core
+core_stones();
+
+// 2. Draw the marble cladding wedges
+// Note: This calculates the exact volume of marble required to fill the "steps"
+marble_facade();
+
+// --- ANNOTATIONS ---
+// (Visible in Console)
+echo("--- PHARAOH'S PYRAMID PLAN ---");
+echo("Total Layers:", num_layers);
+echo("Total Height (Stone):", num_layers * stone_size, "m");
+echo("Total Height (with Facade Apex):", facade_height, "m");
+echo("Base Width (Stone):", base_core_width, "m");
+echo("Base Width (Marble):", facade_base_width, "m");
+echo("Stones Used:", 9455);
+echo("Men Required:", 94550);
+echo("Orientation: +Y is NORTH");

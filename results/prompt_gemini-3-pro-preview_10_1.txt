@@ -1,0 +1,16 @@
+
+You are a painter, you have a canvas of size 32 * 32 pixels.
+
+You are painting a scene from the north east, at a 45 degree angle looking down. You are using an orthographic projection.
+
+The scene contains 5 axis aligned cubes, each with a side length of 1 unit. The cubes bottom-centres are placed at the vertices of a 
+regular pentagram of side length 5 units, centred at the origin, aligned so it's 'pointing' positive y, 
+and is centred in the middle of your painting.
+
+Your painting is zoomed such that the outer edges of the cubes touch the edges of the canvas.
+
+Return the canvas as a string, with:
+- # representing a surface facing up (the top plane of a cube)
+- " representing a surface facing east or west.
+- ' representing a surface facing north or south.
+- (space) representing unpainted pixels, the ground, sky, pentagram or anything else.

@@ -726,11 +726,8 @@ def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
     for b in burns:
         roughDeltaV += math.sqrt(b["acceleration"][0]**2 + b["acceleration"][1]**2 + b["acceleration"][2]**2)
 
-    if roughDeltaV > 15000:
-        return 0, "Spacecraft is planning to use more than 15km/s of delta-v from LEO, which is enough to escape the solar system."
-
-    if roughDeltaV > 5000:
-        return 0, "Spacecraft is planning to use more than 5km/s of delta-v from LEO, which is is more than a Mars mission."
+    if roughDeltaV > 20000:
+        return 0, "Spacecraft is planning to use more than 20km/s of delta-v from LEO, which is enough to escape the solar system."
 
     deltaVUsed = 0
     STEP_SIZE = 10  # seconds per simulation step
@@ -870,9 +867,16 @@ def resultToNiceReport(answer, subPass, aiEngineName):
     vc.render_scadText_to_png(scadOutput, output_path)
     print(f"Saved visualization to {output_path}")
 
+    scadFile = "results/22_Visualization_" + aiEngineName + "_" + str(subPass) + ".scad"
+
+    import zipfile
+    with zipfile.ZipFile(output_path.replace(".png", ".zip"), 'w') as zipf:
+        zipf.write(scadFile, os.path.basename(scadFile))
+
+    os.unlink(scadFile)
 
     return f"""
-<a href="{os.path.basename(output_path).replace(".png", "temp.scad")}" download>
+<a href="{os.path.basename(output_path).replace(".png", "zip")}" download>
 <img src="{os.path.basename(output_path)}" alt="Orbital Visualization" style="max-width: 100%;">
 </a>
 """

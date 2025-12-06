@@ -51,6 +51,7 @@ subpassParamSummary = [
     "Cover a 12x12x12 grid with 200 voxels",
     "Cover a 16x16x16 grid with 400 voxels",
     "Cover a 24x24x24 grid with 1000 voxels",
+    "Cover a 24x24x24 grid with 500 voxels, and sum of coordinates (x + y + z) has no 7 in it.",
 ]
 
 promptChangeSummary = "Progressively larger grids with more voxels across subpasses"
@@ -61,6 +62,7 @@ def prepareSubpassPrompt(index):
     if index == 2: return prompt.replace("PARAM_A", "200").replace("PARAM_B", "12")
     if index == 3: return prompt.replace("PARAM_A", "400").replace("PARAM_B", "16")
     if index == 4: return prompt.replace("PARAM_A", "1000").replace("PARAM_B", "24")
+    if index == 5: return prompt.replace("PARAM_A", "500").replace("PARAM_B", "20") + "\nEnsure no voxels coordinate sum (x + y + z) has a 7 in it."
     raise StopIteration
 
 def resultToNiceReport(result, subPass, aiEngineName):
@@ -83,8 +85,8 @@ def resultToNiceReport(result, subPass, aiEngineName):
     return f'<img src="{os.path.basename(output_path)}" alt="Voxel Grid Visualization" style="max-width: 100%;">'
 
 def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
-    sizes = [6, 8, 12, 16, 24]
-    counts = [50, 100, 200, 400, 1000]
+    sizes = [6, 8, 12, 16, 24, 24]
+    counts = [50, 100, 200, 400, 1000, 500]
     if subPass < 0 or subPass >= len(sizes):
         return 0, "Invalid subPass"
     N = sizes[subPass]
@@ -165,6 +167,9 @@ def gradeAnswer(answer: dict, subPass: int, aiEngineName: str):
         p = parse_item(it)
         if p is None:
             return 0, f"Invalid voxel entry: {it}"
+
+        if subPass == 5 and "7" in str(p[0] + p[1] + p[2]):
+            return 0, f"Voxel {p} has a coordinate sum {p[0] + p[1] + p[2]} with a 7 in it"
         pts.append(p)
 
     if len(pts) != expected:

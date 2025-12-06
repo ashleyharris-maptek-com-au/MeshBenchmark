@@ -149,9 +149,9 @@ def gradeAnswer(result : dict, subPass : int, aiEngineName : str):
 
     score = raw_accuracy ** 10
     
-    if subPass == 0: score *= 2
-    if subPass == 1: score *= 1.75
-    if subPass == 2: score *= 1.5
+    if subPass == 0: score *= 1.75
+    if subPass == 1: score *= 1.5
+    if subPass == 2: score *= 1.25
 
     return score, f"Matched {correct}/{size*size} pixels ({raw_accuracy*100:.1f}% accuracy, score: {score:.4f})"
 
